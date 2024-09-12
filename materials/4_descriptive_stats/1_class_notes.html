@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.549">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Descriptive statistics</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="1_class_notes_files/libs/clipboard/clipboard.min.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/quarto.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/popper.min.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/anchor.min.js"></script>
+<link href="1_class_notes_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="1_class_notes_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="1_class_notes_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="1_class_notes_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="1_class_notes_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Descriptive statistics</h1>
+<p class="subtitle lead">class notes</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>In this class, we will dive into the basics of statistics and probability. We will first explore the most frequently employed indicators for describing one or more variables and understanding the relationships between them. Secondly, we will delve into a series of techniques for making population inferences based on a sample.</p>
+<p>A solid understanding of the fundamental concepts of statistics and probability is essential to comprehend R’s operations, as well as to make informed choices when selecting the most suitable indicators to explore and interpret the information contained in a data set.</p>
+</section>
+<section id="data-generating-process-and-probability" class="level1">
+<h1>Data generating process and probability</h1>
+<p>The analysis of probabilities begins with a <strong>data-generating process</strong>. Any phenomenon that systematically produces some kind of information is a data-generating process.</p>
+<p>Each iteration of this process produces information, which we can interpret as an <strong>outcome</strong>. The <strong>sample space</strong> is the set of all possible outcomes of an experiment. An <strong>event</strong> is any set of outcomes that <em>have occurred</em>: an <strong>elementary</strong> event refers to a single outcome in the sample space and a <strong>compound</strong> event refers to multiple outcomes <span class="citation" data-cites="bertsekasIntroductionProbability2008">(<a href="#ref-bertsekasIntroductionProbability2008" role="doc-biblioref">Bertsekas and Tsitsiklis 2008</a>)</span>.</p>
+<p>In this framework, we can define <strong>probability</strong> as an attribute of events indicating how “likely” they are to occur<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>, where <span class="citation" data-cites="devoreProbabilidadEstadisticaPara2011">(<a href="#ref-devoreProbabilidadEstadisticaPara2011" role="doc-biblioref">Devore 2011</a>)</span>:</p>
+<ol type="1">
+<li><p>The probability of any event in the sample space is always between <strong>0</strong> and <strong>1</strong>, where 0 indicates impossibility and 1 indicates certainty.</p></li>
+<li><p>The probability that at least one of the elementary events in the entire sample space will occur is <strong>1</strong>.</p></li>
+<li><p>For any events <em>A</em> and <em>B</em>, the probability that an event in <em>A</em> <strong>or</strong> <em>B</em> will happen is the sum of the probability of an event in <em>A</em> and the probability of an event in <em>B</em>, minus the probability of an event that is in both <em>A</em> <strong>and</strong> <em>B</em>.</p></li>
+</ol>
+<section id="conditional-probability-and-independence" class="level2">
+<h2 class="anchored" data-anchor-id="conditional-probability-and-independence">Conditional probability and independence</h2>
+<p><strong>Conditional probability</strong> is a measure of the probability of an event occurring given the occurrence of <em>another</em> event. We will represent the probability of event A happening given the event B using <span class="math inline">\(P(A/B)\)</span><a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>.</p>
+<p>Two events A and B are said to be <strong>independent</strong> if there is no relationship between them, that is to say that the probability of event A occurring does not depend on the occurrence of event B: <span class="math inline">\(P(A/B) = P(A)\)</span>.</p>
+</section>
+<section id="sample-vs-population" class="level2">
+<h2 class="anchored" data-anchor-id="sample-vs-population">Sample vs population</h2>
+<p>A <strong>population</strong> is a set or universe of items (objects, households, people, etc.) of interest.</p>
+<p>A <strong>sample</strong> is a subset of observations drawn from a population<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>.</p>
+</section>
+<section id="probability-distributions" class="level2">
+<h2 class="anchored" data-anchor-id="probability-distributions">Probability distributions</h2>
+<p>A <strong>variable</strong> is any characteristic whose value can vary from one object to another within the population. Events will be defined as a set of outcome values for the variable or variables observed <a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>.</p>
+<p>A <strong>probability distribution</strong> is a function describing the probability of each possible outcome within the sample space.</p>
+<p>There are two types of distributions:</p>
+<ul>
+<li>A <strong>discrete</strong> probability distribution is the probability distribution of a random variable that can take on only a <em>countable</em> number of possible values.<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a></li>
+</ul>
+<!-- -->
+<ul>
+<li>A <strong>continuous</strong> probability distribution is the probability distribution of a random variable that can take on an <em>uncountable</em> number of possible values.<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a></li>
+</ul>
+<p>Probability distributions are characterized by their <strong>parameters</strong>, which refer to the <em>population</em>’s characteristics.</p>
+<p>For example, the <strong>normal</strong> distribution is characterized by its <strong>mean</strong> and <strong>variance</strong> (or standard deviation)<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a>.</p>
+<p><img src="img/normal_anim.gif" class="img-fluid"></p>
+<p>The Central Limit Theorem<a href="#fn8" class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a> states that even when individual variables are not normally distributed, the sums and averages of the variables will approximately follow a normal distribution <span class="citation" data-cites="devoreProbabilidadEstadisticaPara2011">(<a href="#ref-devoreProbabilidadEstadisticaPara2011" role="doc-biblioref">Devore 2011</a>)</span>.</p>
+<p>On the other hand, for example, the <strong>Chi-Squared distribution</strong> is characterized by its <strong>degrees of freedom</strong>.</p>
+<p><img src="img/chi_anim.gif" class="img-fluid"></p>
+<p>Note that, while distributions may be <strong>symmetrical</strong> (e.g.: the normal distribution), they might also be <strong>positively skewed</strong> (e.g.: the chi-squared distribution), or <strong>negatively skewed</strong> when the tail of the distribution extends towards the left side of the curve, indicating a higher frequency of values at the higher end of the distribution.</p>
+</section>
+</section>
+<section id="statistics-vs-probability" class="level1">
+<h1>Statistics vs probability</h1>
+<p>In a <strong>probability</strong> problem, it is assumed that the properties of the studied population are known, allowing questions to be posed and answered regarding a sample extracted from that population. Starting with a data-generating process, the probability distribution and population parameters can be derived, enabling the computation of the probability of specific events occurring when a sample is taken.</p>
+<p>In a <strong>statistics</strong> problem, on the other hand, the researcher knows the characteristics of a sample, and this information allows them to draw conclusions about the population. Starting with a sample, the probability distribution and its associated parameters can be inferred, finally enabling the researcher to draw conclusions about the data-generating process.</p>
+<p><img src="img/inversion%20problem.png" class="img-fluid"></p>
+<section id="statistical-inference-basics" class="level2">
+<h2 class="anchored" data-anchor-id="statistical-inference-basics">Statistical inference basics</h2>
+<p><strong>Point estimation</strong> involves the use of sample data to calculate a single value which is to serve as a “best guess” of an <em>unknown</em> population parameter. We call this value an <strong>estimator</strong>, where estimators are <strong>statistics</strong>, that is to say, functions of the values of the variables to be gathered from the sample.</p>
+<p>It is also possible to estimate an interval within which we believe a population parameter lies. The advantage of this approach is that we can determine the probability that the population parameter truly lies within this interval. This statistical technique is known as <strong>confidence intervals</strong>.</p>
+<p>Finally, we can calculate the probability that the population parameter is greater than, less than, or equal to a certain value. This is known as <strong>hypothesis testing</strong>.</p>
+<p>When applying these techniques, functions are constructed based on the sample data, which are then compared to known <em>theoretical</em> distributions. We will further develop the key concepts to understand how to apply them in the upcoming sections.</p>
+</section>
+</section>
+<section id="descriptive-basics" class="level1">
+<h1>Descriptive basics</h1>
+<p>Variables can be classified as <span class="citation" data-cites="jamesIntroductionStatisticalLearning2013">(<a href="#ref-jamesIntroductionStatisticalLearning2013" role="doc-biblioref">James et al. 2013</a>)</span>:</p>
+<ul>
+<li><p><strong>Qualitative</strong>: these variables can take on one of a limited number of possible values, assigning each observation to a class or category on the basis of some qualitative property. The variable is considered <strong>ordinal</strong> if values can be ordered (e.g.&nbsp;education level: primary, secondary, etc.) and <strong>nominal</strong> if values present no order (e.g.&nbsp;colors: yellow, red, blue, etc.)</p></li>
+<li><p><strong>Quantitative</strong>: these variables take on numerical values. They can be <strong>discrete</strong> or <strong>continuous</strong> (depending on whether there are “gaps” or “jumps” between values).</p></li>
+</ul>
+<p>One of the main tools to analyze <strong>qualitative</strong> data are <strong>contingency tables</strong>, where each value in the table represents the number of times a particular outcome or combination of variable outcomes occurred <span class="citation" data-cites="cetinkaya-rundelIntroductionModernStatistics2021">(<a href="#ref-cetinkaya-rundelIntroductionModernStatistics2021" role="doc-biblioref">Çetinkaya-Rundel and Hardin 2021</a>)</span>.</p>
+<p>In order to explore the information contained in the data describing a sample or population through its <strong>quantitative</strong> variables we can rely on <strong>numerical summary measures</strong>. These summary measures can be used to describe the main characteristics of the population (parameters) or the sample (estimators). Additionally, we can rely on these tools to study the characteristics of a single variable or the relationship between several variables.</p>
+<section id="measures-of-centrality" class="level2">
+<h2 class="anchored" data-anchor-id="measures-of-centrality">Measures of centrality</h2>
+<p>Measures of centrality will provide information regarding the location of a set of numbers, particularly its center. We will rely on them for the analysis of a single variable.</p>
+<section id="mean" class="level3">
+<h3 class="anchored" data-anchor-id="mean">Mean</h3>
+<p>The <strong>arithmetic mean</strong> (or average) is obtained by adding the observation values and dividing the sum by the total number of values<a href="#fn9" class="footnote-ref" id="fnref9" role="doc-noteref"><sup>9</sup></a>.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="1_class_notes_files/figure-html/mean-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The <strong>weighted mean</strong> follows a similar methodology, but each observation does not contribute equally to the final average. The contribution of each observation to the mean is determined by it’s weight<a href="#fn10" class="footnote-ref" id="fnref10" role="doc-noteref"><sup>10</sup></a>. This measure becomes particularly useful when each observation in our sample corresponds to varying proportions of the population (which is usually the case when working with household surveys).</p>
+<p>The <strong>trimmed mean</strong> is a calculation of the arithmetic mean that removes a certain percentage of extreme values from each end of the distribution, reducing the influence of outliers<a href="#fn11" class="footnote-ref" id="fnref11" role="doc-noteref"><sup>11</sup></a> in the result.</p>
+</section>
+<section id="mode" class="level3">
+<h3 class="anchored" data-anchor-id="mode">Mode</h3>
+<p>The <strong>mode</strong> is the most frequently occurring value of the distribution.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="1_class_notes_files/figure-html/mode-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="median" class="level3">
+<h3 class="anchored" data-anchor-id="median">Median</h3>
+<p>The <strong>median</strong> is the middle value in an ordered list of values. It separates the distribution in such a way that 50% of the values are on its left and 50% are on its right.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="1_class_notes_files/figure-html/median-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Note that the mean, mode and the median may or may not coincide in a distribution.</p>
+</section>
+<section id="quantiles" class="level3">
+<h3 class="anchored" data-anchor-id="quantiles">Quantiles</h3>
+<p>As we mentioned, the median represents the value that divides the data leaving 50% on one side and 50% on the other. This concept can be generalized to any <em>X</em>% using quantiles. The <em>X</em>th quantile is the value that divides the distribution, with <em>X</em>% of the data to its left and <em>1-X</em>% to its right.</p>
+<p>Some of the most commonly used quantiles are the 25th percentile, also known as <span class="math inline">\(Q_{1}\)</span> (the first quartile), <span class="math inline">\(Q_{2}\)</span> (the median), and <span class="math inline">\(Q_{3}\)</span> (the third quartile). <span class="math inline">\(Q_{1}\)</span> separates the lower 25% of the data, <span class="math inline">\(Q_{2}\)</span> represents the median, and <span class="math inline">\(Q_{3}\)</span> separates the lower 75% of the data, leaving the upper 25% to the right.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="1_class_notes_files/figure-html/quantiles-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="measures-of-dispersion" class="level2">
+<h2 class="anchored" data-anchor-id="measures-of-dispersion">Measures of dispersion</h2>
+<p>Measures of dispersion will help us interpret the variability of data or, in other words, the spread of a variable’s distribution. We will also rely on them for the analysis of a single variable.</p>
+<section id="variance" class="level3">
+<h3 class="anchored" data-anchor-id="variance">Variance</h3>
+<p>Variance quantifies the dispersion or spread of a set of data points providing information about how far each value in the dataset deviates from the mean (average) of the data. Specifically, it measures the average squared<a href="#fn12" class="footnote-ref" id="fnref12" role="doc-noteref"><sup>12</sup></a> difference between each data point and the mean<a href="#fn13" class="footnote-ref" id="fnref13" role="doc-noteref"><sup>13</sup></a>.</p>
+</section>
+<section id="standard-deviation" class="level3">
+<h3 class="anchored" data-anchor-id="standard-deviation">Standard deviation</h3>
+<p>The standard deviation is the square root of the variance and provides similar information in a more easily interpretable unit. By computing the square root of the variance, the value is expressed in the same units as the original set of values<a href="#fn14" class="footnote-ref" id="fnref14" role="doc-noteref"><sup>14</sup></a>.</p>
+</section>
+</section>
+<section id="relationships-between-variables" class="level2">
+<h2 class="anchored" data-anchor-id="relationships-between-variables">Relationships between variables</h2>
+<section id="linear-and-non-linear-relationships" class="level3">
+<h3 class="anchored" data-anchor-id="linear-and-non-linear-relationships">Linear and non-linear relationships</h3>
+<p>When analyzing the relationship between two quantitative variables, linear relationships between two <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> variables can be described by a linear equation such as:</p>
+<p><span class="math display">\[ Y = b + mX\]</span></p>
+<p>That is to say, for <strong>any</strong> value of <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> an increase (decrease) in <span class="math inline">\(X\)</span> will imply a <strong>proportional</strong> increase (decrease) in <span class="math inline">\(Y\)</span>.</p>
+</section>
+<section id="correlation" class="level3">
+<h3 class="anchored" data-anchor-id="correlation">Correlation</h3>
+<p><strong>Correlation</strong> quantifies the <em>strength</em> and <em>direction</em> of the linear relationship between two variables<a href="#fn15" class="footnote-ref" id="fnref15" role="doc-noteref"><sup>15</sup></a>. It can take values between <strong>-1</strong> (perfect negative relationship) and <strong>1</strong> (perfect positive relationship), with 0 indicating no linear relationship. The correlation value has no units and will not be affected by a linear transformation in the variables <span class="citation" data-cites="cetinkaya-rundelIntroductionModernStatistics2021">(<a href="#ref-cetinkaya-rundelIntroductionModernStatistics2021" role="doc-biblioref">Çetinkaya-Rundel and Hardin 2021</a>)</span>. It is important to remember that correlation does <em>not</em> imply causation.</p>
+<p>Two of the main correlation calculation methods are Pearson’s and Spearman’s correlation.</p>
+<ul>
+<li><p><strong>Pearson</strong>’s correlation is useful to evaluate linear relationships between variables (and will yield 0 if no linear relationship can be found), but is very sensitive to outliers.</p></li>
+<li><p><strong>Spearman</strong>’s correlation is not as sensible to outliers and can identify monotonic (non-linear) relationships between variables, that is to say, scenarios where when the value of one variable increases, the value of the other variable either consistently increases or consistently decreases, even if these transformations are <em>not</em> proportional.</p></li>
+</ul>
+<p>The choice of our method will therefore depend on whether the relationship between variables is linear or monotonic, and whether our data includes outliers or not.</p>
+</section>
+</section>
+</section>
+<section id="confidence-intervals" class="level1">
+<h1>Confidence intervals</h1>
+<p>A <strong>confidence interval</strong> for an unknown population parameter <span class="math inline">\(\theta\)</span> is an interval built using sample data which will contain <span class="math inline">\(\theta\)</span> with a given high probability which we will refer to as a <em>confidence level</em> <span class="citation" data-cites="bertsekasIntroductionProbability2008">(<a href="#ref-bertsekasIntroductionProbability2008" role="doc-biblioref">Bertsekas and Tsitsiklis 2008</a>)</span>. It is a good practice to complement point estimations with confidence intervals, thus providing a measure of the precision of our estimation.</p>
+<p>A <span class="math inline">\(X\)</span>% confidence interval has the following property: if we take repeated samples and construct the confidence interval for each sample, <span class="math inline">\(X\)</span>% of the intervals we build will contain the true unknown value of the parameter<a href="#fn16" class="footnote-ref" id="fnref16" role="doc-noteref"><sup>16</sup></a> <span class="citation" data-cites="jamesIntroductionStatisticalLearning2013">(<a href="#ref-jamesIntroductionStatisticalLearning2013" role="doc-biblioref">James et al. 2013</a>)</span>.</p>
+</section>
+<section id="hypothesis-testing" class="level1">
+<h1>Hypothesis testing</h1>
+<p>Hypothesis tests are built upon two hypotheses: the null hypothesis (<span class="math inline">\(H_{0}\)</span>) and the alternative hypothesis (<span class="math inline">\(H_{1}\)</span>). For example, if we wanted to test whether the population mean (<span class="math inline">\(\mu\)</span>) of a distribution is greater than <span class="math inline">\(X_{i}\)</span>, we would formulate the following hypotheses:</p>
+<p><span class="math inline">\(H_{0}: \mu = X_{i}\)</span></p>
+<p><span class="math inline">\(H_{1}: \mu &gt; X_{i}\)</span></p>
+<p>The purpose of a test is to determine whether there is sufficient evidence to <strong>reject the null hypothesis</strong>, which typically describes the current state of knowledge. Therefore, we can think of rejecting <span class="math inline">\(H_{0}\)</span> as making a new discovery.</p>
+<p>In order to do find evidence for or against the null hypothesis, it is necessary to compute a <em>test statistic</em>, which summarizes the extent to which our data are consistent with <span class="math inline">\(H_{0}\)</span>.</p>
+<p>Testing the null hypothesis, we may commit a <strong>type I error</strong> if we reject <span class="math inline">\(H_{0}\)</span> when <span class="math inline">\(H_{0}\)</span> is correct, or a <strong>type II error</strong> if we do not reject <span class="math inline">\(H_{0}\)</span> when <span class="math inline">\(H_{0}\)</span> is not correct.</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"><strong>Decision</strong></th>
+<th style="text-align: left;"><span class="math inline">\(H_{0}\)</span></th>
+<th style="text-align: left;"><span class="math inline">\(H_{1}\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Reject <span class="math inline">\(H_{0}\)</span></td>
+<td style="text-align: left;">Type I Error</td>
+<td style="text-align: left;">Correct</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Do Not Reject <span class="math inline">\(H_{0}\)</span></td>
+<td style="text-align: left;">Correct</td>
+<td style="text-align: left;">Type II Error</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>The probability of rejecting <span class="math inline">\(H_{0}\)</span> if <span class="math inline">\(H_{0}\)</span> is correct (type I error), conventionally represented with <span class="math inline">\(\alpha\)</span>, is the statistical significance of the test. The <strong>p-value</strong> is the minimum level of significance at which we will reject the test. We will therefore try to accept or reject our hypothesis keeping the probability of false rejection (type I error) suitably small<a href="#fn17" class="footnote-ref" id="fnref17" role="doc-noteref"><sup>17</sup></a>.</p>
+<p>On the other hand, the <strong>power</strong> of the hypothesis test is defined as the probability of not making a type II error.</p>
+<p>There is a <strong>trade-off</strong> between reducing the probability of committing a type I error and a type II error, and researchers will typically prioritize avoiding type I errors, because they involve declaring a scientific finding that is not correct <span class="citation" data-cites="jamesIntroductionStatisticalLearning2013">(<a href="#ref-jamesIntroductionStatisticalLearning2013" role="doc-biblioref">James et al. 2013</a>)</span>.</p>
+</section>
+<section id="discussion" class="level1">
+<h1>Discussion</h1>
+<p>The <strong>sample size</strong> poses a challenge because if it is <strong>too small</strong>, we may not be able to draw meaningful conclusions (or extrapolate our results), even if the phenomenon we aim to test actually exists.</p>
+<p>However, the most relevant issue in the era of big data is that we will often work with <strong>extremely large</strong> samples, which may result in an exaggerated tendency to reject null hypotheses when observing minimal differences<a href="#fn18" class="footnote-ref" id="fnref18" role="doc-noteref"><sup>18</sup></a>. This will require extreme care when <strong>interpreting</strong> our results, that is to say, having a clear and well-informed hypothesis, backed by a clear understanding of what could potentially account for differences among groups. On the other hand, it’s important to note that merely displaying two or more distributions with some degree of dissimilarity, especially when there is overlap, falls short of confirming the presence of significant differences between groups. Conducting rigorous testing is fundamental to substantiate such claims.</p>
+</section>
+<section id="final-remarks" class="level1">
+<h1>Final Remarks</h1>
+<p>During this lecture, we’ve introduced the fundamental concepts of statistics and probability you will need when analyzing data. As we draw this lecture to a close, it’s important to remember that this is an introductory course: we assume you have some previous knowledge on statistics, and we’re here to help you understand how to apply this knowledge to data science.</p>
+<p>A solid grasp of statistics is a fundamental pillar of good data science, and it is therefore important to study in greater depth the concepts discussed during the class, as well as specific tools you might need on particular projects. The course’s bibliographical references serve as an excellent starting point!</p>
+</section>
+<section id="references" class="level1 unnumbered">
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-bertsekasIntroductionProbability2008" class="csl-entry" role="listitem">
+Bertsekas, Dimitri P., and John N. Tsitsiklis. 2008. <em>Introduction to Probability</em>. 2nd ed. Optimization and Computation Series. <span>Belmont</span>: <span>Athena scientific</span>.
+</div>
+<div id="ref-cetinkaya-rundelIntroductionModernStatistics2021" class="csl-entry" role="listitem">
+Çetinkaya-Rundel, Mine, and Johanna Hardin. 2021. <em>Introduction to <span>Modern Statistics</span></em>. <span>OpenIntro</span>.
+</div>
+<div id="ref-devoreProbabilidadEstadisticaPara2011" class="csl-entry" role="listitem">
+Devore, Jay L. 2011. <em>Probabilidad y Estadística Para Ingeniería y Ciencias</em>. 8a ed. <span>México</span>: <span>Cengage Learning</span>.
+</div>
+<div id="ref-jamesIntroductionStatisticalLearning2013" class="csl-entry" role="listitem">
+James, G, D Witten, T Hastie, and R Tibshirani. 2013. <em>An <span>Introduction</span> to <span>Statistical Learning</span> with <span>Applications</span> in <span>R</span></em>. Second. <span>Springer</span>.
+</div>
+</div></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>An <a href="https://seeing-theory.brown.edu/basic-probability/index.html#section1">example</a> tossing a coin.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p><strong>Bayes’ theorem</strong> provides us with a method to reverse or convert a conditional probability (That is to say, to obtain <span class="math inline">\(P(A/B)\)</span> knowing <span class="math inline">\(P(B/A)\)</span>): <span class="math display">\[ P(A/B) = \frac{P(B/A)P(A)}{P(B)} \]</span><a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Conventionally, uppercase (N) is often used to represent the population, while lowercase (n) is used to denote samples.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>For instance, consider a population in which each object represents an ice cream cone and we are observing the variable “taste”, with the following possible outcome values: chocolate, strawberry, and vanilla.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>Consider, for example, our ice cream “taste” variable: we have three possible values.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>For example, a person’s height. Since this is a continuous set of numbers, the possible values it can take are uncountable, as there are always intermediate values between any two numbers. For example, between 170 and 171, you have 170.5, between 170 and 170.5, there’s 170.25, and so on.<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>We will elaborate on the information contained within these parameters in the following sections.<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn8"><p><a href="https://seeing-theory.brown.edu/probability-distributions/index.html#section3">Try it yourselves</a><a href="#fnref8" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn9"><p>For a series of values <span class="math inline">\(x_{1}, x_{2}, x_{3},...,x_{n}\)</span> we can obtain the mean (<span class="math inline">\(\overline{x}\)</span>) using: <span class="math display">\[ \overline{x} = \frac{1}{n} \sum_{i=1}^{n} x_{i} \]</span><a href="#fnref9" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn10"><p>For a series of values <span class="math inline">\(x_{1}, x_{2}, x_{3},...,x_{n}\)</span> and weights <span class="math inline">\(w_{1}, w_{2}, w_{3},...,w_{n}\)</span> we can obtain the weighted mean using: <span class="math display">\[  \frac{\sum_{i=1}^{n} w_{i}x_{i}}{\sum_{i=1}^{n} w_{i}}  \]</span><a href="#fnref10" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn11"><p>An <strong>outlier</strong> is an observation that appears extreme relative to the rest of the data. Outliers might result from data collection or data entry errors, or might provide interesting unexpected information about the data <span class="citation" data-cites="cetinkaya-rundelIntroductionModernStatistics2021">(<a href="#ref-cetinkaya-rundelIntroductionModernStatistics2021" role="doc-biblioref">Çetinkaya-Rundel and Hardin 2021</a>)</span>. Therefore, removing outliers from our calculations might or might not constitute a good practice in each particular context.<a href="#fnref11" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn12"><p>Make sure you understood the fundamental reasoning behind this concept: what’s the rationale for employing the <strong>squared</strong> difference? <br> (Here’s a hint: consider positive and negative differences may cancel each other out).<a href="#fnref12" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn13"><p>For a series of values <span class="math inline">\(x_{1}, x_{2}, x_{3},...,x_{n}\)</span> we can obtain the variance using: <span class="math display">\[ \frac{1}{n} \sum_{i=1}^{n} (x_{i} - \overline{x})^2 \]</span><a href="#fnref13" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn14"><p>We can obtain it using: <span class="math display">\[ \sqrt{\frac{1}{n} \sum_{i=1}^{n} (x_{i} - \overline{x})^2} \]</span><a href="#fnref14" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn15"><p>Visit <a href="https://rpsychologist.com/correlation/">this site</a> for an intuitive visualization on correlation.<a href="#fnref15" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn16"><p>Visit <a href="https://seeing-theory.brown.edu/frequentist-inference/index.html#section2">this site</a> for a visualization on the interpretation of confidence intervals<a href="#fnref16" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn17"><p>How small should our p-value be? Conventionally, a p-value smaller than <strong>0.05</strong> is considered statistically significant, suggesting strong evidence against the null hypothesis. However, the benchmark value for the significance level may vary depending on the specific problem and the preferences of the researcher or decision-maker.<a href="#fnref17" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn18"><p>A common approach to address this distortion is to conduct our tests on random subsamples of our data.<a href="#fnref18" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

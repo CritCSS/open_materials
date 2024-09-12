@@ -1,0 +1,13 @@
+---
+title: "Shiny Apps"
+subtitle: "Challenge"
+author: ""
+date: ""
+output: html_notebook
+---
+
+For this challenge, you will build your own shiny app to let users explore the relationship between COVID-19 cases (and deaths) and the proportion of black population in different counties based on the [2017 US Census](https://www.kaggle.com/datasets/muonneutrino/us-census-demographic-data). 
+
+1. Use the following two data sets provided to you in the data folder: *us_counties_covid19_daily.csv* and *acs2017_county_data.csv* (you will need to apply some transformations in order to merge both data sets).
+
+2. Build a shiny app using any interactive visualizations you consider relevant.

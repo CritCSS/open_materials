@@ -1,0 +1,12 @@
+---
+title: "Unsupervised Learning"
+subtitle: "Challenge"
+author: ""
+date: ""
+output: html_notebook
+---
+
+For this challenge, you will perform a K-Means clustering model for the World Bank countries data. Ensure to:
+
+1. Try out the model for different levels of K. Which one performed better?
+2. Did it perform better than Hierarchical Clustering? And if so, why?

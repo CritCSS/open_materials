@@ -1,0 +1,1 @@
+download the word2vec binary file from [this link](https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit?usp=sharing) and unzip it in the `./models/` folder of this class

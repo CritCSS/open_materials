@@ -1,0 +1,79 @@
+---
+title: "Unsupervised learning"
+subtitle: "Independent practice"
+author: ""
+date: ""
+output: html_notebook
+editor_options: 
+  markdown: 
+    wrap: sentence
+---
+
+```{r setup, message=FALSE, warning=FALSE, include=FALSE}
+knitr::opts_chunk$set(message = FALSE,warning = FALSE)
+```
+
+In this guided practice, you will make clusters based on information in the `wb_bank_data_2019.csv` with information constructed by the World Bank on the distribution of the employed population by major sectors of activity and occupational category:
+
+-   SL.AGR.EMPL.ZS: total % employment in agriculture: consisting of agriculture, forestry, hunting and fishing activities.
+
+-   SL.IND.EMPL.ZS: % total employment in industry: in mining and quarrying, manufacturing, construction, and energy, gas and water activities.
+
+-   SL.SERV.EMPL.ZS % total employment in services comprises wholesale and retail trade and restaurants and hotels, transportation, storage and communications, finance, insurance, real estate and business services, and personal, social and community services.
+
+-   SL.FAM.WORK.ZS: Total % of family workers.
+
+-   SL.EMP.MPYR.ZS: % total employers
+
+-   SL.EMP.SELF.ZS: % total self-employed (sum of employers and own account and family workers)
+
+-   SL.EMP.WORK.ZS: % total salaried workers
+
+1.  Import the dataset and libraries.
+
+```{r}
+
+```
+
+2.  Complete the blanks of the following code, selecting the variables. Run the code and describe what you see in the correlation plot.
+
+```{r}
+cor <- df %>% 
+  select(     ) %>% 
+  cor()
+
+corrplot::corrplot(cor)
+```
+
+3.  Create the preprocessing of the recipe for a Hierarchical Clustering model. What steps are necessary to perform here? Should we normalize the variables?
+
+```{r}
+
+```
+
+4.  Build the euclidean distance matrix for the data.
+
+```{r}
+
+```
+
+5.  Build three hierarchical clustering models, trying different kinds of linkage: average, complete and single.
+
+```{r}
+
+
+```
+
+6.  Evaluate the clusterings with dendograms. Which one outperformed the others?
+
+```{r}
+
+```
+
+7.  Select one of the methods, define a number of clusters and describe the observations within said clusters.
+
+```{r}
+
+```
+
+

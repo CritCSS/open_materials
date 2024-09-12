@@ -1,0 +1,342 @@
+---
+title: "Supervised Learning I"
+author: ''
+date: ''
+output:
+  html_document:
+    df_print: paged
+subtitle: Guided practice
+---
+
+```{r setup, message=FALSE, warning=FALSE, include = FALSE}
+knn_fit <- readRDS('./models/knn_fit.RDS')
+knn_fit_100 <- readRDS('./models/knn_fit_100.RDS')
+test_val <- readRDS('./data/asec/data_predictions.RDS')
+
+#We include these files that load the models we trained during this notebook. This practice is adopted to mitigate potential long execution times during the notebook run. By saving and reloading these models, we ensure efficient use of time and resources, avoiding redundant training procedures.
+
+library(tidyverse)
+library(tidymodels)
+```
+
+# Dataset
+
+In this guided practice, we will use the **Home Mortgage Disclosure Act Data, NY, 2015** provided and compiled by the [Consumer Finance Protection Board](https://www.kaggle.com/datasets/jboysen/ny-home-mortgage?resource=download). This dataset covers all mortgage decisions made in 2015 for the state of New York.
+
+```{r message=FALSE, warning=FALSE}
+data_selection <- readRDS('./data/asec/sample_mortgage.RDS')
+
+data_selection
+```
+
+As you can see, this dataset contains information regarding the people who applied for loans and the neighborhoods in which they live: demographic and socio-economical data. Our goal for this guided practice is to elaborate KNN and Naive Bayes models that predict whether the person would receive the loan or not, and explore if these models contain an explicit or implicit racial bias.
+
+First, we are going to try...
+
+# Naive Bayes
+
+Our dataset has already been preprocessed, so we don't have to include those steps in the *recipe* for the workflow. We are only going to set the formula `action_taken_name ~ .`, since we want to use all the variables to predict the action taken regarding the mortgage, and we are going to update the role of the column `respondent_id` so it becomes the id column for the model.
+
+```{r}
+recipe <- recipe(action_taken_name ~ ., data = data_selection) %>%
+  update_role(respondent_id, new_role = "id") 
+```
+
+We will create the workflow and apply the recipe to it. Remember that the idea behind `tidymodels` is that the whole modeling process can be contained in a workflow, where we can load, update, and extract parts from different trained models.
+
+```{r}
+wf <- workflow() %>%
+  add_recipe(recipe)
+```
+
+Next, we create the Naive Bayes model that we want to train for the workflow. `tidymodels` only contains the classification models included in the `parnsip` package, not including Naive Bayes. So, for this model we have to load the `discrim` library.
+
+```{r message=FALSE, warning=FALSE}
+library(discrim)
+
+nb_spec <- naive_Bayes() %>%
+  set_mode("classification") %>%
+  set_engine("naivebayes")
+
+nb_spec
+```
+
+Note that we used the parameter "classification" in the `set_mode()` function. This is because we are working with a categorical variable as the target. If we were working with a numeric variable, we would set "regression".
+
+Next, we add the model to the workflow with `add_model`.
+
+```{r}
+wf <- wf %>% add_model(nb_spec)
+```
+
+Then, we can fit it to our dataset. In the context of machine learning, *fitting* refers to the process of training the algorithm on a set of data, so that the model can make accurate predictions on new, unseen data.
+
+```{r message=FALSE, warning=FALSE}
+nb_fit <- wf %>% fit(data_selection)
+
+nb_fit
+```
+
+As you can see from the output, the model was trained and fitted, and it returns the probabilities for each of the variables: the predictors and the target. It also returns different tables with the coefficient value for each variable. We can explore the values of each coefficient:
+
+```{r}
+extract_fit_engine(nb_fit)$tables$applicant_race_name_1
+```
+
+The coefficients are the probability for each applicant race of having a loan originated or not. You can note that the category 'White' has the highest probability of having a loan originated than the other races. 
+
+Now, how does this model work predicting the data? First, we are going to generate a `test_val` dataframe that has a column with the models' predictions.
+
+```{r eval=FALSE}
+test_val <- nb_fit %>%
+  predict(data_selection) %>%
+  bind_cols(., data_selection) %>%
+  rename(pred_nb = .pred_class)
+```
+
+Since we are not getting into evaluation metrics quite yet, we are going to explore the results comparing the proportion of predicted values within the real ones.
+
+```{r message=FALSE, warning=FALSE}
+test_val%>%
+  group_by(action_taken_name, pred_nb) %>%
+  summarize(n= n()) %>%
+  ggplot()+
+  geom_col(aes(x = action_taken_name, y = n, fill = pred_nb),
+           position = "fill")+
+  theme_minimal()
+```
+
+Naive Bayes doesn't perform so badly in this case. Around 73% of the not originated loans were predicted correctly, and around 87% of the originated loans were predicted as such.
+
+# KNN
+
+Now, we are going to try and predict the same variable with a KNN classifier. First, we are going to load the `kknn` library in order to instance this type of model. Next, we will create the model with the function `nearest_neighbor()`. The parameter `neighbors` is used to define the number of neighbors the model will use in order to make the predictions. For this example, we will set it to 5 neighbors.
+
+```{r}
+library(kknn)
+
+knn_spec <- nearest_neighbor(neighbors = 5) %>%
+  set_engine("kknn") %>%
+  set_mode("classification")
+```
+
+Now, we will fit the model to our data.
+
+```{r, eval = FALSE}
+knn_fit <- wf %>% 
+  update_model(knn_spec) %>% 
+  fit(data_selection)
+```
+
+And predict the values on the dataset.
+
+```{r eval=FALSE}
+test_val <- knn_fit %>%
+  predict(data_selection) %>%
+  bind_cols(., test_val) %>%
+  rename(pred_knn = .pred_class)
+```
+
+How did the model perform?
+
+```{r message=FALSE, warning=FALSE}
+test_val%>%
+  group_by(action_taken_name, pred_knn) %>%
+  summarize(n= n()) %>%
+  ggplot()+
+  geom_col(aes(x = action_taken_name, y = n, fill = pred_knn),
+           position = "fill")+
+  theme_minimal()
+
+write_rds(knn_fit, './models/knn_fit.RDS')
+```
+
+Apparently, this model predicted *perfectly*. This would be good if we were trying out the model in data we didn't train the model on. However, we are predicting on the same dataset we fitted the model. Also, the model is based on the categories of 5-near neighbors, which is quite a small number. This could mean that the model we trained can capture almost perfectly our dataset's categories... but it's way too specific for the cases we have, and it won't predict well on new cases. This is called a case of **overfitting**. 
+
+What happens if we use `K = 100`? First, we set the parameter...
+
+```{r}
+knn_spec_100 <- nearest_neighbor(
+  neighbors = 100
+) %>%
+  set_engine("kknn") %>%
+  set_mode("classification")
+```
+
+Then, we refit and predict the values.
+
+```{r eval = FALSE}
+knn_fit_100 <- wf %>% 
+  update_model(knn_spec_100) %>% 
+  fit(data_selection)
+
+test_val <- knn_fit_100 %>%
+  predict(data_selection) %>%
+  bind_cols(., test_val) %>%
+  rename(pred_knn_100 = .pred_class)
+```
+
+And we visualize the results.
+
+```{r message=FALSE, warning=FALSE}
+test_val%>%
+  group_by(action_taken_name, pred_knn_100) %>%
+  summarize(n= n()) %>%
+  ggplot()+
+  geom_col(aes(x = action_taken_name, y = n, fill = pred_knn_100),
+           position = "fill")+
+  theme_minimal()
+```
+
+Now, the model doesn't predict the cases perfectly, but it is a better model to apply in new scenarios! It even improves Naive Bayes' performance, capturing 76% of the not originated loans and 88% of the originated loans correctly.
+
+# Racial bias
+
+The dataset contains different categories referring to the applicant's race and ethnicity. We know that race could make a person a more (or less) favorable candidate in order to receive a loan. So, what happens when a computer learns from a racially-motivated premise to make recomendations on giving out mortgages?
+
+We are going to explore the results in our model comparing the predicted target values in white and non-white applicants. First, we are going to create an ad-hoc variable with the races of applicants grouped in those two categories.
+
+```{r}
+test_val <- test_val %>% 
+  mutate(race_grouped = case_when(
+    applicant_race_name_1 == "White" ~ "White",
+    applicant_race_name_1 %in% c("Information not provided by applicant in mail, Internet, or telephone application", "Not applicable") ~ "Information not supplied",
+    TRUE ~ "Non-white"
+  )
+)
+```
+
+Now, we will see the proportion of correctly classified cases in the different groups, and compare each model.
+
+```{r fig.height=8, message=FALSE}
+results_nb <- test_val%>%
+  filter(race_grouped != "Information not supplied") %>%
+  group_by(race_grouped, action_taken_name, pred_nb) %>%
+  summarize(n= n()) %>%
+  mutate(perc = round(n/sum(n)*100,2))
+
+results_knn <- test_val%>%
+  filter(race_grouped != "Information not supplied") %>%
+  group_by(race_grouped, action_taken_name, pred_knn_100) %>%
+  summarize(n= n()) %>%
+  mutate(perc = round(n/sum(n)*100,2))
+
+p1 <- ggplot(results_nb, aes(x = pred_nb, y = action_taken_name)) +
+  geom_tile(fill = "white", color = "black") + 
+  geom_text(aes(label=perc))+
+  scale_fill_viridis_c()+
+  facet_wrap(vars(race_grouped),
+             nrow = 2, 
+             scales = "free")+
+  labs(title = "Naive Bayes classifier",
+       x = "Prediction",
+       y = "Real value")+
+  theme_minimal()
+
+
+p2 <- ggplot(results_knn, aes(x = pred_knn_100, y = action_taken_name)) +
+  geom_tile(fill = "white", color = "black") + 
+  geom_text(aes(label=perc))+
+  scale_fill_viridis_c()+
+  facet_wrap(vars(race_grouped),
+             nrow = 2, 
+             scales = "free")+
+  labs(title = "KNN classifier",
+       x = "Prediction",
+       y = "Real value")+
+  theme_minimal()
+
+library(patchwork)
+
+p1 / p2
+
+```
+
+When comparing the predictions of both models across different demographic groups, it becomes apparent that the proportion of accurately classified cases varies. Specifically, for white individuals, *both models exhibit a higher classification error in predicting not originated loans.* This implies that both models display a bias towards classifying white individuals as loan recipients, indicating a tendency to approve loans for white applicants more frequently than for non-white applicants. This bias is further evident in the classifications for non-white individuals, where in reality, white individuals have a higher acceptance rate than their non-white counterparts.
+
+```{r}
+test_val%>%
+  filter(race_grouped != "Information not supplied") %>%
+  group_by(race_grouped, action_taken_name) %>%
+  summarize(n= n()) %>%
+  mutate(perc = round(n/sum(n)*100,2)) %>%
+  ggplot(aes(x = race_grouped, y = perc, fill = action_taken_name))+
+  geom_col()
+```
+
+In the plot depicting the results of the models, it's evident that the KNN classifier lacks statistically significant errors or biases, yet it reproduces this existing real-life inequality. The plot highlights a disparity in loan offerings, favoring white individuals over non-white individuals. On the other hands, the Naive Bayes classifier reveals a concerning pattern of higher misclassification rates for non-white applicants, often erroneously classifying them as ineligible for loan origination. This unsettling observation indicates that the model is not only reflecting but also amplifying an inherent inequality, introducing an unjust racial bias into the loan origination process.
+
+Now, could this be avoided if we removed the category `applicant_race_name_1` from the model? Let's try it out. We must update the recipe to remove certain variables, and refit the model.
+
+```{r message=FALSE, warning=FALSE}
+new_recipe <- recipe(action_taken_name ~ ., data = data_selection)%>%
+  update_role(respondent_id, new_role = "id") %>%
+  step_rm(c(applicant_race_name_1, applicant_ethnicity_name))
+
+new_wf <- wf %>%
+  update_recipe(new_recipe)
+
+new_nb_fit <- new_wf %>% 
+  update_model(nb_spec) %>%
+  fit(data_selection)
+
+new_knn_fit <- new_wf  %>% 
+  update_model(knn_spec_100) %>%
+  fit(data_selection)
+
+```
+
+Now, we predict with the new model over the dataframe, and evaluate its bias following the same steps as before.
+
+```{r message=FALSE, warning=FALSE}
+test_val <- new_nb_fit %>%
+  predict(test_val) %>%
+  bind_cols(., test_val) %>%
+  rename(pred_nb_new = .pred_class)
+
+results_nb_new <- test_val%>%
+  filter(race_grouped != "Information not supplied") %>%
+  group_by(race_grouped, action_taken_name, pred_nb_new) %>%
+  summarize(n= n()) %>%
+  mutate(perc = round(n/sum(n)*100,2))
+
+test_val <- new_knn_fit %>%
+  predict(test_val) %>%
+  bind_cols(., test_val) %>%
+  rename(pred_knn_new = .pred_class)
+
+results_knn_new <- test_val%>%
+  filter(race_grouped != "Information not supplied") %>%
+  group_by(race_grouped, action_taken_name, pred_knn_new) %>%
+  summarize(n= n()) %>%
+  mutate(perc = round(n/sum(n)*100,2))
+
+
+p3 <- ggplot(results_nb_new, aes(x = pred_nb_new, y = action_taken_name)) +
+  geom_tile(fill = "white", color = "black") + 
+  geom_text(aes(label=perc))+
+  scale_fill_viridis_c()+
+  facet_wrap(vars(race_grouped),
+             nrow = 2, 
+             scales = "free")+
+  labs(title = "Naive Bayes classifier",
+       x = "Prediction",
+       y = "Real value")+
+  theme_minimal()
+
+p4 <- ggplot(results_knn_new, aes(x = pred_knn_new, y = action_taken_name)) +
+  geom_tile(fill = "white", color = "black") + 
+  geom_text(aes(label=perc))+
+  scale_fill_viridis_c()+
+  facet_wrap(vars(race_grouped),
+             nrow = 2, 
+             scales = "free")+
+  labs(title = "KNN Bayes classifier",
+       x = "Prediction",
+       y = "Real value")+
+  theme_minimal()
+
+p3 / p4
+```
+
+While this reduces the bias in the model, it doesn't erase it completely. This is because there are certain variables which could be associated to the race of applicants, and removing only this variable does not completely reduce the model's bias.

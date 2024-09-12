@@ -1,0 +1,252 @@
+---
+title: "Social network analysis"
+subtitle: "Guided practice"
+author: ""
+date: ""
+output: html_notebook
+---
+
+```{r message=FALSE, warning=FALSE}
+library(tidygraph)
+library(tidyverse)
+library(ggraph)
+library(igraph) 
+library(janitor)
+```
+
+## Dataset
+
+We are going to use the **General Relativity and Quantum Cosmology collaboration network** from the [SNAP](https://snap.stanford.edu/data/ca-GrQc.html) team at Stanford.
+
+-   It is a collaboration network of Arxiv General Relativity category.
+-   There is an edge if authors coauthored at least one paper.
+-   The original dataset comes in a `.txt` with some descriptive metadata on top. We need to read the raw file and clean it a bit before we can start
+
+```{r}
+raw_file <- read_delim('data/ca-GrQc.txt',delim = '\t',skip = 3) %>% clean_names(replace= c('#'=''))
+raw_file
+```
+
+## [igraph](https://igraph.org/)
+
+*igraph* is large library for graph/network analysis. Not only is used in R, but also has versions for python and C/C++.
+
+The network will not be stored as a dataframe, matrix or list. *igraph* builds a new type of `object`.
+
+> *This package uses a specific vocabulary, more related with the math/graph community. So a network is a **graph**, nodes are called **vertex** and links are **edges.***
+
+## Building the network
+
+To parse the network with igraph we use the function `graph_from_data_frame`. We also need to specify if the network is directed or not. As this is a co-authorship network, the relation is symmetrical (undirected) among authors.
+
+```{r}
+g <- graph_from_data_frame(raw_file, directed=FALSE)
+```
+
+If we want to see the main features of this network, we simply call the object.
+
+```{r}
+g
+```
+
+-   We can see that the network `g` has 5242 nodes and 28980 links.
+
+-   The nodes (also called vertex) have one attribute: the name. This is the id of each author.
+
+-   Both nodes and edges can have any number of attributes. If the network is weighted, then the edges should have an attribute to represent the strength of the connection.
+
+-   We can use the function `V` to access nodes, and `E` to access edges.
+
+-   If we want to access the attributes of the nodes, we use the `$` with the name of the attribute.
+
+```{r}
+V(g)$name %>% sample(10)
+E(g) %>% sample(10)
+```
+
+## Node level metrics
+
+*igraph* has a lot of metrics implemented, and it is pretty straight-forward to use.
+
+-   For example, if we want to get the degree of each node, we can use the function `degree` which returns a named vector with the degree of each node.
+
+```{r}
+degree(g) %>% sample(10)
+```
+
+-   We can do the same for `betweenness` and `closeness`. `eigen_centrality` returns a list with some other parameters, and the centrality of each node under the `vector` element of the list
+
+```{r}
+betweenness(g) %>% sample(10)
+closeness(g) %>% sample(10)
+
+eigen_centrality(g)$vector %>% sample(10)
+```
+
+-   If we combine all these, we can build a dataframe with the different centrality measures
+
+```{r}
+centrality_metrics <- tibble(node= V(g)$name,degree=degree(g), betweenness= betweenness(g), closeness=closeness(g), eigen_centrality= eigen_centrality(g)$vector) 
+
+centrality_metrics %>% 
+  arrange(-degree)
+```
+
+-   We can see that the author `21012` has 162 co-authors and has the highest eigen-centrality (1).
+-   We can also make a first visualization of the degree distribution:
+
+```{r}
+centrality_metrics %>% 
+  ggplot(aes(x=degree))+
+  geom_histogram()
+```
+
+## Network level metrics
+
+-   **Density:** we can check the ratio between the number of edges and the number of possible edges with `edge_density`.
+
+```{r}
+igraph::edge_density(g)
+```
+
+-   Is our network connected?
+
+```{r}
+is_connected(g)
+```
+
+No! this means that there are some authors that are not connected in any path with some others. Let's see the components of the network:
+
+-   How many distinct components are?
+
+```{r}
+igraph::count_components(g)
+```
+
+-   The function `components` gives the `membership` of all authors to the different components.
+-   It also tell us the number of components and the size of each one.
+
+```{r}
+components(g)$csize
+```
+
+-   There is one huge component of 4158 authors, and all the other components are much smaller.
+
+### **Graph decomposition**
+
+Sometimes all the relevant analysis is on the giant component of the network, as most of the metrics don't make sense between unconnected components. So it makes sense to only keep the biggest one. For this we can use the function `decompose`, that builds the sub-graphs of connected components. And we keep the first element of the list, that contains the largest component.
+
+```{r}
+gg <- decompose(g)[[1]]
+```
+
+-   Which is the largest distance between two co-authors? we can use the function `diameter`.
+
+```{r}
+diameter(gg)
+```
+
+-   And what about the 6 degrees of separation?
+
+```{r}
+mean_distance(gg)
+```
+
+It works pretty well for this network! this means that if an author wants to reach another only through his colleagues, it takes on average 6 people.
+
+-   For the **average degree** we can simply average the previous result.
+
+```{r}
+centrality_metrics$degree %>% mean()
+```
+
+An author has 11 co-authors on average.
+
+-   The **clustering coefficient** is also called *transitivity*, and that's how we find it in *igraph*.
+
+```{r}
+transitivity(gg)
+```
+
+There is a lot of clustering among co-authors! if an author collaborated with 2 other, there is a high chance that those authors also collaborated among them. This makes sense on collaboration networks because people work on teams/labs, and also because the relation *co-authorship* is based on papers that have more than 2 authors, so the same event (a paper) creates links among all co-authors.
+
+## Network visualization
+
+*igraph* has its own implementation of network visualization using the function `plot`. But in this note we will use the library `ggraph` that makes a ggplot-friendly implementation of network visualizations.
+
+### [Layouts](https://cran.r-project.org/web/packages/ggraph/vignettes/Layouts.html)
+
+Networks are hard to visualize because we need to show points (nodes) in a space, but there are no natural x-y dimensions to sort them. The *layout* in which we sort nodes is defined by a specific algorithm, and there are many!
+
+We can see all the different components sorted by size with the `layout = 'stress'`.
+
+```{r}
+ggraph(g, layout = 'stress')+
+  geom_edge_link()+
+  geom_node_point() +
+  theme_graph()
+```
+
+Let's now focus on the middle-size components that are easier to visualize.
+
+Using the `components` function we can build a dataset with the membership of each node, and the size of its component. This is easy to filter, so we can remove the giant component and the smallest components.
+
+```{r}
+comp <- tibble(name = V(g)$name, membership= components(g)$membership) %>% 
+  left_join(tibble(size=components(g)$csize) %>% 
+              mutate(membership=row_number()),by='membership') %>% 
+  filter(membership!=1,size>4)
+```
+
+With the `induced_subgraph` function we can filter the network by id, using the `comp$name`.
+
+```{r}
+small_g <- induced_subgraph(g, comp$name)
+```
+
+We can add the membership of the nodes as an attribute.
+
+```{r}
+V(small_g)$membership <- components(small_g)$membership
+```
+
+```{r}
+ggraph(small_g, layout = 'stress')+
+  geom_edge_link()+
+  geom_node_point(aes(color=factor(membership)))+
+  theme_graph()+
+  theme(legend.position = 'none')
+```
+
+We can also add centrality measures of nodes and visualize them.
+
+```{r}
+V(small_g)$degree <- degree(small_g)
+V(small_g)$closeness <- closeness(small_g)
+V(small_g)$betweenness <- betweenness(small_g)
+
+ggraph(small_g, layout = 'stress')+
+  geom_edge_link()+
+  geom_node_point(aes(color=factor(membership), size=betweenness))+
+  theme_graph()+
+  theme(legend.position = 'none')
+```
+
+If we want to look at the giant component, the size makes it hard to see patterns. We can represent the edges as a density over the space instead of showing all of them. Also, it's a good idea to make points smaller. Still, this is a visualization with a lot of information (4158 data points!) so it can take some time to render.
+
+```{r}
+
+#for simplicity we select only the first 1000 nodes and their neighbors
+gg <- decompose(induced_subgraph(g, c(1:1000, neighbors(gg,1:1000))))[[1]]
+
+V(gg)$degree <- degree(gg)
+
+
+gg %>% 
+ggraph(., layout = 'stress')+
+  geom_edge_density()+
+  geom_node_point(size=0.01, aes(color=degree))+
+  theme_graph()
+```
+
+We can see a center-periphery structure among the co-authors network.

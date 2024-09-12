@@ -1,0 +1,162 @@
+---
+title: "Social Network Analysis"
+subtitle: "Independent practice"
+author: ""
+date: ""
+output: html_notebook
+---
+
+Load the libraries needed
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(ggraph)
+library(igraph) 
+```
+
+## CORA Dataset
+
+We are going to use the CORA dataset: You can see the original article at:
+
+<https://link.springer.com/article/10.1023/A:1009953814988>
+
+And we are taking the data originally from: <https://graphsandnetworks.com/the-cora-dataset/>
+
+1.  Load the data from the folder 'data/cora/' into the dataframes `raw_nodes` and `raw_edges`.
+
+```{r}
+
+```
+
+2.  Check the format of nodes and links of the dataframes
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+3.  Select variables
+
+-   The `raw_nodes` data frame contains the attributes of each node. We only want to keep the `nodeId` and `subject`.
+-   The `raw_edges` data frame has the links, with the clarification that the type of relation is 'cites', so the source node cites the target node, this is a directed network. We only want to keep the `sourceNodeId` and `targetNodeId`.
+
+```{r}
+
+```
+
+## Build the igraph object
+
+4.  Use the edgelist to build the graph `g` using `graph_from_data_frame`. We want to add the nodes attributes, so we can pass the `raw_nodes` dataframe to the `vertices` parameter.
+
+```{r}
+
+```
+
+## Inspection
+
+5.  Take a look at the graph. How many nodes and links are there?
+
+```{r}
+
+```
+
+6.  Check the subject of the first 10 nodes.
+
+```{r}
+
+```
+
+## Node level metrics
+
+7.  Build a dataframe with the name, subject and centrality measures of nodes, and call it `nodes_df`.
+
+```{r}
+
+```
+
+Which node has the highest degree?
+
+## Describe subjects centrality
+
+8.  Use `nodes_df` to find subject level average centrality with `group_by` and `summarise`.
+
+```{r}
+
+```
+
+-   How many nodes are there per subject?
+-   Which subject has the highest degree?
+-   Which subject has the highest betweenness? Can you imagine why?
+
+## Network level metrics
+
+9.  Check the density of the network
+
+```{r}
+
+```
+
+10. Is our network connected?
+
+```{r}
+
+```
+
+11. If not, how many distintct components are?
+
+```{r}
+
+```
+
+12. Which is the size of the components?
+
+```{r}
+
+```
+
+13. Which is the diameter of the network?
+
+```{r}
+
+```
+
+14. Which is the diameter of the network? Does it follow the 6-degrees of separation rule?
+
+```{r}
+
+```
+
+15. Which is the **clustering coefficient** of the network?
+
+```{r}
+
+```
+
+-   Is this network as clustered as the collaboration network from the guided practice? can you give a rationale of why?
+
+## Network visualization
+
+16. To simplify the exercise, build a the subgraph with all components that have more than 4 nodes, but less than 1000.
+
+```{r}
+
+```
+
+17. Now visualize the subgraph, and color the nodes by their subject
+
+```{r}
+
+```
+
+-   Are papers from the same subject connected?
+
+18. Now use the `decompose` function to keep the giant component and visualize it
+
+```{r}
+
+```
+
+-   Do you see any pattern by subject?

@@ -1,0 +1,464 @@
+---
+title: "Data Storytelling"
+subtitle: "Guided practice"
+author: ''
+date: ''
+output: html_notebook
+---
+
+```{r setup, message=FALSE, warning=FALSE, include=FALSE}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE, include = TRUE)
+```
+
+# Introduction
+
+In this guided practice we will address some of the functions used in R for making graphs and plots. We will work with the [Gender Inequality Index](https://www.kaggle.com/datasets/gianinamariapetrascu/gender-inequality-index) developed by the United Nations Development Programme (UNDP). The Gender Inequality Index (GII) measures gender inequality by analyzing health, empowerment, and labor market participation indicators. This dataset includes the GII scores for over 190 countries in 2021.
+
+```{r}
+library(tidyverse)
+
+options(scipen=999)
+
+data <- read_csv("./data/asec/Gender_Inequality_Index.csv")
+
+data <- data %>% filter(!is.na(Human_development))
+
+top_5 <- data %>% slice_max(GII, n = 5)
+
+```
+
+First, let's take a look at the columns.
+
+```{r}
+head(data)
+```
+
+# The basics: plot()
+
+The basic function that comes with R base to make graphs is `plot()`. Its most basic functionality is to show all the relationship between all the variables of the dataframe with each other.
+
+```{r}
+plot(data)
+```
+
+However, as we might tell, this is not very useful to understand the information contained in the dataset when there are many variables. To look into specific variables with different types of graphs, some parameters of the function must be modified. To do so, the variables that go into the x and y axis and the type of plot should be defined, as in the following example.
+
+```{r}
+plot(x = data$GII, type = "h")
+```
+
+In the `x` parameter, one can define the column that wants to be displayed as the independent variable. In this case, as we are showing a histogram, we do not need to define an y axis. The type of plot that shows the information is defined by the parameter `type`. If we defined another type of plot, for example, a scatter plot to see the relationship between the GII and the adolescent birth rate, we should set this parameter to "p".
+
+```{r}
+plot(x = data$GII, y = data$Adolescent_birth_rate, type = "p")
+```
+
+While `plot()` is a function that works correctly, and with only a few lines of code does the job necessary to show information, it is not the best way to show data in a visually appealing way. It does not allow us to easily map values as aesthetic attributes, which makes it hard to add more than one layer of information. In the following section, we will introduce the package used by excellence in the R community to make graphs.
+
+# Reloaded plots with ggplot
+
+`ggplot2` is the most popular data visualization package to use in R. It is included in the `tidyverse` package, and even the [BBC uses it to make graphs](https://medium.com/bbc-visual-and-data-journalism/how-the-bbc-visual-and-data-journalism-team-works-with-graphics-in-r-ed0b35693535) displayed in the journal. The reason why it's so successful and popular is because the logic behind the syntaxis and functionality of this package is the previously mentioned **Grammar of Graphics**. The elements of the graph are incorporated as layers, which makes developing charts structural and effusive.
+
+Let's dive into the functionality of `ggplot()`. First, the library should be imported.
+
+```{r eval=FALSE}
+library(ggplot2)
+```
+
+However, remember that this package is also included in the tidyverse! Therefore, if we import `tidyverse` package, there is no need to import `ggplot2` as well.
+
+## Basic usage
+
+The most simple case of use of a ggplot graph is the following:
+
+-   calling the function `ggplot()`, inputing a dataset and an aesthetic mapping with `aes()`
+-   a 'geom' layer, which defines the type of graph that will show the data.
+
+For example, if we wanted to replicate the scatterplot that shows the relationship of the GII with adolescent birth rate, we should do the following:
+
+```{r}
+ggplot(data, aes(x = GII, y = Adolescent_birth_rate))+
+  geom_point()
+```
+
+Easy! If we wanted to change the scatter plot into a line plot, we should only replace `geom_point()` with `geom_line()`.
+
+```{r}
+ggplot(data, aes(x = GII, y = Adolescent_birth_rate))+
+  geom_line()
+```
+
+And the order of the variables in the axis can be inverted:
+
+```{r}
+ggplot(data, aes(y = GII, x = Adolescent_birth_rate))+
+  geom_point()
+```
+
+Line plots and scatter plots are the easiest way to show the relationship between two continuous variables in a graph. To show categorical values, we will likely use the geometries geom_bar() or geom_col() to make barplots. What is the difference between those two?
+
+Let's look into it with an example. We can show the count of countries with human development index in the following way:
+
+```{r}
+ggplot(data, aes(x = Human_development))+
+  geom_bar()
+```
+
+The function `geom_bar()` automatically counts all the observations per group in the selected variable for 'x' and displays them in bars. Therefore, there is no need to define a variable for the 'y' axis. However, if we wanted to show the numerical values of groups we would not be able to do so with this geometry. In this case, we would need to use `geom_col()`. Look at this example with the dataframe `top_5`, which contains the 5 countries with the highest GII.
+
+```{r}
+ggplot(top_5, aes(x = Country, y = GII))+
+  geom_col()
+```
+
+The bars can also be sorted using the function `reorder()`:
+
+```{r}
+ggplot(top_5, aes(x = reorder(Country, -GII), y = GII))+
+  geom_col()
+```
+
+These are the most common geometries used to show categorical and continuous information. However, remember that during the theoretical exposition of the class we also presented some graphs that show the distribution of variables in a dataset. We went over histograms (`geom_histogram()`), density graphs (`geom_smooth()`), and boxplots (`geom_boxplot()`).
+
+```{r}
+ggplot(data, aes(y = F_Labour_force))+
+  geom_boxplot()
+```
+
+Note that for these kind of plots, we follow the same logic of only passing one variable as y or x. The other axis will automatically be plotted according to the kind of distribution for the geom.
+
+Finally, while geographical data is beyond the scope of this class, it is important to note that it is possible to make maps with ggplot, using the geometry `geom_sf()`.
+
+## Mapping more aesthetic attributes
+
+So far, we have only worked with the parameters x and y to map variables into axis. However, we can also map variables as *color*, *shapes* and *sizes*. All these options can be controlled through parameters in the function `aes()`.
+
+Recall the plot that showed the five countries with highest GII. We could also show the ranking of human development for each country, coloring the bars. To do so, we should set the parameter `fill` to the variable `Human_development`.
+
+```{r}
+ggplot(top_5, aes(x = Country, y = GII, fill = Human_development))+
+  geom_col()
+```
+
+As we can see, most of the countries with a high inequality index present a low index of human development.
+
+`aes()` also contains the parameter `color` to map a variable as colors in a graph. However, look at what would happen if we used it in this bar plot.
+
+```{r}
+ggplot(top_5, aes(x = Country, y = GII, color = Human_development))+
+  geom_col()
+```
+
+Only the borders of the bars were colored! This is because `color` is used to color lines and points. This is why we only use it to color scatter plots, line plots, or the outlines of box plots. Take a look at how the previous example of the relationship between GII and adolescent birth rate looks like when we introduce level of human development in the scatter plot:
+
+```{r}
+ggplot(data, aes(y = GII, x = Adolescent_birth_rate, color = Human_development))+
+  geom_point()
+```
+
+And how it looks like when we do so in the line plot:
+
+```{r}
+ggplot(data, aes(y = GII, x = Adolescent_birth_rate, color = Human_development))+
+  geom_line()
+```
+
+It's crucial to recognize that, in this instance, the line plot isn't the most suitable choice for representing the data. Since there are multiple lines drawn in different colors, the graph doesn't appear as visually appealing as the scatter plot. Often, when we introduce additional aesthetic elements into a graph, it necessitates adjustments to ensure a cohesive presentation of all the new layers of information.
+
+To illustrate this, consider examining the density plot of the Gender Inequality Index. Initially, let's observe the straightforward distribution.
+
+```{r}
+ggplot(data, aes(x = GII))+
+  geom_density()
+```
+
+This is pretty simple and understandable. The values have a uniform distribution with two modes around the index of 0.1 and 0.45. Now, let's look at how this distribution looks like controlling by human development.
+
+```{r}
+ggplot(data, aes(x = GII, fill = Human_development))+
+  geom_density()
+```
+
+In this scenario, the outcomes are somewhat ambiguous because the density areas overlap, making it challenging to discern all the information. The density of GII for countries with high levels of human development is notably absent. To address this issue, we can modify the `alpha` parameter of the density plot to fine-tune the transparency of the areas and enhance the clarity of the displayed information.
+
+```{r}
+ggplot(data, aes(x = GII, fill = Human_development))+
+  geom_density(alpha = 0.6)
+```
+
+Until now, our emphasis has been put on incorporating information through color. However, we can also represent numeric values in a plot by utilizing the `size` parameter. If we wished to introduce the variable of maternal mortality into our earlier scatter plot, which illustrates the connection between adolescent birth rate, Gender Inequality Index (GII), and human development, we would proceed as follows.
+
+```{r}
+ggplot(data, aes(y = GII, x = Adolescent_birth_rate, 
+                 color = Human_development, size = Maternal_mortality))+
+  geom_point()
+
+```
+
+This automatically changes the sizes of the points in the plot, and countries with higher maternal mortality occupy a larger area.
+
+These aesthetic attributes can be used as well as fixed parameters for a geom; that is, not changing according to the values of a variable, but remaining the same for all plotted figures. This is achieved by defining a specific value, and outside the call to `aes()`. For example, using `color = "blue"` instead of assigning a variable, such as `aes(color = Human_development)`. Note the difference: inside the `aes()` function, we do not define specific colors, ggplot takes care of that. We just state the column that we want to map into the plot as colors. 
+
+```{r}
+ggplot(data, aes(y = F_Labour_force))+
+  geom_boxplot( color = 'navyblue')
+```
+
+R also contains many packages with color palettes that can be used in plots. The most popular one is `viridis`. The color palettes in `viridis` can be easily added with one line of code:
+
+```{r}
+library(viridis)
+
+ggplot(data, aes(y = GII, x = Adolescent_birth_rate, 
+                 color = Human_development, size = Maternal_mortality))+
+  geom_point()+
+  scale_color_viridis_d()
+```
+
+## Control variables
+
+Another technique for displaying additional categorical variables on a plot is faceting. It involves partitioning the data into subsets and presenting the same graph for each subset, effectively generating tables of graphics. Small multiples, as a result, prove to be a valuable asset for exploratory data analysis. They enable swift comparisons of patterns across various data segments, facilitating the assessment of similarities and differences.
+
+The `facet_wrap()` function organizes a long strip of panels, which can be generated by any number of variables, into a two-dimensional format. This proves especially handy when dealing with a single variable that has numerous levels and we aim to arrange the plots in a more space-efficient fashion.
+
+We have the ability to manage how the strip is transformed into a grid using parameters such as `ncol`, `nrow`, `as.table`, and `dir.`
+
+-   `ncol` and `nrow` determine the number of columns and rows in the grid (we only need to specify one of them).
+-   `as.table` dictates whether the facets should be laid out in a table-like fashion (TRUE), where higher values are positioned at the bottom-right, or in a plot-oriented manner (FALSE), with higher values placed at the top-right.
+-   `dir` allows us to choose the direction of wrapping, whether it's horizontal or vertical.
+
+```{r}
+ggplot(data, aes(x = GII))+
+  geom_density()+
+  facet_wrap(~Human_development, ncol = 2)
+```
+
+We can influence whether the position scales are consistent across all panels (fixed) or permitted to differ between panels (free) by utilizing the "scales" parameter in various ways:
+
+-   `scales = "fixed"`: This setting ensures that both the x and y scales are consistent and identical across all panels.
+-   `scales = "free_x"`: In this scenario, the x scale is free to vary between panels, while the y scale remains fixed and consistent across all panels.
+-   `scales = "free_y"`: Here, the y scale is allowed to vary independently between panels, while the x scale remains fixed and consistent.
+-   `scales = "free"`: In this case, both the x and y scales are free to vary between panels, enabling each panel to have its unique scaling.
+
+```{r}
+ggplot(data, aes(x = GII))+
+  geom_density()+
+  facet_wrap(~Human_development, ncol = 2, scales = "free_x")
+```
+
+## Polishing graphs
+
+In the context of data exploration, the important thing is to work quickly. We try one or another visualization technique and refine our results until we find interesting patterns, or get our doubts about the content out of our minds. We don't need to title the visualizations, because we already know what they are about (we just wrote them down!). We don't worry that the names of the axes clearly indicate the variable they represent, because we already know beforehand.
+
+But when we want to save a graph to share with others, either by publishing it in a paper or emailing it to colleagues, we need to be more careful. We have moved from the realm of exploration to the realm of communication. Now we do care about clarity, because we don't know in advance how familiar the eventual audience is with the data.
+
+Although clear communication is an art whose rules depend on the context, and everyone has their own style, we can mention at least three elements that should not be missing in a graphic designed to be shared:
+
+-   A descriptive, but brief title.
+-   Clear (not ambiguous) labels on the axes.
+-   Descriptive names in the legends
+
+and while we're at it, two optional ones:
+
+-   A subtitle where to put important details that do not fit in a brief title.
+-   A footnote with additional information: source of the data, academic citation, warnings, etc.
+
+All of this can be done using the function `labs()`. Its usage is really simple: it is only necessary to modify the parameters that have the name of the label one wants to change.
+
+```{r}
+ggplot(data, aes(y = GII, x = Adolescent_birth_rate, 
+                 color = Human_development, size = Maternal_mortality))+
+  geom_point()+
+  scale_color_viridis_d()+
+  labs(
+    title = 'Gender inequality vs. reproductive health in the world',
+    subtitle = 'year: 2021',
+    x = 'Adolescent birth rate (per 1000 women)',
+    y = 'Gender Inequality Index',
+    size = 'Maternal deaths (per 100000 births)',
+    color = 'Human development'
+    )
+```
+
+So far we have been able to adjust the graphic attributes that are closely related to the data, such as scales, colors and sizes. But what about other visual components that we could change, such as text size, font, background colors, grid lines, and more? Some common elements that we can control using themes in ggplot2 are:
+
+1.  Axis Text: We can modify the appearance of axis labels, titles, and text.
+
+2.  Plot Title: Customize the title of our plot.
+
+3.  Background: Adjust the plot's background color.
+
+4.  Grid Lines: Control the visibility and appearance of grid lines.
+
+5.  Legend: Modify the appearance of the legend, including its position, background, and text.
+
+6.  Facets: Customize the appearance of facets (if our plot uses them).
+
+We can change the theme of our ggplot2 plot using the `theme()` function. For example:
+
+```{r}
+ggplot(data, aes(y = GII, x = Adolescent_birth_rate, 
+                 color = Human_development, size = Maternal_mortality))+
+  geom_point()+
+  scale_color_viridis_d()+
+  labs(
+    title = 'Gender inequality vs. reproductive health in the world',
+    subtitle = 'year: 2021',
+    x = 'Adolescent birth rate (per 1000 women)',
+    y = 'Gender Inequality Index',
+    size = 'Maternal deaths (per 100000 births)',
+    color = 'Human development'
+    ) +
+  theme(
+  plot.title = element_text(face = "bold"),
+  axis.title = element_text(size = 14),
+  axis.text = element_text(size = 12),
+  text=element_text(family="serif")
+)
+```
+
+The ggplot2 package includes several functions that apply predefined themes, such as `theme_dark()`, `theme_void`, `theme_minimal`, etc. Therefore, to use the themes it is enough to add a line that calls the corresponding function. For example, to use `theme_minimal()`:
+
+```{r}
+ggplot(data, aes(y = GII, x = Adolescent_birth_rate, 
+                 color = Human_development, size = Maternal_mortality))+
+  geom_point()+
+  scale_color_viridis_d()+
+  labs(
+    title = 'Gender inequality vs. reproductive health in the world',
+    subtitle = 'year: 2021',
+    x = 'Adolescent birth rate (per 1000 women)',
+    y = 'Gender Inequality Index',
+    size = 'Maternal deaths (per 100000 births)',
+    color = 'Human development'
+    )+
+  theme_minimal()
+```
+
+There are also R packages that add new ready-to-use themes to our toolbox, such as [`ggthemes`](https://yutannihilation.github.io/allYourFigureAreBelongToUs/ggthemes/) and [`hrbrthemes`](https://cinc.rud.is/web/packages/hrbrthemes/).
+
+We can save the result plots by using the function `ggsave()`. The parameters we must pass by to successfully save the plot are the filename, which should be the name we want to create on disk, and optionally the plot to save. If nothing is defined, it just saves the last plot displayed.
+
+```{r eval=FALSE}
+ggsave('plot_01.jpg')
+```
+
+# Interactive plots
+
+So far, we have only developed and addressed static plots. However, R has a wide toolset that allows us to make interactive graphs: going from clickable-interactive htmls, to gifs or videos. The set of packages that allow us to make these kind of charts are gathered by the name of [`htmlwidgets`](https://gallery.htmlwidgets.org/), which generate dynamic visualizations with a great variety of styles and resources.
+
+The packages gathered in the `htmlwidgets` collection wrap JavaScript code in R instructions, bridging the two worlds, and allowing to generate R visualizations that can be published as web content. For our purposes, we are going to focus on one of the options in particular: `Plotly`. This is because `Plotly` allows us to convert our graphics made with `ggplot2` into interactive versions, just by adding a line of code. In other words, we can produce interactive visualizations... without needing anything more than what we have already learned!
+
+First, we should import the package:
+
+```{r}
+library(plotly)
+```
+
+Now we only need two things:
+
+-   to save the result of our visualization in a variable, which we will call - to pick something - "p".
+-   pass the variable containing the visualization to the ggplotly function, which will convert it into an interactive version.
+
+And that's it. Let's give it a try:
+
+```{r}
+p <- ggplot(data, aes(y = GII, x = Adolescent_birth_rate, 
+                 color = Human_development))+
+  geom_point()+
+  scale_color_viridis_d()+
+  labs(
+    title = 'Gender inequality vs. reproductive health in the world',
+    subtitle = 'year: 2021',
+    x = 'Adolescent birth rate (per 1000 women)',
+    y = 'Gender Inequality Index',
+    color = 'Human development'
+    )+
+  theme_minimal()
+
+ggplotly(p)
+```
+
+This allows us to:
+
+-   obtain a pop-up box (or tooltip in GUI jargon) by sliding the mouse pointer over a point, obtaining the exact value of the displayed variables.
+-   "dragging and dropping with the mouse to define an area to zoom in on
+-   click on the categories of the legend to "turn on" or "turn off" the corresponding data
+-   select a subset of the data to highlight (with the rectangle and lasso icons)
+-   save the visualization as an image, including the settings we made (with the camera icon)
+
+By default, the tooltip displays the variables representing the aesthetic attributes we assigned when creating the ggplot, inside some call to `aes()`. To control which ones are displayed, we can use the "tooltip" parameter.
+
+One thing that is often useful is to utilize the tooltip to display values in the box that we have not represented visually, so that we can include information. We might want to show the country that represents each point, since it is practical to be able to indicate the country only for the point that is chosen, instead of filling the screen with labels showing the names of all countries at once. For that we make up an aesthetic attribute name, for example "for_plotly" and assign it the variable to be seen in the tooltip. `ggplot` ignores the aesthetic attributes it does not know, but `plotly` receives them and can display their values in the popup box.
+
+```{r}
+p <- ggplot(data, aes(y = GII, x = Adolescent_birth_rate, 
+                 color = Human_development, for_plotly = Country))+
+  geom_point()+
+  scale_color_viridis_d()+
+  labs(
+    title = 'Gender inequality vs. reproductive health in the world',
+    subtitle = 'year: 2021',
+    x = 'Adolescent birth rate (per 1000 women)',
+    y = 'Gender Inequality Index',
+    color = 'Human development'
+    )+
+  theme_minimal()
+
+ggplotly(p, tooltip = c('for_plotly'))
+```
+
+# `ggplot` resources
+
+To conclude this class, it's important to remark that `ggplot` contains its own ggplot-verse with adjacent packages that introduce many new functionalities to improve and customize the plots. [This](https://exts.ggplot2.tidyverse.org/gallery/) gallery contains a wide list of packages that can be explored and used. Some of the ones we can highlight are:
+
+-   `patchwork` to paste multiple plots together
+
+```{r}
+library(patchwork)
+
+p1 <- ggplot(data, aes(x = F_Labour_force))+
+  geom_density()
+
+p2 <- ggplot(data, aes(y = F_Labour_force))+
+  geom_boxplot() 
+
+p1 + p2
+```
+
+-   `ggrepel` to add anotations and labels that don't overlap.
+
+```{r}
+library(ggrepel)
+
+ggplot(data, aes(x = GII, y = Adolescent_birth_rate, label = Country))+
+  geom_point() + 
+  geom_text_repel()
+```
+
+-   `ggtext` to customize with markdown text in the labels.
+
+```{r}
+library(ggtext)
+
+ggplot(data, aes(y = GII, x = Adolescent_birth_rate, 
+                 color = Human_development, size = Maternal_mortality))+
+  geom_point()+
+  scale_color_viridis_d()+
+  labs(
+    title = 'Gender inequality vs. reproductive health in the world',
+    subtitle = 'year: 2021',
+    x = '**Adolescent birth rate** (per 1000 women)',
+    y = '**Gender Inequality Index**',
+    size = 'Maternal deaths (per 100000 births)',
+    color = 'Human development'
+    )+
+  theme_minimal()+
+ theme(plot.title = element_markdown(face = 'bold'),
+ axis.title.x = element_markdown(),
+ axis.title.y = element_markdown())
+```
+
+In addition, the independent `ggplot` package offers numerous functions for tailoring plots. The [cheat sheet](https://www.maths.usyd.edu.au/u/UG/SM/STAT3022/r/current/Misc/data-visualization-2.1.pdf) serves as a comprehensive guide to the various customization options, while the [R Graph Gallery](https://r-graph-gallery.com/) showcases a variety of charts created using the package, serving as a valuable source of inspiration. For a more thorough understanding of the graphs, Claus O. Wilke's book 'Fundamentals of Data Visualization' features an extensive chapter titled ['Directory of Visualizations.'](https://clauswilke.com/dataviz/directory-of-visualizations.html)
+
+

@@ -1,0 +1,17 @@
+---
+title: "Supervised Learning I"
+subtitle: "Challenge"
+author: ""
+date: ""
+output: html_notebook
+---
+
+For this challenge, you will build a supervised learning model from the pre-processing to the predictions on the dataset. 
+
+1.  Run a supervised learning workflow as seen on the guided and independent practice, and the feature engineering seen during the previous classes. 
+
+2. Use one of the [Carnegie Classification of Institutions of Higher Education](https://carnegieclassifications.acenet.edu/downloads.php) datasets, and predict the Carnegie Basic Classification. Careful! This is a raw dataset, so you will have to also look at the documentation to see the codification for the variables. 
+
+3.  Run one Naive Bayes model and at least two KNN models with different size of K. 
+
+4.  Which was the best model? 

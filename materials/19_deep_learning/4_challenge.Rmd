@@ -1,0 +1,17 @@
+---
+title: "Deep Learning"
+subtitle: "Challenge"
+author: ""
+date: ""
+output: html_notebook
+---
+
+For this challenge, you will build a deep learning model from the pre-processing to the test.
+
+1.  Run a full deep learning pipeline as seen on the guided and independent practice.
+
+2.  Instead of MNIST, use the [CIFAR100](https://keras.io/api/datasets/cifar100/) dataset. Beware that this new data has different sizes and shapes, and images are in color!
+
+3.  Run at least 4 different models (combinations of hyper-parameters), with at least 1 FCNN and 1 CNN. Explain the procedure and the different number of trainable parameters.
+
+4.  Which was the best model? Which hyper-parameters made the most difference?

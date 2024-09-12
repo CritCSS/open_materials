@@ -1,0 +1,18 @@
+---
+title: "Version control and Documentation"
+subtitle: "Challenge"
+author: ""
+date: ""
+output: html_notebook
+---
+
+For this challenge, you will work in groups. 
+
+1. Document the exercise from the practice using R Markdown and publish it into a new github repository. 
+
+2. Add your group members as collaborators. 
+
+3. One member of the group can create the README file, another one the .gitignore (both in the main branch).
+
+4. Each of the members will create a new branch, modify the README file and create a new script, make a pull request and merge. Solve any conflicts that may arise.
+

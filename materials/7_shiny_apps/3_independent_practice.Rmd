@@ -1,0 +1,83 @@
+---
+title: "Shiny Apps"
+subtitle: "Independent practice"
+author: ""
+date: ""
+output: html_notebook
+---
+
+```{r setup, message=FALSE, warning=FALSE, include=FALSE}
+knitr::opts_chunk$set(message = FALSE,warning = FALSE)
+```
+
+```{r}
+library(tidyverse)
+library(lubridate)
+options(scipen = 999)
+```
+
+## Import and explore the data set
+
+We will work with the [COVID-19 cases in USA data set](https://www.kaggle.com/datasets/sudalairajkumar/covid19-in-usa?select=us_states_covid19_daily.csv) at state level.
+
+```{r}
+
+```
+
+Apply any pre-processing you consider necessary.
+
+```{r}
+# We will select the following variables: date, state, positive, negative and probable cases, and viral, antibody and antigen total tests. We will clean their names. On the other hand, we will clean the information on date and reorganize information on tests. 
+
+
+```
+
+## App basic structure
+
+Once you are done exploring and pre processing the data set, in a new .R document start building the basic structure of your app:
+
+```{r,eval=FALSE, include=TRUE}
+
+```
+
+## Design the ui
+
+When designing the ui, you may use a fluid page and sidebar layout.
+
+Include:
+
+-   selectizeInput()
+
+-   sliderInput()
+
+-   tableOutput()
+
+-   plotlyOutput()
+
+```{r,eval=FALSE, include=TRUE}
+
+```
+
+## Design the server
+
+Pay attention to id correspondence!
+
+You will need to use:
+
+-   renderTable()
+
+-   renderPlotly()
+
+```{r,eval=FALSE, include=TRUE}
+
+```
+
+## Run the app
+
+Verify the app works as expected by clicking on the Run App button located in the top right corner of the RStudio interface.
+
+Is there anything that needs improving?
+
+```{r,eval=FALSE, include=TRUE}
+
+```

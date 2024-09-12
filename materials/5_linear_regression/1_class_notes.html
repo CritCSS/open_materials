@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.549">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Linear Regression</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="1_class_notes_files/libs/clipboard/clipboard.min.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/quarto.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/popper.min.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/anchor.min.js"></script>
+<link href="1_class_notes_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="1_class_notes_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="1_class_notes_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="1_class_notes_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="1_class_notes_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Linear Regression</h1>
+<p class="subtitle lead">class notes</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>In this session, we will delve into linear regression, renowned for its simplicity and popularity in statistical analysis. With its analytical solution, it serves as a cornerstone in understanding various statistical models, laying a solid foundation for comprehending more advanced techniques in data analysis and prediction.</p>
+</section>
+<section id="central-concepts" class="level1">
+<h1>Central concepts</h1>
+<section id="linear-and-non-linear-relationships" class="level3">
+<h3 class="anchored" data-anchor-id="linear-and-non-linear-relationships">Linear and non-linear relationships</h3>
+<p>When analyzing the relationship between two quantitative variables, linear relationships between two <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> variables can be described by a linear equation such as:</p>
+<p><span class="math display">\[ Y = b + mX\]</span></p>
+<p>That is to say, for <strong>any</strong> value of <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> an increase (decrease) in <span class="math inline">\(X\)</span> will imply a <strong>proportional</strong> increase (decrease) in <span class="math inline">\(Y\)</span>. That proportion is given by <span class="math inline">\(m\)</span>.</p>
+</section>
+<section id="correlation" class="level3">
+<h3 class="anchored" data-anchor-id="correlation">Correlation</h3>
+<p><strong>Correlation</strong> quantifies the <em>strength</em> and <em>direction</em> of the linear relationship between two variables<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. It can take values between <strong>-1</strong> (perfect negative relationship) and <strong>1</strong> (perfect positive relationship), with 0 indicating no linear relationship.</p>
+<p>As correlation increases, the scatter plot increasingly resembles a line. For example:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="864"></p>
+</figure>
+</div>
+</div>
+</div>
+<blockquote class="blockquote">
+<p><em>Can you imagine how the plot for a correlation of -1 would look like?</em></p>
+</blockquote>
+<p>The correlation value has no units and will not be affected by a linear transformation in the variables <span class="citation" data-cites="cetinkaya-rundelIntroductionModernStatistics2021">(<a href="#ref-cetinkaya-rundelIntroductionModernStatistics2021" role="doc-biblioref">Çetinkaya-Rundel and Hardin 2021</a>)</span>. It is important to remember that correlation does <em>not</em> imply causation.</p>
+</section>
+</section>
+<section id="simple-linear-regression" class="level1">
+<h1>Simple linear regression</h1>
+<p>Linear regression is a widely used statistical method to determine the existence of a relationship between an <strong>outcome</strong> variable and a set of one or more <strong>predictor</strong> variables, as well as to quantify the strength of that relationship. This technique can also be used for <em>predicting</em> a quantitative response in our outcome variable <span class="citation" data-cites="jamesIntroductionStatisticalLearning2013">(<a href="#ref-jamesIntroductionStatisticalLearning2013" role="doc-biblioref">James et al. 2013</a>)</span>.</p>
+<section id="formula-and-coefficient-interpretation" class="level2">
+<h2 class="anchored" data-anchor-id="formula-and-coefficient-interpretation">Formula and coefficient interpretation</h2>
+<p>When building a simple linear regression model, we will fit a line to data where the relationship between two variables, <span class="math inline">\(X\)</span> and <span class="math inline">\(y\)</span>, can be modeled as a straight line with some degree of error following the formula:</p>
+<p><span class="math display">\[ y = \beta_{0} + \beta_{1}X + \epsilon\]</span></p>
+<ul>
+<li><p><span class="math inline">\(\beta_{0}\)</span> represents the <strong>intercept</strong>. How can we interpret this value? It represents the average value of <span class="math inline">\(y\)</span> when <span class="math inline">\(X = 0\)</span>.</p></li>
+<li><p><span class="math inline">\(\beta_{1}\)</span> is the <strong>slope</strong> of the line, which indicates the average increases in <span class="math inline">\(y\)</span> when <span class="math inline">\(X\)</span> increases by one unit.</p></li>
+<li><p><span class="math inline">\(\epsilon\)</span> represents the <strong>error</strong> or <strong>residual</strong>.</p></li>
+</ul>
+<p><span class="math inline">\(\beta_{0}\)</span> and <span class="math inline">\(\beta_{1}\)</span> are the model’s <strong>coefficients</strong> or <strong>parameters</strong>. When fitting a line, we may ask ourselves, should we move the line slightly further up or further down? Should the line be steeper or less steep? The first question refers to estimating <span class="math inline">\(\beta_{0}\)</span>. The second question refers to estimating <span class="math inline">\(\beta_{1}\)</span>.</p>
+<p>Here’s a graphical representation of the role of <span class="math inline">\(\beta_{0}\)</span> and <span class="math inline">\(\beta_{1}\)</span>:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="numeric-vs.-analytic-calculation" class="level2">
+<h2 class="anchored" data-anchor-id="numeric-vs.-analytic-calculation">Numeric vs.&nbsp;analytic calculation</h2>
+<p>When estimating the model’s parameters<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>, we will try to find a line that minimizes the residuals, that is to say, the difference between our estimation of <span class="math inline">\(y\)</span> (which we will represent using <span class="math inline">\(\hat{y_{i}}\)</span>) and its observed value for each <span class="math inline">\(X\)</span>.</p>
+<p><span class="math display">\[\epsilon_{i} = y_{i} - \hat{y_{i}}\]</span></p>
+<p>In order to do this, we might rely on <strong>numeric</strong> or <strong>analytic</strong> calculation methods. Numeric calculation methods will basically try different combinations of <span class="math inline">\(\hat{\beta_{0}}\)</span> and <span class="math inline">\(\hat{\beta_{1}}\)</span> and choose the best possible solution (in this case, the line that minimizes the residuals). On the other hand, analytic calculation methods will solve the mathematical expressions that describe the problem in order to obtain the solution.</p>
+<section id="numeric-calculation" class="level3">
+<h3 class="anchored" data-anchor-id="numeric-calculation">Numeric calculation</h3>
+<p>In order to explain what happens when using numeric methods, we will use an example<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> based on the <em><code>sim1</code></em> toy dataset of the <em><code>modelr</code></em> package. This is how the data looks like:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>To adjust a linear regression, we can randomly generate several linear models and see what they look like:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>To decide which model is the best one, we try to find a line that minimizes the residuals. We could design a function that describes the residuals and find the set of slope and intercept that minimizes our residuals.</p>
+<p>Plotting our best models:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Another way to present our models is to build a scatter plot with all possible combinations of <span class="math inline">\(\beta_{0}\)</span> and <span class="math inline">\(\beta_{1}\)</span>, while coloring dots according to their residual measure:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The <em>Newton-Raphson</em> method and <em>gradient descent</em> are more refined numerical optimization techniques used to find the minimum of a function. In the context of linear regression, these methods can be used to iteratively adjust model parameters until the optimal values are reached.</p>
+<p>In R, we can use the <code>optim()</code> function to perform these optimization methods. We need to provide the initial parameter values (for example <span class="math inline">\(\beta_{0} = 0\)</span> and <span class="math inline">\(\beta_{1} = 0\)</span>) and the objective function to be minimized (in this case, our function describing the residuals). The function will iteratively adjust the parameters, providing the optimized parameter estimates for the linear regression model.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>best <span class="ot">&lt;-</span> <span class="fu">optim</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>), measure_residuals, <span class="at">data =</span> sim1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>In this case, the resulting model would be characterized by the parameters <span class="math inline">\(\beta_{0} =\)</span> 4.2 and <span class="math inline">\(\beta_{1} =\)</span> 2.1. Graphically:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="analytic-calculation" class="level3">
+<h3 class="anchored" data-anchor-id="analytic-calculation">Analytic calculation</h3>
+<p>The <strong>least squares</strong> approach is an analytic calculation method that chooses <span class="math inline">\(\hat{\beta_{0}}\)</span> and <span class="math inline">\(\hat{\beta_{1}}\)</span> to minimize the residual sum of squares<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> (RSS), that is to say, the parameters that describe a line that provides the smallest possible value for this measure:</p>
+<p><span class="math display">\[RSS = \sum_{i=1}^n \epsilon^2_{i} = \sum_{i=1}^n (y_{i} - \hat{y}_{i})^2\]</span></p>
+<p>Once we minimize the function describing the residual sum of squares, we will obtain the following formulas describing our statistics<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>:</p>
+<p><span class="math display">\[
+\hat{\beta_{1}} = \frac{\sum_i^n (y_i -\bar{y})(x_i -\bar{x})}{\sum_i^n (x_i- \bar{x})}
+\]</span></p>
+<p><span class="math display">\[
+\hat{\beta_{0}} = \bar{y} - \hat{\beta_{1}}\bar{x}
+\]</span></p>
+</section>
+</section>
+<section id="model-assumptions" class="level2">
+<h2 class="anchored" data-anchor-id="model-assumptions">Model assumptions</h2>
+<p>The simple regression model makes several assumptions regarding the variables involved. It is therefore fundamental to assess these assumptions before drawing conclusions from a regression analysis.</p>
+<p>The first assumption is that of <strong>linearity</strong>: there is a linear relationship between the outcome and predictor variable. Consequently, the effect on <span class="math inline">\(y\)</span> of a variation in <span class="math inline">\(X\)</span> is the same regardless <span class="math inline">\(X\)</span>’s value.</p>
+<p>The model also assumes that errors are <strong>normally distributed</strong> with a mean equal to <strong>0</strong> and a <strong>constant variance</strong><a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a> (across all levels of the independent variables). On the other hand, it is assumed that errors are independent of each other, and that their distribution is independent of the predictor variables.</p>
+</section>
+</section>
+<section id="statistical-significance" class="level1">
+<h1>Statistical significance</h1>
+<p>How can we test if the relationship between <span class="math inline">\(X\)</span> and <span class="math inline">\(y\)</span> is statistically significant or not? We can formulate a <strong>hypothesis test</strong><a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a> with the following hypotheses <span class="citation" data-cites="jamesIntroductionStatisticalLearning2013">(<a href="#ref-jamesIntroductionStatisticalLearning2013" role="doc-biblioref">James et al. 2013</a>)</span>:</p>
+<p><span class="math inline">\(H_{0}\)</span>: “There is no relationship between X and Y”<a href="#fn8" class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a></p>
+<p><span class="math inline">\(H_{A}\)</span>: “There is a relationship between X and Y”</p>
+<p>This is equivalent to saying:</p>
+<p><span class="math display">\[ H_{0}: \beta_{1}=0\]</span></p>
+<p><span class="math display">\[ H_{A}: \beta_{1} \neq 0\]</span></p>
+<p>We will consider the relationship between <span class="math inline">\(X\)</span> and <span class="math inline">\(y\)</span> to be statistically significant when the p-value of the test is close to 0.</p>
+</section>
+<section id="evaluation" class="level1">
+<h1>Evaluation</h1>
+<p>The first step to evaluate our model is to test our assumptions. Synthetically, this can be done by observing the distribution of the model’s residuals. If we can not find any <em>pattern in our residuals</em>, we can confidently interpret our model’s results. Patterns in our residuals may indicate a non-linear relation between <span class="math inline">\(X\)</span> and <span class="math inline">\(y\)</span>, a lack of independence between the error term and <span class="math inline">\(X\)</span>, etc.</p>
+<p>Our expected residual plot should look like:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>If we encountered a plot such as the following, it would suggest a violation of the assumption of <strong>constant variance</strong> in the residuals:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>On the other hand, a plot such as the following might indicate the relationship between x and y is not <strong>linear</strong>:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The next step in order to evaluate our model’s capacity to describe the relationship between <span class="math inline">\(y\)</span> and <span class="math inline">\(X\)</span>, is to calculate the <strong>coefficient of determination</strong> (denoted as <span class="math inline">\(R^2\)</span>), which will always take values between 0 and 1. This metric quantifies the proportion of variation in the outcome variable <span class="math inline">\(y\)</span> that can be explained by the linear model with the predictor variable <span class="math inline">\(X\)</span>.</p>
+<p>We can measure the variability in the values of <span class="math inline">\(y\)</span> by considering how far they tend to deviate from their mean (<span class="math inline">\(\overline{y}\)</span>). We define this value as the total sum of squares (TSS), which is calculated using the following formula:</p>
+<p><span class="math display">\[TSS = (y_{1} - \overline{y})^2 + (y_{2} - \overline{y})^2 + ... + (y_{n} - \overline{y})^2 = \sum_{i=1}^n (y_{i} - \overline{y})^2\]</span></p>
+<p>The remaining variability in the values of <span class="math inline">\(y\)</span> given <span class="math inline">\(X\)</span> can be measured by the residual sum of squares (RSS) discussed above:</p>
+<p><span class="math display">\[RSS = \sum_{i=1}^n \epsilon^2_{i} = \sum_{i=1}^n (y_{i} - \hat{y}_{i})^2\]</span> Therefore, the coefficient of determination can be obtained using:</p>
+<p><span class="math display">\[ R^{2} = \frac{TSS- RSS}{TSS} = 1 - \frac{RSS}{TSS}\]</span></p>
+<p>An <span class="math inline">\(R^{2}\)</span> statistic that is close to 1 indicates that a large proportion of the variability in the response is explained by the regression. A number near 0 indicates that the regression does not explain much of the variability in the response <span class="citation" data-cites="jamesIntroductionStatisticalLearning2013">(<a href="#ref-jamesIntroductionStatisticalLearning2013" role="doc-biblioref">James et al. 2013</a>)</span>.</p>
+</section>
+<section id="multiple-linear-regression" class="level1">
+<h1>Multiple linear regression</h1>
+<p>Multiple linear regression is a widely used statistical method to determine the existence of a relationship between an <strong>outcome</strong> variable and a set of one or more <strong>predictor</strong> variables, as well as to quantify the strength of that relationship. This technique can also be used for <em>predicting</em> a quantitative response in our outcome variable <span class="citation" data-cites="jamesIntroductionStatisticalLearning2013">(<a href="#ref-jamesIntroductionStatisticalLearning2013" role="doc-biblioref">James et al. 2013</a>)</span>.</p>
+<section id="formula.-coefficient-interpretation" class="level2">
+<h2 class="anchored" data-anchor-id="formula.-coefficient-interpretation">Formula. Coefficient interpretation</h2>
+<p>When building a multiple linear regression model, we will estimate a series of parameters describing the linear relationship between a set of <span class="math inline">\(n\)</span> predictor variables, <span class="math inline">\(X_{1}\)</span>, <span class="math inline">\(X_{2}\)</span>,…, <span class="math inline">\(X_{n}\)</span> and <span class="math inline">\(y\)</span>, which can be modeled following the formula:</p>
+<p><span class="math display">\[ y = \beta_{0} + \beta_{1}X_{1} + \beta_{2}X_{2} + ... + \beta_{n}X_{n} + \epsilon\]</span></p>
+<ul>
+<li><p><span class="math inline">\(\beta_{0}\)</span> represents the average value of <span class="math inline">\(y\)</span> when <span class="math inline">\(X_{1} = X_{2} = ... = X_{n} = 0\)</span>.</p></li>
+<li><p><span class="math inline">\(\beta_{i}\)</span> indicates the average increases in <span class="math inline">\(y\)</span> when <span class="math inline">\(X_{i}\)</span> increases by one unit holding all other predictors (<span class="math inline">\(X_{1}\)</span>, <span class="math inline">\(X_{2}\)</span>,…, <span class="math inline">\(X_{i-1}\)</span>,<span class="math inline">\(X_{i+1}\)</span>,…, <span class="math inline">\(X_{n}\)</span>) <strong>fixed</strong>.</p></li>
+<li><p><span class="math inline">\(\epsilon\)</span> represents the <strong>error</strong> or <strong>residual</strong>.</p></li>
+</ul>
+</section>
+<section id="model-assumptions-1" class="level2">
+<h2 class="anchored" data-anchor-id="model-assumptions-1">Model assumptions</h2>
+<p>Besides the model assumptions discussed for the simple linear regression, multiple linear regression models must assume the absence of <strong>multicollinearity</strong>. Multicollinearity refers to the presence of high correlation or linear dependence <em>among the predictors</em> in a regression model.</p>
+<p>Multicollinearity poses a problem because when predictors are correlated, it becomes difficult to distinguish and isolate the individual effects of each predictor on the outcome variable. As a result, the coefficients of the model become less precise and can lead us to draw unreliable conclusions.</p>
+</section>
+<section id="categorical-predictors" class="level2">
+<h2 class="anchored" data-anchor-id="categorical-predictors">Categorical predictors</h2>
+<p>Categorical predictors are built transforming <strong>qualitative</strong> variables. That is to say, variables that can take one of a limited number of possible values, assigning each observation to a class or category on the basis of some qualitative property. In order to incorporate qualitative variables into regression analysis, we must first transform them into <strong>numerical</strong> values.</p>
+<p>Let’s start with the simplest case: <strong>binary</strong> qualitative variables (also called <strong>dummy</strong> variables) can only take one value of two categories (e.g., having received or not certain medical treatment). In this case, we will assign a value of 1 to indicate the presence of the attribute represented by one of the variable’s possible values (for example: having received the medical treatment), and 0 to represent the absence of the attribute (for example: not having received the medical treatment). The group identified with a 0 is referred to as the <strong>base</strong> or <strong>reference</strong> category (in this case, the patients that did not received the treatment).</p>
+<blockquote class="blockquote">
+<p><em>Note that we do not create a dummy variable for each category of our qualitative variable, since that would leave us with redundant information in the model. For example, if we create a dummy variable for “holds a higher degree” (with value 1 to indicate TRUE and 0 for FALSE), and another one for “does not hold a higher degree” (with value 1 to indicate TRUE and 0 for FALSE), they are evidently redundant and each can be predicted from the other one. This relates to the multicollinearity problem mentioned above, and it is called the <strong>dummy variable trap</strong>.</em></p>
+</blockquote>
+<p>Let’s consider an example in order to understand how a binary variable contributes to the model. Suppose we have a regression equation given by:</p>
+<p><span class="math display">\[ Y = \beta_{0} + \beta_{1}X_{1} + \beta_{2}X_{2} + \epsilon\]</span></p>
+<p>Where <span class="math inline">\(X_1\)</span> is quantitative (e.g., income) and <span class="math inline">\(X_2\)</span> is qualitative (e.g., having or not having a higher education degree).</p>
+<p>Let’s see what happens for each possible value of <span class="math inline">\(X_2\)</span>:</p>
+<ul>
+<li>If <span class="math inline">\(X_{2}\)</span> = 1:</li>
+</ul>
+<p><span class="math display">\[ Y \approx \beta_{0} + \beta_{1}X_{1} + \beta_{2}\]</span> <span class="math display">\[ Y \approx (\beta_{0} + \beta_{2}) + \beta_{1}X_{1}\]</span></p>
+<ul>
+<li>If <span class="math inline">\(X_{2}\)</span> = 0:</li>
+</ul>
+<p><span class="math display">\[ Y \approx \beta_{0} + \beta_{1}X_{1}\]</span></p>
+<p>So, what is the effect of the inclusion of a qualitative variable in the model? It leads to a <em>shift in the intercept</em>. This can be visualized through a graphical representation<a href="#fn9" class="footnote-ref" id="fnref9" role="doc-noteref"><sup>9</sup></a>:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>When incorporating a qualitative variable, the coefficient <span class="math inline">\(\beta_0\)</span> can be interpreted as the intercept for cases where the qualitative variable has a value of 0 (in our example, people who do not have a higher degree), while the coefficient <span class="math inline">\(\beta_2\)</span> represents the shift in the intercept for cases where the qualitative variable has a value of 1 (in our example, people holding a higher degree).</p>
+<section id="what-approach-should-be-taken-when-dealing-with-a-qualitative-variable-that-has-more-than-two-categories" class="level3">
+<h3 class="anchored" data-anchor-id="what-approach-should-be-taken-when-dealing-with-a-qualitative-variable-that-has-more-than-two-categories">What approach should be taken when dealing with a qualitative variable that has more than two categories?</h3>
+<p>For a qualitative variable with <span class="math inline">\(n\)</span> categories, we will need to create <span class="math inline">\(n - 1\)</span> dummy variables that take on values of 0 or 1. The <strong>reference category</strong> will be the category for which <span class="math inline">\(\beta_{1} = \beta_{2} = ... = \beta_{n-1} = 0\)</span> <a href="#fn10" class="footnote-ref" id="fnref10" role="doc-noteref"><sup>10</sup></a>.</p>
+<p>Consider for example a non-ordinal variable on scientific domain, that can take one of three values: Natural sciences, Social sciences and humanities, and Health sciences. In order to transform this variable, we would need to create <span class="math inline">\(2\)</span> (<span class="math inline">\(= 3 - 1\)</span>) dummy variables, <span class="math inline">\(X_{1}\)</span> and <span class="math inline">\(X_{2}\)</span>.</p>
+<ul>
+<li><p><span class="math inline">\(X_{1}\)</span> identifies individuals who are part of the Social sciences and humanities community. If <span class="math inline">\(X_{1} = 1\)</span>, the person is part of that community; if <span class="math inline">\(X_{1} = 0\)</span>, they are not. The intercept for people from Social sciences and humanities is <span class="math inline">\(\beta_{0} + \beta_{1}\)</span>.</p></li>
+<li><p><span class="math inline">\(X_{2}\)</span> identifies individuals who are part of the Health sciences community. If <span class="math inline">\(X_{2} = 1\)</span>, the person is part of that community; if <span class="math inline">\(X_{2} = 0\)</span>, they are not. The intercept for people from Health sciences is <span class="math inline">\(\beta_{0} + \beta_{2}\)</span>.</p></li>
+<li><p>The remaining category (Natural sciences) serves as the reference category, and its intercept corresponds to <span class="math inline">\(\beta_{0}\)</span> since observations in this group have <span class="math inline">\(X_{1} = 0\)</span> and <span class="math inline">\(X_{2} = 0\)</span>.</p></li>
+</ul>
+</section>
+</section>
+</section>
+<section id="discussion" class="level1">
+<h1>Discussion</h1>
+<p>What sort of questions can linear regression models answer? Linear models can provide insights into the <strong>correlation</strong> between two variables, but they cannot establish <strong>causality</strong> (it is possible to find correlations between any set of clearly independent variables<a href="#fn11" class="footnote-ref" id="fnref11" role="doc-noteref"><sup>11</sup></a>). Linear models can therefore help us understand the relationship between two variables, but should never be cited as evidence of causal relationships.</p>
+<p>Models can be classified into two main categories <span class="citation" data-cites="jamesIntroductionStatisticalLearning2013">(<a href="#ref-jamesIntroductionStatisticalLearning2013" role="doc-biblioref">James et al. 2013</a>)</span>:</p>
+<ul>
+<li><p><strong>Inference</strong>: these models aim to understand and describe the relationships and patterns within a given data set.</p></li>
+<li><p><strong>Prediction</strong>: these models are used in situations where we have a set of inputs <span class="math inline">\(X\)</span>, but obtaining the output <span class="math inline">\(y\)</span> is not feasible. The aim of these models is to generate accurate predictions of <span class="math inline">\(y\)</span>.</p></li>
+</ul>
+<p>Linear regression models are mainly considered <strong>inference</strong> models, but may sometimes be used for predicting purposes. Specifically, insights regarding the relationships between variables might constitute an important first step when building or improving a predictive model.</p>
+<p>A relevant consideration regarding linear regression models is that they might be sensitive to <strong>outliers</strong><a href="#fn12" class="footnote-ref" id="fnref12" role="doc-noteref"><sup>12</sup></a>. Outliers that influence on the slope of our model (that is to say, our estimation of <span class="math inline">\(\beta_{1}\)</span>) are called <em>influential points</em> <span class="citation" data-cites="cetinkaya-rundelIntroductionModernStatistics2021">(<a href="#ref-cetinkaya-rundelIntroductionModernStatistics2021" role="doc-biblioref">Çetinkaya-Rundel and Hardin 2021</a>)</span>. It is <em>not</em> a good practice to remove outliers in this context, because they might provide important insights on the true relationship between our variables, or might even suggest the relation between them is not linear.</p>
+<p>A very important caveat when working with linear models is the issue of <strong>extrapolation</strong>. This concept refers to the application of a model estimation to values outside the range of the original data. A linear model is merely an approximation of the true relationship between variables; when we extrapolate, we are making a questionable assumption: that the approximate linear relationship we found will hold in untested intervals<a href="#fn13" class="footnote-ref" id="fnref13" role="doc-noteref"><sup>13</sup></a> <span class="citation" data-cites="cetinkaya-rundelIntroductionModernStatistics2021">(<a href="#ref-cetinkaya-rundelIntroductionModernStatistics2021" role="doc-biblioref">Çetinkaya-Rundel and Hardin 2021</a>)</span>. Therefore, we can have more confidence in our estimations when the range of observations is closer to the training set of data.</p>
+</section>
+<section id="references" class="level1 unnumbered">
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-cetinkaya-rundelIntroductionModernStatistics2021" class="csl-entry" role="listitem">
+Çetinkaya-Rundel, Mine, and Johanna Hardin. 2021. <em>Introduction to <span>Modern Statistics</span></em>. <span>OpenIntro</span>.
+</div>
+<div id="ref-jamesIntroductionStatisticalLearning2013" class="csl-entry" role="listitem">
+James, G, D Witten, T Hastie, and R Tibshirani. 2013. <em>An <span>Introduction</span> to <span>Statistical Learning</span> with <span>Applications</span> in <span>R</span></em>. Second. <span>Springer</span>.
+</div>
+</div></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Note that <span class="math inline">\(\beta_2\)</span> could take negative values. In that case, we would observe a downward shift in the intercept.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>This transformation is known as one-hot encoding <span class="citation" data-cites="kuhnTidyModelingFramework2022a">(<a href="#ref-kuhnTidyModelingFramework2022a" role="doc-biblioref"><strong>kuhnTidyModelingFramework2022a?</strong></a>)</span>.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>This section is based on this <a href="http://r4ds.had.co.nz">book</a> and this <a href="https://jennybc.github.io/purrr-tutorial/ls03_map-function-syntax.html">tutorial</a><a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>Why do we <strong>square</strong> the residuals? The main reason is to eliminate the sign of the differences. By squaring the residuals, we ensure that all values are positive and prevent positive and negative differences from canceling each other out. This allows us to focus on the magnitude of the differences rather than their direction when fitting the model.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>Recall a statistic is a function of the values of the variables to be gathered from the sample.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>The assumption of constant variance is usually named <strong>homoscedasticity</strong>.<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>Remember hypothesis tests are decision rules that use information from the sample to evaluate whether a property exists in the population.<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn8"><p>Recall the null hypothesis typically describes the current state of knowledge.<a href="#fnref8" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn9"><p>Note that <span class="math inline">\(\beta_2\)</span> could take negative values. In that case, we would observe a downward shift in the intercept.<a href="#fnref9" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn10"><p>This transformation is known as one-hot encoding <span class="citation" data-cites="kuhnTidyModelingFramework2022a">(<a href="#ref-kuhnTidyModelingFramework2022a" role="doc-biblioref"><strong>kuhnTidyModelingFramework2022a?</strong></a>)</span>.<a href="#fnref10" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn11"><p>A famous example is the correlation between the number of people who drowned by falling into a pool and the films Nicolas Cage appeared in for a given period of time. <a href="https://www.tylervigen.com/spurious-correlations">Some more examples</a>.<a href="#fnref11" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn12"><p>Recall an <strong>outlier</strong> is an observation that appears extreme relative to the rest of the data.<a href="#fnref12" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn13"><p>For example, imagine a linear model describing the relationship between height (<span class="math inline">\(y\)</span>) and age (<span class="math inline">\(X\)</span>) in humans. If we build this model using data corresponding to humans between the ages of 5 and 20, would it be correct to assume the same relationship between the variables holds for a 40 year old human?<a href="#fnref13" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

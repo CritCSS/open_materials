@@ -1,0 +1,265 @@
+---
+title: "Evaluation"
+subtitle: "Guided practice"
+author: ""
+date: ""
+output: html_notebook
+---
+
+In this guided practice we will explore the evaluation tools for models as outlined in the class notes. To do so, we will use the packages `tidymodels` and `yardstick`.
+
+```{r setup, message=FALSE, warning=FALSE, include=FALSE}
+knitr::opts_chunk$set(message = FALSE,warning = FALSE)
+```
+
+# Evaluating models
+
+In this session, we will once again construct KNN model. However, we will integrate the concepts learned in the guided practice to create a robust model and assess its performance. Specifically, we will employ:
+
+-   Train/test validation sets
+-   Cross-validation
+-   Evaluation metrics
+
+We will use the **Home Mortgage Disclosure Act Data, NY, 2015** provided and compiled by the [Consumer Finance Protection Board](https://www.kaggle.com/datasets/jboysen/ny-home-mortgage?resource=download). This dataset covers all mortgage decisions made in 2015 for the state of New York.
+
+```{r}
+library(tidyverse)
+library(tidymodels)
+
+data_selection <- readRDS('./data/asec/sample_mortgage.RDS')
+```
+
+The initial dataset contains 22,917 rows.
+
+## Splitting data
+
+First, we will implement the validation set approach. This involves dividing the dataset into two subsets: a training dataset and a test dataset. This step is crucial as it allows us to train the model on our dataset while also assessing its performance on new, unseen data.
+
+We can easily accomplish this using the following functions:
+
+-   `initial_split()`: This function creates a single binary split of the data into a training set and testing set. The `prop` parameter allows us to specify the proportion of data to be retained for modeling. By default, the value is set to 0.75. This function returns an `initial_split` object.
+
+    To generate the dataframe for each sample, it is necessary to run the following functions:
+
+-   `training()`: Generates the training dataset from the inital split.
+
+-   `testing()`: Generates the test sample from the initial split.
+
+```{r}
+set.seed(123)
+
+split <- initial_split(data_selection)
+train <- training(split)
+test <- testing(split)
+
+```
+
+It's important to note that we are also setting a random seed before executing the sampling split to ensure reproducibility of the results. This results in a training dataset with 17,187 rows and a testing set with 5,730 rows. With these datasets in place, we can proceed to train and evaluate the model. Let's begin by training a KNN model using `tidymodels`, as we have previously done.
+
+```{r}
+recipe <- recipe(action_taken_name ~ ., data = data_selection)%>%
+  update_role(respondent_id, new_role = "id") 
+
+wf <- workflow() %>%
+  add_recipe(recipe)
+
+library(kknn)
+
+knn_spec <- nearest_neighbor(
+  neighbors = 5
+) %>%
+  set_engine("kknn") %>%
+  set_mode("classification")
+
+knn_fit <- wf %>% 
+  add_model(knn_spec) %>% 
+  fit(train)
+```
+
+Now, what are the outcomes of applying the `knn_fit` model to predict the data? We will employ the `predict` function to generate values for the `test` set, mimicking its performance on unseen data.
+
+```{r}
+test_val <- knn_fit %>%
+  predict(test) %>%
+  bind_cols(., test) %>%
+  rename(pred_knn = .pred_class)
+
+test_val
+```
+
+Additionally, we will evaluate the performance of the predictions on the training data.
+
+```{r}
+train <- knn_fit%>%
+  predict(train) %>%
+  bind_cols(., train) %>%
+  rename(pred_knn = .pred_class)
+```
+
+## Classification metrics
+
+As we are dealing with a categorical variable, we will employ metrics derived from the confusion matrix to evaluate the model's performance. To obtain the results of the confusion matrix, we will use the `conf_mat` function. This function requires as input the dataframe containing the results, with the parameter `truth` representing the observed actual values and `pred` representing the predicted values.
+
+```{r}
+conf_mat(test_val, truth = action_taken_name, estimate = pred_knn)
+```
+
+This matrix can be interpreted as:
+
+-   1347 cases are true positives, not originated loans that were classified correctly.
+-   3025 observations are true negatives, originated loans that were classified correctly.
+-   571 cases are false positives, not originated loans that were classified as originated.
+-   787 false negatives, of originated loans that were classified as not originated.
+
+What does the confusion matrix reveal about our training data?
+
+```{r}
+conf_mat(train, truth = action_taken_name, estimate = pred_knn)
+```
+
+This provides a clear illustration of why it's crucial to split our dataset into training and testing subsets. In our training data, the model misclassified only four cases. This serves as a prime example of overfitting. Merely relying on these results would fail to provide a reliable understanding of how our model truly performs on real-world data.
+
+To obtain standardized evaluation metrics, including recall, precision, and F1 score, we can use the `metric_set` function. This function outputs a tibble containing the values for the various metrics. It accepts different estimators as parameters, including the ones mentioned.
+
+```{r}
+class_metrics <- metric_set(precision, recall, f_meas)
+
+class_metrics(test_val, truth = action_taken_name, estimate = pred_knn)
+```
+
+The model accurately predicted 70% of the non-originated loans, with a precision of 63%. The F1 score is 66%. These metrics indicate that the model's performance is not very strong and could benefit from improvement.
+
+Let's examine the metrics on the training set.
+
+```{r}
+class_metrics <- metric_set(precision, recall, f_meas)
+
+class_metrics(train, truth = action_taken_name, estimate = pred_knn)
+```
+
+That is what overfitting looks like.
+
+## ROC Curve
+
+Plotting the ROC curve and obtaining the AUC ROC is not feasible with our current setup. This limitation arises because we solely used the `predict` function to forecast categories, whereas these metrics hinge on threshold classification. To resolve this, we must adjust our predictions to acquire the probability of classification for each observation. This adjustment can be accomplished by specifying the parameter `type = 'prob'` in the `predict` function.
+
+```{r}
+test_val <- knn_fit %>%
+  predict(test_val, type = 'prob') %>%
+  bind_cols(., test_val) 
+
+test_val
+```
+
+This provides us with the probabilities for each class across all observations in the validation set. Subsequently, we can derive the values for the ROC curve using the `roc_curve` function.
+
+```{r}
+ test_val%>% 
+  roc_curve(truth = action_taken_name, ".pred_Loan not originated")
+```
+
+\
+Note that for each classification threshold, this function returns values of specificity and sensitivity. These data points will form the curve, which can be plotted using the `autoplot()` function.
+
+```{r}
+ test_val%>% 
+  roc_curve(truth = action_taken_name, ".pred_Loan not originated") %>%
+  autoplot()
+```
+
+Recall that the standardized metric for analyzing the ROC curve is the area under the curve (AUC). This can be calculated using the `roc_auc()` function.
+
+```{r}
+test_val%>% 
+  roc_auc(truth = action_taken_name, ".pred_Loan not originated")
+```
+
+## Cross-validation
+
+So far, we have only tested one model with 5 neighbors. However, in real-life scenarios involving machine learning, it's common to experiment with multiple parameters for the same model to determine the best fit for our problem. We can systematically explore these parameters using **cross-validation** on subsets of the dataset.
+
+First, let's define a new KNN model. The process is nearly identical, except that instead of pre-defining a number of neighbors, we set the **`tune()`** value. We will use this approach for different hyperparameters we want to evaluate.
+
+```{r}
+knn_cv <- nearest_neighbor(
+  neighbors = tune()
+) %>%
+  set_engine("kknn") %>%
+  set_mode("classification")
+
+knn_wf_cv <- wf %>% 
+  update_model(knn_cv)
+```
+
+Next, we need to create a grid with possible values for our hyperparameters. We can achieve this using the **`grid_regular()`** function, which generates grids for any number of parameter objects. We specify the **`neighbors()`** parameter, as it's the one we want to generate values for, and set the number of values for each parameter to use when creating the regular grid using the **`levels`** parameter.
+
+```{r}
+knn_grid <- grid_regular(neighbors(), 
+                          levels = 3)
+
+knn_grid
+```
+
+This returns a tibble with three possible values we will try out for the model: 1 neighbor, 5, and 10.
+Note that function provides only a low flexibility when it comes to choosing the value of the tuning parameters. We can select the parameters themselves and the number of unique levels/values. However, the values are automatically selected by the function within a default range specific to each tuning parameter (in this case, ranges of 5).
+
+Next, we create the cross-validation folds. This is done using the **`vfold_cv()`** function, which randomly divides the data into the specified number of folds (**`V`**) and repeats this process as many times as indicated. In this case, we will create 5 folds of the data and repeat the operation 3 times.
+
+Using the **`tune_grid()`** function, we proceed to train and evaluate multiple models across our cross-validation folds. It's worth noting that we can specify the metrics we want to calculate for each model using the **`metrics`** parameter.
+
+```{r}
+set.seed(1912)
+
+folds <- vfold_cv(train, v = 5, repeats = 3)
+
+
+knn_spec <- knn_wf_cv %>% 
+  tune_grid(
+    resamples = folds,
+    grid = knn_grid,
+    metrics = metric_set(precision, recall,
+                         roc_auc, f_meas))
+
+knn_spec
+```
+
+This generates a tibble with the results for each fold of the cross-validation. However, we can visualize these results graphically using the `autoplot` function.
+
+```{r}
+autoplot(knn_spec)
+```
+
+It seems that as the number of neighbors increases, overall metrics improve. Among these three models, the one with 10 neighbors performs best in predicting loan assignments. To choose this trained model for predictions, we can use the **`select_best`** function. This function takes the computed set of performance metrics and selects the best one based on the defined metric. In our case, we will select it based on the AUC ROC.
+
+```{r}
+best_model <- select_best(knn_spec, "roc_auc")
+```
+
+Finally, we complete the model definition with the **`finalize_model`** function. This function takes the tuning parameter values from the **`best_model`** and incorporates them into our original KNN model that needed tuning. Once that is done, we can fit our final model to the training data.
+
+```{r}
+final_model <- finalize_model(knn_cv, best_model)
+
+final_fit <- wf %>%
+  update_model(final_model) %>%
+  fit(train)
+```
+
+Now, we can predict the values in the validation set.
+
+```{r}
+test_val <- final_fit %>%
+  predict(test_val) %>%
+  bind_cols(., test_val) %>%
+  rename(pred_knn_cv = .pred_class)
+
+test_val
+```
+
+> *Did this model improve upon our previous KNN?*
+
+```{r}
+class_metrics(test_val, truth = action_taken_name, estimate = pred_knn_cv)
+```
+
+Yes, it did! Apparently, increasing the number of neighbors tends to enhance the model's performance. Therefore, in practice, it would be advisable to test a higher number of neighbors during cross-validation tuning. While we won't delve into that further at the moment, you'll have opportunities to explore this during the independent practice sessions.

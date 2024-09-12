@@ -1,0 +1,59 @@
+---
+title: "Version control and Documentation"
+subtitle: "Independent practice"
+author: ""
+date: ""
+output: html_notebook
+---
+
+```{r setup, message=FALSE, warning=FALSE, include=FALSE}
+knitr::opts_chunk$set(message = FALSE,warning = FALSE)
+```
+
+## Branching and merging
+
+1. Create a new branch in the GitHub repository created during the Guided practice.
+
+```{r}
+
+```
+
+
+2. Make modifications in your R Markdown file within the new branch, push your changes.
+
+```{r}
+
+```
+
+
+3. Merge both branches.
+
+```{r}
+
+```
+
+
+## Error handling
+
+4. Now modify the R Markdown file's YAML in your branch the following way:
+
+```yaml
+---
+title: "My R Markdown Report"
+author: "My name"
+output: pdf_document
+---
+```
+5. Push your changes and merge both branches. 
+
+```{r}
+
+```
+
+
+6. You will receive error messages. Explain what the problem is and how to fix it.
+
+```{r}
+
+```
+

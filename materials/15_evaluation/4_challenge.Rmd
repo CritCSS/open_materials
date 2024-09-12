@@ -1,0 +1,9 @@
+---
+title: "Evaluation"
+subtitle: "Challenge"
+author: ""
+date: ""
+output: html_notebook
+---
+
+Take the [ProPublica criminal](https://github.com/propublica/compas-analysis) prediction model and evaluate its performance. How could we show, with the tools learnt in this class, that this data has racial bias? 

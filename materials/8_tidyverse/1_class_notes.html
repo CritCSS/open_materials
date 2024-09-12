@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.549">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Tidyverse</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="1_class_notes_files/libs/clipboard/clipboard.min.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/quarto.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/popper.min.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/anchor.min.js"></script>
+<link href="1_class_notes_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="1_class_notes_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="1_class_notes_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="1_class_notes_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="1_class_notes_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Tidyverse</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<section id="packages" class="level2">
+<h2 class="anchored" data-anchor-id="packages">Packages</h2>
+<p>One of the main advantages that R has as a software for statistic analysis is its incremental syntax. This means that the things you can do in R are constantly updated and expanded through the creation of new <strong>packages</strong>, developed by researchers, users or private companies.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="https://gist.github.com/daroczig/3cf06d6db4be2bbe3368"><img src="img/packages.png" class="img-fluid figure-img" width="641" alt="Source: Gergely Daróczi"></a></p>
+<figcaption>Source: Gergely Daróczi</figcaption>
+</figure>
+</div>
+<p>These packages contain <em>code</em>, <em>data</em>, and <em>documentation</em> in a standardized collection that can be installed by users of R. Most of the time, we will install them in order to use <em>functions</em> that will do certain tasks that help us work with our data. So far, we were using functions contained in R base: such as <code>mean()</code>, <code>median()</code>, <code>quantile()</code>, etc. But as we dive deep into the data science life cycle, we might address certain challenges that require more complex, or specific, functions. We will need to import the data, tidy the data into a format that is easy to work with, explore the data, generate visualizations, carry out the analysis and communicate the insights. The tidyverse ecosystem provides a powerful tool for streamlining the workflow in a coherent manner that can be easily connected with other data science tools.</p>
+</section>
+</section>
+<section id="tidyverse-data-workflow" class="level1">
+<h1><code>tidyverse</code> + Data workflow</h1>
+<p>The tidyverse is a set of R packages designed for data science. The main idea behind tidyverse is to contain in a single installation line, a set of tools that contain the entire data analysis workflow: from the importation of data to the communication of results.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="https://r4ds.had.co.nz/explore-intro.html"><img src="img/data-science-explore.png" class="img-fluid figure-img" alt="Source: R for Data Science"></a></p>
+<figcaption>Source: R for Data Science</figcaption>
+</figure>
+</div>
+<section id="tidy-data" class="level2">
+<h2 class="anchored" data-anchor-id="tidy-data">Tidy data</h2>
+<p>All packages share an underlying design philosophy, grammar, and data structures. These structures refer to the format of <strong>tidy datasets</strong>. But, what is tidy data? It is a way to describe data that’s organized with a particular structure: a rectangular structure, where each variable has its own column and each observation has its own row <span class="citation" data-cites="wickham_tidy_2014 peng_tidyverse_nodate">(<a href="#ref-wickham_tidy_2014" role="doc-biblioref">Wickham 2014a</a>; <a href="#ref-peng_tidyverse_nodate" role="doc-biblioref">Peng n.d.</a>)</span>.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="https://www.openscapes.org/blog/2020/10/12/tidy-data/"><img src="img/tidydata_1.jpg" class="img-fluid figure-img" width="653" alt="Julie Lowndes and Allison Horst"></a></p>
+<figcaption>Julie Lowndes and Allison Horst</figcaption>
+</figure>
+</div>
+<p>According to <span class="citation" data-cites="wickham2014">(<a href="#ref-wickham2014" role="doc-biblioref">Wickham 2014b</a>)</span>,</p>
+<blockquote class="blockquote">
+<p>“Tidy datasets are easy to manipulate, model and visualize, and have a specific structure: each variable is a column, each observation is a row, and each type of observational unit is a table.”</p>
+</blockquote>
+<p>Working with tidy data means that we work with information that has a consistent data structure. The main benefit behind this is that we will have to spend less time thinking how to process and clean data, because we can use existing tools instead of starting from scratch each time we work with a new dataset. In other words, we only require a small set of tools to be learned, since we can reuse them from one project to the other.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="https://www.openscapes.org/blog/2020/10/12/tidy-data/"><img src="img/tidydata_3.jpg" class="img-fluid figure-img" alt="Julie Lowndes and Allison Horst"></a></p>
+<figcaption>Julie Lowndes and Allison Horst</figcaption>
+</figure>
+</div>
+</section>
+<section id="tidyverse-ecosystem" class="level2">
+<h2 class="anchored" data-anchor-id="tidyverse-ecosystem"><code>tidyverse</code> ecosystem</h2>
+<p>We can think of the tidyverse ecosystem <span class="citation" data-cites="grolemund_welcome_nodate">(<a href="#ref-grolemund_welcome_nodate" role="doc-biblioref">Grolemund n.d.</a>)</span> as the set of tools we can reuse in our tidy data. It is an ecosystem because consists in a set of various packages that can be installed in one line of code (<code>install.packages(tidyverse)</code>), and each package fits into a part of the data science life cycle. This is the main reason why we prefer to use tidyverse instead of R base. It provides us with a consistent set of tools we can use for many different datasets, it is designed to keep our data tidy, and it contains all the specific tools we might need in our data science workflow.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="https://www.tidyverse.org/"><img src="img/ecosystem.jpeg" class="img-fluid figure-img" width="575" alt="Tidyverse"></a></p>
+<figcaption>Tidyverse</figcaption>
+</figure>
+</div>
+<p>There is a set of core tidyverse packages that are installed with the main ecosystem, which are ones you are likely to use in everyday data analyses.</p>
+<ul>
+<li><p><strong><code>tibble</code></strong>: it is a package that <em>re-imagines the familiar R data.frame</em>. It is a way to store information in columns and rows, but does so in a way that addresses problems earlier in the pipeline. That is to say, it stores it in the tidy data format. The official documentation calls tibbles ‘lazy and slurly’, since they do less (they don’t change variable names or types, and don’t do partial matching) and complain more (e.g.&nbsp;when a variable does not exist). This forces you to confront problems earlier, typically leading to cleaner, more expressive code.</p></li>
+<li><p><strong><code>readr</code></strong>: this is a package we will use every time we start a new project. It helps read rectangular data into R, and it includes data in .csv and .tsv format. It is designed to flexibly parse many types of data found.</p>
+<ul>
+<li>to read data in .xlsx or .xlx format, you should install the tidyverse-adjacent package <strong><code>readxl</code></strong>.</li>
+</ul></li>
+<li><p><strong><code>dplyr:</code></strong> designed for data wrangling. It is built around five primary verbs (mutate, select, filter, summarize, and arrange) that help make the data wrangling process simpler.</p></li>
+<li><p><strong><code>tidyr:</code></strong> it is quite similar to <code>dplyr</code>, but its main goal is to provide a set of functions to help us convert dataframes into tidy data.</p></li>
+<li><p><strong><code>purr:</code></strong> enhances R’s functional programming toolkit by providing a complete and consistent set of tools for working with functions and vectors. It makes easier for us to work with loops inside a dataframe.</p></li>
+<li><p><strong><code>stringr:</code></strong> it is designed to help us work with data in string format.</p></li>
+<li><p><strong><code>forcats:</code></strong> it provides functions to help us work with data in the factor format.</p></li>
+<li><p><strong><code>ggplot:</code></strong> the main package for data visualization in the R community. It is a system for declaratively creating graphics, based on The Grammar of Graphics. You provide the data, tell ggplot2 how to map variables to aesthetics, what graphical primitives to use, and it takes care of the details.</p></li>
+</ul>
+<p>While this is the main structure of the tidyverse ecosystem, there are multiple adjacent packages that we can install which fit into the tidy syntax and work well with the tidy data format. Some of them are <code>readxl</code> to read data in .xlsx or .xl format, <code>janitor</code> for cleaning data, <code>patchwork</code> to paste ggplot graphs together, <code>tidymodels</code> for machine learning… and many more.</p>
+</section>
+<section id="tidy-data-functions" class="level2">
+<h2 class="anchored" data-anchor-id="tidy-data-functions">Tidy data functions</h2>
+<p>As you had a glimpse in the previous classes, there are some basic functions that we use to tidy data:</p>
+<ul>
+<li><p><code>mutate</code>: to transform columns</p></li>
+<li><p><code>select</code>: to select certain columns</p></li>
+<li><p><code>filter</code>: to select certain rows (we can think of filter as the row-wise version of select, and select as the column-wise version of filter)</p></li>
+<li><p><code>arrange</code>: to reorder values of rows</p></li>
+</ul>
+<p>Now, we will go over the basics of more complex data transformation functions to <strong>reshape</strong> the data: joins, pivots, summarizes and date processing.</p>
+<section id="merges-of-dataframes" class="level3">
+<h3 class="anchored" data-anchor-id="merges-of-dataframes">Merges of dataframes</h3>
+<p>If you ever worked with SQL or multiple databases in the past, you might already be familiar with the concept of joining data. A tidy dataset should contain one type of observational unit per table. For example, if we have done a survey regarding labor conditions to individuals, but we also have sociodemographical information regarding their household, we should have each information in a different dataset. However, we will probably be interested in crossing the information regarding the individuals and their household conditions. So we need to have key IDs to be able to combine these two datasets: for example, in this case, the ID for the household.</p>
+<p><img src="img/merges.png" class="img-fluid" width="418"></p>
+<p>Note that the household ID is not the same as the person ID. Each person has a unique identifier, but so does each household. The information is consistent: when we have two individuals who share a household ID, we see in the household information that there are two people living there.</p>
+<p>Now, how do dataframe joins work?</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="https://medium.com/@niloy.swe/how-to-join-tables-across-databases-in-metabase-sql-e2bbbf67fb90"><img src="img/join-types.png" class="img-fluid figure-img" width="671" alt="Niloy Biswas"></a></p>
+<figcaption>Niloy Biswas</figcaption>
+</figure>
+</div>
+<ul>
+<li><strong>Inner join:</strong> this creates a new dataset that only contains the information of rows where the IDs match. For example, in our case, the data of the household 5 wouldn’t appear since it doesn’t join any individual data.</li>
+</ul>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 7 × 7
+  person_ID household_ID gender   age income neighborhood_income
+      &lt;int&gt;        &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;              
+1         1            1 f         39   3096 low income         
+2         2            1 f         48   4477 low income         
+3         3            2 m         39   4048 low income         
+4         4            3 m         47   3727 high income        
+5         5            4 m         33   1335 high income        
+6         6            6 f         31   1614 high income        
+7         7            7 f         38   1302 high income        
+# ℹ 1 more variable: n_people_household &lt;dbl&gt;</code></pre>
+</div>
+</div>
+<ul>
+<li><strong>Left join:</strong> it keeps all the rows of the data on the “left” and adds the columns that match the dataframe on the right. The decision of which dataframe goes where (left or right) is arbitrary and up to us, but we must keep in mind that it will be our main dataframe in the join. In our example, if we chose the individual dataset as the left, we would have the same table as the result of the inner join. But if we chose the household dataset, we would have a dataset with empty values for the ID’s that don’t match.</li>
+</ul>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 8 × 7
+  household_ID neighborhood_income n_people_household person_ID gender   age
+         &lt;dbl&gt; &lt;chr&gt;                            &lt;dbl&gt;     &lt;int&gt; &lt;chr&gt;  &lt;dbl&gt;
+1            1 low income                           2         1 f         39
+2            1 low income                           2         2 f         48
+3            2 low income                           1         3 m         39
+4            3 high income                          1         4 m         47
+5            4 high income                          1         5 m         33
+6            5 low income                           5        NA &lt;NA&gt;      NA
+7            6 high income                          4         6 f         31
+8            7 high income                          3         7 f         38
+# ℹ 1 more variable: income &lt;dbl&gt;</code></pre>
+</div>
+</div>
+<ul>
+<li><strong>Full join:</strong> it keeps all the columns and all the rows in both dataframes.</li>
+</ul>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 8 × 7
+  household_ID neighborhood_income n_people_household person_ID gender   age
+         &lt;dbl&gt; &lt;chr&gt;                            &lt;dbl&gt;     &lt;int&gt; &lt;chr&gt;  &lt;dbl&gt;
+1            1 low income                           2         1 f         39
+2            1 low income                           2         2 f         48
+3            2 low income                           1         3 m         39
+4            3 high income                          1         4 m         47
+5            4 high income                          1         5 m         33
+6            5 low income                           5        NA &lt;NA&gt;      NA
+7            6 high income                          4         6 f         31
+8            7 high income                          3         7 f         38
+# ℹ 1 more variable: income &lt;dbl&gt;</code></pre>
+</div>
+</div>
+</section>
+<section id="summarizing-information" class="level3">
+<h3 class="anchored" data-anchor-id="summarizing-information">Summarizing information</h3>
+<p>Many times, we will want to summarize the information in our dataset. We can catch a glimpse of the summarized dataset with functions such as <code>summary()</code> or <code>str()</code>. However, more often, we will want to see specific information regarding groups in our dataset. For example, how many households we have in the different types of neighborhoods. To do this, it is necessary to group our data. We will not look into the total number of households, but we will group the data by the neighborhood of the households. Then, we can count each group.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 2
+  neighborhood_income     n
+  &lt;chr&gt;               &lt;int&gt;
+1 high income             4
+2 low income              3</code></pre>
+</div>
+</div>
+<p>Other times, we might be interested in getting descriptive statistics per group. For example, the median age for men and women in the individuals dataset.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 2
+  gender median_age
+  &lt;chr&gt;       &lt;dbl&gt;
+1 f            38.5
+2 m            39  </code></pre>
+</div>
+</div>
+<p>Or even combine groups and subgroups. For example, the median income for women and men who live in low income or high income neighborhoods</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 4 × 3
+# Groups:   neighborhood_income [2]
+  neighborhood_income gender income
+  &lt;chr&gt;               &lt;chr&gt;   &lt;dbl&gt;
+1 high income         f       1458 
+2 high income         m       2531 
+3 low income          f       3786.
+4 low income          m       4048 </code></pre>
+</div>
+</div>
+</section>
+<section id="reshaping-data" class="level3">
+<h3 class="anchored" data-anchor-id="reshaping-data">Reshaping data</h3>
+<p>Converting your data from wide-to-long or from long-to-wide data formats is referred to as <strong>reshaping</strong> your data.</p>
+<p>For example, take this subset of columns from our individuals dataset.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 7 × 4
+  person_ID gender   age income
+      &lt;int&gt; &lt;chr&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+1         1 f         39   3096
+2         2 f         48   4477
+3         3 m         39   4048
+4         4 m         47   3727
+5         5 m         33   1335
+6         6 f         31   1614
+7         7 f         38   1302</code></pre>
+</div>
+</div>
+<p>This is what we call a wide format: each variable has its own column, and each row represents a single observation. Long data, on the other hand, refers to a dataset where each variable is contained in its own column. This format is often used when working with large datasets or when performing statistical analyses that require data to be presented in a more condensed format.</p>
+<p>This is the same dataset we had previously but reshaped as long data.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 14 × 4
+   person_ID gender variable value
+       &lt;int&gt; &lt;chr&gt;  &lt;chr&gt;    &lt;dbl&gt;
+ 1         1 f      age         39
+ 2         1 f      income    3096
+ 3         2 f      age         48
+ 4         2 f      income    4477
+ 5         3 m      age         39
+ 6         3 m      income    4048
+ 7         4 m      age         47
+ 8         4 m      income    3727
+ 9         5 m      age         33
+10         5 m      income    1335
+11         6 f      age         31
+12         6 f      income    1614
+13         7 f      age         38
+14         7 f      income    1302</code></pre>
+</div>
+</div>
+<p>As you can see, the wide data format has a separate column for each variable, whereas the long data format has a single “variable” column that indicates whether the value refers to age or income.<br>
+</p>
+</section>
+</section>
+<section id="dates-in-r" class="level2">
+<h2 class="anchored" data-anchor-id="dates-in-r">Dates in R</h2>
+<p>Dates are a special type of object in R. There are three types of data that refer to an instant in time:</p>
+<ol type="1">
+<li><p>A <strong>date</strong>. Tibbles will print it as <code>date</code>.</p></li>
+<li><p>A <strong>time</strong> within a day. Tibbles will print it as <code>time</code>.</p></li>
+<li><p>A <strong>date-time</strong>, which refer to dates plus times, specifying an exact moment in time. Tibbles print this as <code>&lt;dttm&gt;</code>. In R base, these are called POSIXct.</p></li>
+</ol>
+<p>It is a good practice to keep our data simple, so if we don’t necessarily need the time information to work in our project, we will usually prefer to work with <code>date</code> formats.</p>
+<p>When working with dates in R, we should also be careful with time zones. Time zones are an enormously complicated topic because of their interaction with geopolitical entities. R uses the international standard IANA time zones. You can find out what R thinks your time zone is using the following command:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">Sys.timezone</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "America/Toronto"</code></pre>
+</div>
+</div>
+<p><code>lubridate</code> uses UTC (Coordinated Universal Time), which is the standardized time zone used by the scientific community.</p>
+</section>
+</section>
+<section id="discussion" class="level1">
+<h1>Discussion</h1>
+<p>During this class, we went over the <code>tidyverse</code> functions that we use for preprocessing and transforming the data. This is a crucial step of the data science workflow. Most of the times, we will receive a non-tidy dataset with many errors (NA’s, wrong formats in columns…) and a large portion of our work will be dedicated to tidying the data. Then, this will be the raw material we use to make our analysis and communicate the results. This is why it is a huge, important step in the workflow, not only because of technical difficulties, but also some conceptual problems might emerge.</p>
+<p>Another problem can show up in the <strong>merging of databases</strong>. We should be careful to not join data just because they share and ID or a value (for example, a city or a state). Datasets are only comparable when the population of reference is the same in both. So, if we join two tables that don’t share a population, we should explicit so and explain why we are doing it. For example, are we using it as a control variable? How different are the populations?</p>
+<p>In this sense, this is why it is important to keep a record of the code we use for preprocessing the data. The analysts’ bias can be introduced during this process, so it is important to keep track of this in order to guarantee reproducibility and to be held accountable of our methodological decisions.</p>
+</section>
+<section id="references" class="level1 unnumbered">
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-grolemund_welcome_nodate" class="csl-entry" role="listitem">
+Grolemund, Hadley Wickham and Garrett. n.d. <em>Welcome <span></span> <span>R</span> for <span>Data</span> <span>Science</span></em>. Accessed March 23, 2023. <a href="https://r4ds.had.co.nz/">https://r4ds.had.co.nz/</a>.
+</div>
+<div id="ref-peng_tidyverse_nodate" class="csl-entry" role="listitem">
+Peng, Stephanie C. Hicks and Roger D., Shannon E. Ellis. n.d. <em>Tidyverse <span>Skills</span> for <span>Data</span> <span>Science</span></em>. Accessed March 23, 2023. <a href="https://jhudatascience.org/tidyversecourse/">https://jhudatascience.org/tidyversecourse/</a>.
+</div>
+<div id="ref-wickham_tidy_2014" class="csl-entry" role="listitem">
+Wickham, Hadley. 2014a. <span>“Tidy <span>Data</span>.”</span> <em>Journal of Statistical Software</em> 59 (10): 1–23. <a href="https://doi.org/10.18637/jss.v059.i10">https://doi.org/10.18637/jss.v059.i10</a>.
+</div>
+<div id="ref-wickham2014" class="csl-entry" role="listitem">
+———. 2014b. <span>“Tidy Data.”</span> <em>Journal of Statistical Software</em> 59 (10): 1–23. <a href="https://doi.org/10.18637/jss.v059.i10">https://doi.org/10.18637/jss.v059.i10</a>.
+</div>
+</div></section></div></main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

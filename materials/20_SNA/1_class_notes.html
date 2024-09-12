@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.549">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="">
+
+<title>Social network analysis</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="1_class_notes_files/libs/clipboard/clipboard.min.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/quarto.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/popper.min.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/anchor.min.js"></script>
+<link href="1_class_notes_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="1_class_notes_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="1_class_notes_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="1_class_notes_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="1_class_notes_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Social network analysis</h1>
+<p class="subtitle lead">class notes</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>Networks are complex structures used to represent relations. In math they are studied as <em>graphs</em>, but they can be used in multiple ways. As a way to represent knowledge, to define a model, as database systems, or to represent information. Many machine learning models are built as graphs: Neural networks, decision trees, and even causal models. In this course, we will focus on networks for social science. Here, we will use graphs to represent data about social relations between entities (people, institutions, countries, etc.).</p>
+</section>
+<section id="elements-of-a-network" class="level1">
+<h1>Elements of a network</h1>
+<p>In order to work with networks, we first need to go through some basic definitions.</p>
+<ul>
+<li>A <strong>network</strong> —or <em>graph</em>— is composed by <strong>nodes</strong> —or <em>vertex</em>— and <strong>links</strong> —or <em>edges</em>—<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. <strong>Nodes</strong> represent the entities of the problem, and <strong>links</strong> their relations. Mathematically, we can define it as:</li>
+</ul>
+<p><span class="math display">\[
+G=(V, E)
+\]</span> Where <span class="math inline">\(V\)</span> is the set of nodes, and <span class="math inline">\(E\)</span> the set of links.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/tikz/nodes_links.png" class="img-fluid figure-img" style="width:50.0%"></p>
+<figcaption><span class="math inline">\(V\)</span>: {A,B,C}, <span class="math inline">\(E\)</span>: {1,2}</figcaption>
+</figure>
+</div>
+<div class="cell">
+<p>Placeholder (you should not see this)</p>
+</div>
+<ul>
+<li><p>A node that has a link that points to itself is called a <strong>loop</strong>.</p></li>
+<li><p>A <strong>walk</strong> is a sequence of nodes and links, like <code>(B, 1, A, 2, C)</code> in our simple network, where the links between nodes are those that connect them, so it can also be represented as <code>(1, 2)</code>.</p></li>
+<li><p>A <strong>path</strong> is a walk where all the links are different (it does not go through the same link twice).</p></li>
+<li><p>The <strong>length</strong> of a path is its <em>number of links</em>, and the <strong>shortest path</strong><a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> between two nodes is the one that connects them and has the least number of links.</p></li>
+<li><p>The <strong>distance</strong><a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> between two nodes is given by the length of the shortest path that connects them.</p></li>
+<li><p>A <strong>sub-graph</strong> <span class="math inline">\(G'=(V', E')\)</span> is a subset of <span class="math inline">\(G\)</span> where <span class="math inline">\(V'\)</span> is a subset of <span class="math inline">\(V\)</span> and <span class="math inline">\(E'\)</span> is a subset of <span class="math inline">\(E\)</span> that only contains links that connect nodes in <span class="math inline">\(V'\)</span>.</p></li>
+<li><p>An <strong>ego network</strong> is obtained when we take a node and build the sub-graph that contains all the nodes that are connected to it, and all the respective links that connect them.<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a></p></li>
+<li><p>Two nodes are <strong>connected</strong> if there is path between them. If all the nodes of the network are connected, then it is a <strong>connected network</strong>.</p></li>
+</ul>
+<div class="cell">
+<p>Placeholder (you should not see this)</p>
+</div>
+<ul>
+<li>If the network is not connected, then it can have <strong>components</strong>: sub-graphs of connected nodes. These may have different sizes, and the most important is the <strong>giant component</strong>: the one with he highest number of nodes.</li>
+</ul>
+</section>
+<section id="types-of-networks" class="level1">
+<h1>Types of networks</h1>
+<section id="weighted-or-unweighted-networks" class="level2">
+<h2 class="anchored" data-anchor-id="weighted-or-unweighted-networks">Weighted or unweighted networks</h2>
+<p>The relation between two nodes can either be <em>dichotomous</em> or <em>quantitative</em>. For example, a link can represent co-authorship – given two authors, they either co-authored a paper or not– and for it we might use an <strong>unweighted network</strong>. But a link can also represent the number of papers two co-authors wrote together, and in this case we might use a <strong>weighted network</strong>. A weighted network can be represented as an unweighted one for those relations above a given threshold.</p>
+<p><img src="img/tikz/weighted.png" class="img-fluid" style="width:75.0%"></p>
+</section>
+<section id="directed-or-undirected-networks" class="level2">
+<h2 class="anchored" data-anchor-id="directed-or-undirected-networks">Directed or undirected networks</h2>
+<p>Connections can have a direction<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>. For example, in Twitter, <code>B</code> can follow <code>A</code>, who follows <code>C,</code> that also follows <code>A</code> back. While in Facebook, the connections are defined as <em>friendship</em>, where there is no direction.</p>
+<p><img src="img/tikz/directed.png" class="img-fluid" style="width:75.0%"></p>
+</section>
+<section id="bipartite-networks" class="level2">
+<h2 class="anchored" data-anchor-id="bipartite-networks">Bipartite networks</h2>
+<p>Networks can encode complex relations between different types of entities. For example, if we want to represent people that belongs to different institutions, we can have nodes that represent people {<span class="math inline">\(A_1,A_2,...,A_5\)</span>}, and other type of nodes that represent institutions {<span class="math inline">\(I_1,I_2,...,I_4\)</span>}, and here the links represent the relation of <em>belonging</em>.</p>
+<p><img src="img/tikz/bipartite.png" class="img-fluid" style="width:75.0%"></p>
+<p>This type of networks can also be simplified using <strong>projection</strong>, where we keep only one type of node. In the example above, we can relate institutions to each other if they have people in common, and link people if they belong to the same institution:</p>
+<p><img src="img/tikz/projection.png" class="img-fluid" style="width:75.0%"></p>
+</section>
+<section id="dynamic-networks" class="level2">
+<h2 class="anchored" data-anchor-id="dynamic-networks">Dynamic networks</h2>
+<p>If we want to use network analysis to study a social process, a static representation can fall short to understand how the social interactions evolve over time. For this, we can also think networks as a dynamic process, where new nodes enter, old nodes disappear, and links change over time.</p>
+<p><img src="img/growing_network.gif" class="img-fluid"></p>
+</section>
+</section>
+<section id="network-representation-and-metrics" class="level1">
+<h1>Network representation and metrics</h1>
+<ul>
+<li>There are different ways to represent a network numerically. This is important because it is how we can store the data, and it will define how we can compute metrics to understand the network behavior.</li>
+<li>Social Network Analysis (SNA) metrics can be divided into those that describe the <em>network topology</em><a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a> at an aggregate level, and those that describe the relevance of a specific node.</li>
+</ul>
+<p>Lets take a small random network and see how it can be represented and which metrics can be used to describe it:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li>The <strong>adjacency matrix</strong> represents nodes as rows and columns, and the existence (or not) of a link between nodes <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> as a 1 (or 0)<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a> in the row <span class="math inline">\(i\)</span> and column <span class="math inline">\(j\)</span>. The adjacency matrix is normally denoted as <span class="math inline">\(A\)</span>.</li>
+<li>If the network is undirected this matrix will be symmetrical, while if it is directed, it will probably not be.</li>
+</ul>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>   1 2 3 4 5 6 7 8 9 10
+1  0 0 0 0 1 0 1 1 0  0
+2  0 0 0 0 0 0 0 0 0  1
+3  0 0 0 1 0 0 0 0 1  0
+4  0 0 1 0 1 1 0 0 1  0
+5  1 0 0 1 0 0 1 1 0  0
+6  0 0 0 1 0 0 1 0 1  0
+7  1 0 0 0 1 1 0 0 0  1
+8  1 0 0 0 1 0 0 0 0  0
+9  0 0 1 1 0 1 0 0 0  0
+10 0 1 0 0 0 0 1 0 0  0</code></pre>
+</div>
+</div>
+<ul>
+<li>Although adjacency matrices are really intuitive, they are not really efficient. Networks are usually <em>sparse</em>, so most of the matrix will be filled with zeros. If we work with large networks, with millions of nodes, this is a very costly way to represent the data.</li>
+<li>In practice, there are very few links with respect to all the possible combinations. If there are few links per node, a much more efficient way to store the data is to build an <strong>edge list</strong> that stores the name of the two nodes that a link connects.</li>
+</ul>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>      [,1] [,2]
+ [1,]    3    4
+ [2,]    1    5
+ [3,]    4    5
+ [4,]    4    6
+ [5,]    1    7
+ [6,]    5    7
+ [7,]    6    7
+ [8,]    1    8
+ [9,]    5    8
+[10,]    3    9
+[11,]    4    9
+[12,]    6    9
+[13,]    2   10
+[14,]    7   10</code></pre>
+</div>
+</div>
+<ul>
+<li>We can also build an <strong>adjacency list</strong> that lists all nodes, and for each of them, the nodes to which it is connected.</li>
+</ul>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>$`1`
++ 3/10 vertices, named, from 73354db:
+[1] 5 7 8
+
+$`2`
++ 1/10 vertex, named, from 73354db:
+[1] 10
+
+$`3`
++ 2/10 vertices, named, from 73354db:
+[1] 4 9</code></pre>
+</div>
+</div>
+<section id="node-level-metrics" class="level2">
+<h2 class="anchored" data-anchor-id="node-level-metrics">Node level metrics</h2>
+<p>A key concept in network analysis is <strong>centrality</strong>. It refers to the importance of a node within the network. Generally speaking, if a node is <em>well connected</em>, it can exercise more <em>influence</em> over the network.</p>
+<blockquote class="blockquote">
+<p><em>Let’s imagine our network is composed of a group of 10 people. Links represent friendship and trust between them. If we want to know how fake news are spread across the network, centrality measures can help us to understand what would happen if any of the nodes start a rumor<a href="#fn8" class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a>.</em></p>
+</blockquote>
+<blockquote class="blockquote">
+<p><em>Who do you think that can be more effective spreading the misinformation? Node 4, 7 or 2?</em></p>
+</blockquote>
+<p>There are many ways to define the influence of a node, and which one is the best depends on the research question.</p>
+<ul>
+<li><strong>Degree centrality</strong> counts the number of connections of a node. It is one of the most common metrics.</li>
+</ul>
+<div class="cell" data-fig.margin="true">
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Using the `size` aesthetic in this geom was deprecated in ggplot2 3.4.0.
+ℹ Please use `linewidth` in the `default_aes` field and elsewhere instead.</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="384"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 2
+    node degree
+   &lt;int&gt;  &lt;dbl&gt;
+ 1     1      3
+ 2     2      1
+ 3     3      2
+ 4     4      4
+ 5     5      4
+ 6     6      3
+ 7     7      4
+ 8     8      2
+ 9     9      3
+10    10      2</code></pre>
+</div>
+</div>
+<p>We can see that by <em>degree centrality</em> nodes 4, 5, and 7 are considered equally important.</p>
+<ul>
+<li><strong>Closeness centrality</strong> is the average closeness<a href="#fn9" class="footnote-ref" id="fnref9" role="doc-noteref"><sup>9</sup></a> between the node and all the other nodes in the graph. The intuition is that the closer it is to all other nodes, the more central a node is.</li>
+</ul>
+<div class="cell" data-fig.margin="true">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="384"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><span class="math display">\[
+closeness(i) = \frac{N-1}{\sum_{j\neq i}d_{i,j}}
+\]</span></p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 2
+    node closeness
+   &lt;int&gt;     &lt;dbl&gt;
+ 1     5     0.067
+ 2     7     0.067
+ 3     4     0.059
+ 4     6     0.059
+ 5     1     0.056
+ 6     9     0.05 
+ 7    10     0.048
+ 8     8     0.045
+ 9     3     0.042
+10     2     0.034</code></pre>
+</div>
+</div>
+<p>When we consider closeness, node 4 is not as important as in degree centrality. As it is not connected to node 7, its distance to nodes 10 and 2 is rather long.</p>
+<ul>
+<li><strong>Betweenness centrality</strong> measures a specific type of influence over the network. It counts how many times a node is in the shortest path of other nodes. The influence here implies that, in order to get from one point of the network to another, you must go through this specific node. A central node in this metric behaves as a bridge between others. It can be formally defined as:</li>
+</ul>
+<p><span class="math display">\[
+betweenness(i)= \sum_{j,k\neq i}\frac{b_{jik}}{b_{jk}}
+\]</span>Where <span class="math inline">\(b_{jk}\)</span> are all the shortest paths between nodes <span class="math inline">\(j\)</span> and <span class="math inline">\(k\)</span>, and <span class="math inline">\(b_{jik}\)</span> are all of those shortest paths that go through <span class="math inline">\(i\)</span>.</p>
+<div class="cell" data-fig.margin="true">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="384"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 2
+    node betweenness
+   &lt;int&gt;       &lt;dbl&gt;
+ 1     7       16.7 
+ 2     5       10.2 
+ 3     4        8.83
+ 4    10        8   
+ 5     6        7   
+ 6     1        1.83
+ 7     9        1.5 
+ 8     2        0   
+ 9     3        0   
+10     8        0   </code></pre>
+</div>
+</div>
+<p>For betweenness, the node 7 is the most important by far, as it is the only bridge to nodes 10 and 2, and one of the two connections between nodes {5, 1, 8} and nodes {6, 9, 4, 3}.</p>
+<ul>
+<li><strong>Eigen centrality</strong> is based on the idea that not only does it matter how many connections a node has, but also the centrality of the nodes with which the node is connected. A node can be connected to many others, but if those nodes are only connected to the first one, the influence of the node in the network will be limited.</li>
+</ul>
+<p>This is a recursive problem, as the centrality can be defined as</p>
+<p><span class="math display">\[
+x_i = \kappa^{-1} \sum_{\text{nodes j connected to i}}x_j
+\]</span></p>
+<p>The centrality of the node <span class="math inline">\(x_i\)</span> is some proportion of the centrality of its neighbors (<span class="math inline">\(\kappa\)</span> being a proportionality constant).</p>
+<p>We can use the adjacency matrix <span class="math inline">\(A\)</span> to redefine this problem, given that if the nodes are connected, <span class="math inline">\(A_{ij}\)</span> is 1, and 0 otherwise.</p>
+<p><span class="math display">\[
+x_i = \kappa^{-1} \sum_{j}^nA_{ij}x_j
+\]</span> It is called <em>eigen</em> centrality, because the solution to this equation is the <em>eigen vector</em> of the adjacency matrix<a href="#fn10" class="footnote-ref" id="fnref10" role="doc-noteref"><sup>10</sup></a>.</p>
+<div class="cell" data-fig.margin="true">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="384"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 2
+    node eigen_centrality
+   &lt;int&gt;            &lt;dbl&gt;
+ 1     5             1   
+ 2     4             0.96
+ 3     7             0.91
+ 4     6             0.81
+ 5     1             0.77
+ 6     9             0.72
+ 7     8             0.56
+ 8     3             0.52
+ 9    10             0.32
+10     2             0.1 </code></pre>
+</div>
+</div>
+<p>When we consider <em>eigen</em> centrality, node 5 is more important than node 7. This happens because node 5 is connected to both nodes 4 and 7, which are the two following nodes in importance, while nodes 4 and 7 are not connected between them.</p>
+</section>
+<section id="network-level-metrics" class="level2">
+<h2 class="anchored" data-anchor-id="network-level-metrics">Network level metrics</h2>
+<ul>
+<li><strong>Size</strong>: refers to the number of nodes or links in the network.</li>
+<li>The <strong>diameter</strong> is the distance between the two most distant pair of nodes<a href="#fn11" class="footnote-ref" id="fnref11" role="doc-noteref"><sup>11</sup></a> in the network.</li>
+<li><strong>Density/sparsity</strong>: the density of the network is the ratio between the number of existing edges and all the possible edges that a network with the same number of nodes can have.</li>
+<li>The <strong>average degree</strong> is simply the average degree centrality of all nodes.</li>
+<li><strong>Clustering coefficient</strong>: it shows how much the nodes are locally cohesive. Each node has a <em>neighborhood</em> that consists of all the nodes that are connected to it. The clustering coefficient shows how much the nodes in the same neighborhood are also connected between themselves. It is computed for each node as the ratio between the existing connections among its neighbors, and the total possible connections. After this, we can average the clustering coefficient of all nodes to get the value for the network level.</li>
+<li><strong>Assortativity</strong> measures how much nodes with a high degree tend to be connected between each other. It can be operationalized as the degree-correlation among neighbors. <em>Do central nodes tend to connect more to other central nodes? or they tend to relate with less central nodes?</em></li>
+</ul>
+</section>
+</section>
+<section id="social-networks" class="level1">
+<h1>Social networks</h1>
+<section id="random-networks" class="level2">
+<h2 class="anchored" data-anchor-id="random-networks">Random networks</h2>
+<p>Networks are complex structures. There are no simple tests like in descriptive statistics that we can use to check if a network follows a property, but random networks can be used to compare some properties. Random networks are generative models, where we can specify some parameters like the number of nodes, edges, or the probability of a link between nodes, and a network is built following a specific algorithm.</p>
+</section>
+<section id="preferential-attachment-model" class="level2">
+<h2 class="anchored" data-anchor-id="preferential-attachment-model">Preferential attachment model</h2>
+<p>These models can also help us infer which are the evolutive properties of a network. For example, the preferential attachment model iteratively adds new nodes to the network. This new nodes have a probability to connect with old nodes that is given by the degree of the old nodes. This iterative process recreates the <em>rich gets richer</em> effect.</p>
+<p>One type of preferential attachment model is the Barabási-Albert (BA) model. The algorithm of the BA model works as follows:</p>
+<ol type="1">
+<li>The network begins with an initial connected network with <span class="math inline">\(n\)</span> nodes.</li>
+<li>New nodes are added to the network, one at a time. Each new node will connect with the previous nodes in the network with the probability:</li>
+</ol>
+<p><span class="math display">\[
+p_{i}\sim k_i^\alpha
+\]</span>Where <span class="math inline">\(k_i\)</span> is the degree of the node <span class="math inline">\(i\)</span> and <span class="math inline">\(\alpha\)</span> is a parameter that defines the power of the preferential attachment.</p>
+<p>Let’s see how this process looks like:</p>
+<p><img src="img/growing_network.gif" class="img-fluid"></p>
+<blockquote class="blockquote">
+<p><em>What effects does a cumulative process have?</em></p>
+</blockquote>
+<p>Let’s see the degree distribution of such type of networks:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The centrality follows a <em>power-law</em> distribution, where a few nodes have a really high centrality, while the great majority has a low centrality.</p>
+</section>
+<section id="small-world" class="level2">
+<h2 class="anchored" data-anchor-id="small-world">Small world</h2>
+<p>Another property that is commonly found in real-world networks is the <strong>small world</strong> phenomena: as networks get bigger in number of nodes, the average distance of the network only increases mildly. Huge networks with millions of nodes have very short distances between any pair of nodes, even if it is sparsely connected<a href="#fn12" class="footnote-ref" id="fnref12" role="doc-noteref"><sup>12</sup></a>.</p>
+<p>This happens because of a combination of <em>clustering</em> and <em>power-law</em> degree distributions: there are a few highly connected nodes that guarantee the more distant connections, and then the densely connected neighborhoods easily connect the node with that highly connected node in its neighborhoods.</p>
+</section>
+<section id="communities" class="level2">
+<h2 class="anchored" data-anchor-id="communities">Communities</h2>
+<p>Detecting communities within a network is a common task in SNA.</p>
+<p>Finding Twitter communities, for example, can be the key for understanding the patterns of political polarization <span class="citation" data-cites="conover2011">(<a href="#ref-conover2011" role="doc-biblioref">Conover et al. 2011</a>)</span>. A <strong>community</strong> in a network is a sub-graph in which the nodes are densely connected within them, and sparsely connected to nodes outside their community.</p>
+<p>It is the same concept as <em>clustering</em>, but the techniques used to detect them are different, given the particular structure of network’s data.</p>
+<p><strong>Modularity</strong> (<span class="math inline">\(Q\)</span>) <span class="citation" data-cites="newman2006">(<a href="#ref-newman2006" role="doc-biblioref">Newman 2006</a>)</span> is an important metric for community detection. It shows the extent to which the number of links between a group of nodes is greater (<span class="math inline">\(Q&gt;0\)</span>) or smaller (<span class="math inline">\(Q&lt;0\)</span>) than expected at random in that graph.</p>
+<ul>
+<li>One of the many community detection algorithms is the <strong>Louvain</strong> <strong>algorithm</strong> <span class="citation" data-cites="blondel2008">(<a href="#ref-blondel2008" role="doc-biblioref">Blondel et al. 2008</a>)</span>, that maximizes modularity to find the most distinctive communities. Given that this results in very small communities, the algorithm iteratively merges communities by considering its nodes as a unit.</li>
+</ul>
+<p>Let’s see how our networks looks like if we build communities using Louvain algorithm:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li>One of the most important problems of community detection in real-world networks is how to do it efficiently. Although the intuition of what we want as communities can be simple, the way to find them in a fast-enough way is complex. The <strong>walktrap</strong> <strong>algorithm</strong> <span class="citation" data-cites="pons2005">(<a href="#ref-pons2005" role="doc-biblioref">Pons and Latapy 2005</a>)</span> is a creative solution for this: By using <em>random walks</em>, it computes the distance between nodes, and uses those distances to build a hierarchical clustering.</li>
+</ul>
+<div class="cell">
+<p>Placeholder (you should not see this)</p>
+</div>
+</section>
+<section id="homophily" class="level2">
+<h2 class="anchored" data-anchor-id="homophily">Homophily</h2>
+<p>One of the main findings across several studies is the concept of <strong>homophily</strong>: the idea that people tend to relate more to others that they perceive similar to them in some way.</p>
+<p>A great example is the political homophily: people tend to relate more with people that share their political beliefs. For example, the figure below shows the Twitter network of Argentina.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/tiwtter_argentina.jpeg" class="img-fluid figure-img"></p>
+<figcaption>Twitter Argentina <span class="citation" data-cites="gonzález2016">(<a href="#ref-gonzález2016" role="doc-biblioref">González 2016</a>)</span></figcaption>
+</figure>
+</div>
+<p>Twitter US also shows a similar split between democrats and republicans.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/twitter_US.jpg" class="img-fluid figure-img"></p>
+<figcaption>Twitter US <span class="citation" data-cites="ribeiro">(<a href="#ref-ribeiro" role="doc-biblioref">Ribeiro et al., n.d.</a>)</span></figcaption>
+</figure>
+</div>
+<p>To measure homophily, we can also use the metric of <strong>modularity</strong>, but instead of measuring the groups built as a community detection algorithm, we use it with taking the nodes grouped by an attribute attached to each one of them (e.g.&nbsp;democrat or republican).</p>
+</section>
+</section>
+<section id="discussions" class="level1">
+<h1>Discussions</h1>
+<section id="why-does-the-rich-get-richer" class="level2">
+<h2 class="anchored" data-anchor-id="why-does-the-rich-get-richer">Why does the rich get richer?</h2>
+<p>The preferential attachments mechanism for building networks is an interesting model to rethink inequalities. The time component allows to think how if a <em>small</em> difference happens repeatedly over time, and has a cumulative nature, it can create an outcome with extreme inequalities. This model also shows that those who enter first to the system of accumulation already have a unbeatable advantage with respect to those that enter afterwards.</p>
+<blockquote class="blockquote">
+<p><em>Income has such cumulative mechanism. Money makes money. If a group of the population was systematically deprived for generations, even if there seems to be equal opportunities at some point in time, the cumulative nature of income will continue to affect that group. This is why colorblind policies are not enough, and without restorative actions reaching equality is impossible.</em></p>
+</blockquote>
+<p><img src="img/growing_network2.gif" class="img-fluid"></p>
+</section>
+<section id="re-discussing-homophily" class="level2">
+<h2 class="anchored" data-anchor-id="re-discussing-homophily">Re-discussing homophily</h2>
+<p>Homophily is one of the biggest sociological ideas that came up from network studies. A classical example has always been the friendship network in a US high school, which shows how black and white kids tend to play with other kids that share their identity <span class="citation" data-cites="bearman2002">(<a href="#ref-bearman2002" role="doc-biblioref">Bearman, Moody, and Stovel 2002</a>)</span>. Nevertheless, this concept is also problematic, and without enough care it can foster misleading conclusions.</p>
+<blockquote class="blockquote">
+<p><em>When we talk about identities, there are privileged and excluded populations. The concept of homophily equas all groups to a single dynamic, when in reality there are different phenomena happening for different groups.</em></p>
+<p><em>The empirical observation of a high modularity needs to be properly contextualized. An extreme example would be the residential segregation in US. In the 30’s, the Federal Housing Administration made public housing projects exclusively for white people. If we would measure the racial segregation by neighborhoods at that time, we could think that both black and white people showed homophily behaviors. But black people did not had a choice, as they were excluded from white neighborhoods. The reasons behind the behavior of each group are strikingly different, and modularity alone cannot capture that complexity.</em></p>
+</blockquote>
+</section>
+</section>
+<section id="references" class="level1 unnumbered">
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-bearman2002" class="csl-entry" role="listitem">
+Bearman, Peter Shawn, James Moody, and Katherine Stovel. 2002. <span>“Chains of Affection: The Structure of Adolescent Romantic and Sexual Networks.”</span> <a href="https://doi.org/10.7916/D83R10RS">https://doi.org/10.7916/D83R10RS</a>.
+</div>
+<div id="ref-blondel2008" class="csl-entry" role="listitem">
+Blondel, Vincent D., Jean-Loup Guillaume, Renaud Lambiotte, and Etienne Lefebvre. 2008. <span>“Fast Unfolding of Communities in Large Networks.”</span> <em>Journal of Statistical Mechanics: Theory and Experiment</em> 2008 (10): P10008. <a href="https://doi.org/10.1088/1742-5468/2008/10/P10008">https://doi.org/10.1088/1742-5468/2008/10/P10008</a>.
+</div>
+<div id="ref-conover2011" class="csl-entry" role="listitem">
+Conover, Michael, Jacob Ratkiewicz, Matthew Francisco, Bruno Goncalves, Filippo Menczer, and Alessandro Flammini. 2011. <span>“Political Polarization on Twitter.”</span> <em>Proceedings of the International AAAI Conference on Web and Social Media</em> 5 (1): 89–96. <a href="https://doi.org/10.1609/icwsm.v5i1.14126">https://doi.org/10.1609/icwsm.v5i1.14126</a>.
+</div>
+<div id="ref-gonzález2016" class="csl-entry" role="listitem">
+González, Pablo A. 2016. <span>“Jugada preparada | El Gato y La Caja.”</span> <a href="https://elgatoylacaja.com/jugada-preparada">https://elgatoylacaja.com/jugada-preparada</a>.
+</div>
+<div id="ref-newman2006" class="csl-entry" role="listitem">
+Newman, M. E. J. 2006. <span>“Modularity and Community Structure in Networks.”</span> <em>Proceedings of the National Academy of Sciences</em> 103 (23): 8577–82. <a href="https://doi.org/10.1073/pnas.0601602103">https://doi.org/10.1073/pnas.0601602103</a>.
+</div>
+<div id="ref-pons2005" class="csl-entry" role="listitem">
+Pons, Pascal, and Matthieu Latapy. 2005. <span>“Computing Communities in Large Networks Using Random Walks.”</span> In, edited by pInar Yolum, Tunga Güngör, Fikret Gürgen, and Can Özturan, 284–93. Lecture Notes in Computer Science. Berlin, Heidelberg: Springer. <a href="https://doi.org/10.1007/11569596_31">https://doi.org/10.1007/11569596_31</a>.
+</div>
+<div id="ref-ribeiro" class="csl-entry" role="listitem">
+Ribeiro, Manoel Horta, Pedro H. Calais, Virgílio A. F. Almeida, and Wagner Meira Jr. n.d. <span>“<span>"</span>Everything i Disagree with Is <span>#</span>FakeNews<span>"</span>: Correlating Political Polarization and Spread of Misinformation.”</span> <a href="https://doi.org/10.48550/arXiv.1706.05924">https://doi.org/10.48550/arXiv.1706.05924</a>.
+</div>
+</div></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>The differences in the vocabulary are due to the usages of the different scientific communities that use networks. Graph theory is a sub-field of math, while networks are used in other disciplines like computer science or sociology.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>There can be more than one shortest path between a pair of nodes.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>If there is no path between the two nodes, we can say that the distance is <span class="math inline">\(\infty\)</span>.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>We can also build the ego network that contains all the nodes at a distance of 2, 3, etc.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>This changes a little the definition of walks and paths, as they now need to follow the direction of links. Also the distance between two nodes can be asymmetrical.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>How nodes and links are arranged globally.<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>In weighted networks, 0 and 1 can be replaced with any continuous scale.<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn8"><p>This same kind of analysis can be made for the spread of diseases, political beliefs, among many different research questions.<a href="#fnref8" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn9"><p>Closeness is the opposite of the length of the shortest path (1/distance)<a href="#fnref9" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn10"><p>In algebra this is defined as <span class="math inline">\(Ax=\lambda x\)</span>, where <span class="math inline">\(\lambda\)</span> is the <em>eigen value</em> and <span class="math inline">\(x\)</span> the <em>eigen vector</em> that solve this equation. For the scope of this class, we can just think that this gives us the solution of our recursive problem.<a href="#fnref10" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn11"><p>The distance between two pair of nodes is their shortest paths, so the diameter of the network is the largest of all the shortest paths.<a href="#fnref11" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn12"><p><strong>“Six degrees of separation”</strong>: is the idea that all people are six or fewer social connections away from each other. Although this number is somehow forced, in Facebook the average distance between any pair of users is 5.73, and in twitter 4.67.<a href="#fnref12" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

@@ -1,0 +1,415 @@
+---
+title: "Unsupervised Learning"
+author: ''
+date: ''
+output:
+  html_document:
+    df_print: paged
+subtitle: Guided practice
+---
+
+```{r setup, message=FALSE, warning=FALSE, include=FALSE}
+knitr::opts_chunk$set(message = FALSE,warning = FALSE)
+```
+
+# Dataset
+
+In this guided practice we will address how to work with clustering methods using `tidymodels`. The clustering methods we will present correspond to the ML branch of unsupervised learning.
+
+> **Recall:** the main idea is to find clusters in the data, in such a way that the observations are similar to the rest of their cluster, and as different as possible from the data in other clusters.
+
+We will try to find patterns within universities in the U.S., based on the Carnegie Classification of Institutions of Higher Education. We will try to identify if there is a relationship between the degree of urbanization surrounding the university, if historically the university has received black students, the level of full time enrollment, the profile of students and the emission of postgraduate degrees.
+
+First, we load the packages we will use:
+
+```{r}
+library(tidyverse)
+library(tidymodels)
+library(GDAtools)
+library(ggdendro)
+```
+
+Now, we will read the data stored in `carnegie_data_2021.csv`.
+
+```{r}
+data <- read_csv('./data/carnegie/carnegie_data_2021.csv')
+
+data <- data %>% mutate(hbcu = case_when(
+  hbcu == 2 ~ 0,
+  TRUE ~ hbcu)) #We change this variable so it matches the format of the rest of variables (0 means no and 1 means yes)
+```
+
+Our hypothesis is that public universities located at less urbanized areas will likely be related to achievement of higher education levels for minorities, but presenting lower postgraduate study rates. On the other hand, private universities in more central areas might have higher levels of education profiles. So, for our K-Means model we will consider the following variables:
+
+- `hbcu`: Historically black colleges. 
+- `hsi`: Historical hispanic community universities. 
+- `msi`: Colleges historically have enrollment of minorities. 
+- `control`: Public, private for non-profit or private for-profit universities. 
+- `locale`: Degree of urbanization of the university location (Urban-centric locale). Numerical variable that goes from 11 - City large to 43 - Rural remote. 
+- `enrprofile2021`: Enrollment profile of students. Numerical variable that goes from **1 - Exclusively undergraduate two-year** to **7 - Exclusively graduate**.
+- We will also keep the `name` of the university, the `city` where it is located and the `basic2021` which is the Carnegie Classification for that year. 
+
+# K-Means Clustering
+
+First, we will clean the data and remove missing values.
+
+```{r}
+df_select <- data %>% select(name, city, basic2021, 
+                             hbcu, hsi, msi, locale, control,
+                             totdeg, enrprofile2021)
+
+df_select <- df_select %>% filter(locale > 0, totdeg > 0)
+df_select <- df_select %>% drop_na() 
+
+summary(df_select)
+```
+
+Our variables are categorical, however, they are coded as numeric values and are ordered by their level of education or urbanization. Since the methods for clustering we saw during the theoretical part only take as input numerical features, we want to keep them as numeric values. However, because we want to check class balancing, we will create ad-hoc columns with the suffix '\_fct' to get the count of classes for each variable.
+
+```{r}
+df_select <- df_select %>% 
+    mutate(across(c(hbcu, hsi, msi, locale, control, enrprofile2021),
+                  list(fct = ~ as.factor(.)),
+                  .names = "{.col}_fct"))
+
+summary(df_select %>% select(contains('_fct')))
+```
+
+We will re balance the `control` class, and merge the Private non-profit and Private for-profit classes into only 'Private'. 
+
+```{r}
+df_select <- df_select %>% 
+  mutate(control = case_when(control == 3 ~ 2, 
+                             TRUE ~ control))
+```
+
+With a simple boxplot we can check the relationship between some of the variables. For example, let's look at the enrollment profile of 2021 by the degree of urbanization.
+
+```{r}
+ggplot(df_select, aes(x = as.factor(locale), y = enrprofile2021))+
+  geom_boxplot()
+```
+
+To perform a K-means clustering, we will follow the steps of building a `tidymodels` workflow. In the recipe, we will add all the variables we selected into the model. Followed by that, we will use `step_normalize` to normalize all variables into the same unit.
+
+```{r}
+recipe_km <-df_select %>% 
+             recipe(~.) %>%
+             step_normalize(c(hbcu:enrprofile2021)) 
+```
+
+Now, we will instantiate the K-Means clustering.
+
+```{r}
+set.seed(123)
+
+km_2clst <- recipe_km %>%
+  prep(df_select) %>%
+  bake(df_select) %>%
+  select(hbcu:enrprofile2021) %>%
+  kmeans(x=.,
+         centers=3)
+```
+
+Note the following points from the code:
+
+1.  We set a seed to control the random factor of initialization of our clustering. In this way, we ensure that our code is reproducible and the clusters will be the same to everyone that has this data with our preprocessing.
+2.  We use the function `prep()` to estimate the parameters to our training data and `bake()` to apply the preprocessing to our dataset. These two functions are analogous to how we use `fit()` and `predict()` in supervised learning. First we shape the preprocessing for our data and then we apply it.
+3.  We select the variables we want to use for our model.
+4.  We apply the built-in `kmeans()` function for the K-Means model. With `x=.` we specify to apply the modeling on the previous preprocessed dataframe, and with the parameter `center` we define the number of clusters. We will start with three clusters to see how our groups look.
+
+The output of a K-means clustering is the following:
+
+```{r}
+km_2clst
+```
+
+The output is a large recipe with multiple elements. The first one tells us about the model: we have three clusters which are pretty balanced. The first one has 1244 rows, the second one 1009 and the last one 1682 We can also see the means of all the features for each cluster. Since the features were standarized, they are not so easy to interpret, but in general it seems like they have the following characteristics:
+
+- Cluster 1: Private universities, historically black, but low appearance of hispanic serving and minority serving, a low enrollment profile (mostly undergraduate) and lower number of degrees conferred.
+- Cluster 2: Has similar values an characteristics to the first cluster, but is not representing or including minorities and has a high enrollment profile.
+- Cluster 3: Appearance of minority-representing public universities, with lower enrollment profile, in less urbanized regions, public schools, and a high number of degrees conferred. 
+
+The second element returned is a vector that contains 3939 numbers, this is the classification of all the rows of the dataset into one of the clusters.
+
+The third element is the result of the intra-cluster distance for the three clusters. It appears that the cluster with the lowest ICD is the second one.
+
+Finally, the fourth element contains the different components for the clusters. Each of the components contain different information:
+
+- `cluster` contains the classification for each point
+- `centers`, `withinss`, and `size` (3 values) contain information (within-cluster distance, means and size) about each cluster. 
+- `totss`, `tot.withinss`, `betweenss`, and `iter` (1 value) contain information about the full clustering (Total within-cluster sum of squares, within-cluster sum of squares, between-cluster sum of squares, number of iterations to achieve final clusters).
+- `ifault` is related to the convergence of the algorithm. The value indicates whether the K-means algorithm converged successfully or if there were any issues during the iterations.
+
+The function `tidy()` also returns the values in a tibble format.
+
+```{r}
+tidy(km_2clst)
+```
+
+And lastly, the function `glance()` returns a summary.
+
+```{r}
+glance(km_2clst)
+```
+
+Is this the best clustering that could be achieved? As we saw in the previous part of the class, K-Means requires that we define a number of clusters before training the data. This is tricky, because we cannot know for sure which is the best way to group the data until we do it. Therefore, we will train our data from K = 1 to K = 10 clusters, and evaluate which one has the biggest within-cluster distance fall to select the final number of clusters.
+
+First, we will generate a vector with the sequence of clusters and initialize two empty tibbles to fill with the cluster assignments and their metrics.
+
+```{r}
+centers <- 1:10 
+
+assignments <- tibble()
+clusterings <- tibble()
+```
+
+Then, we will create the loop that iterates training the clusters for multiple K and assign the values into the tibbles.
+
+```{r}
+for (K in centers){
+   
+   km <- recipe_km %>%
+    prep(df_select) %>%
+    bake(df_select) %>%
+    select(hbcu:enrprofile2021) %>%
+    kmeans(x=.,
+            centers=K)
+   
+   clusterings <- clusterings %>% 
+     bind_rows(
+       glance(km) %>% 
+         mutate(k=K) %>% 
+         select(k, everything())
+       )
+   
+   assignments <- assignments %>%
+                     bind_rows(
+                       augment(km, df_select) %>%
+                       mutate(k = K) %>%
+                       select(k, everything())
+                 )
+}
+
+```
+
+The table `assignments` contains our original rows with two additional columns: `k`, for the pre-defined number of K and `.cluster` with the assigned cluster for that K.
+
+```{r}
+assignments
+```
+
+`clusterings` contains the metrics for the trained models. We are interested in selecting the K with the biggest fall in the within-cluster distance.
+
+```{r}
+ggplot(clusterings, aes(x=as.factor(k), y=tot.withinss, group=1)) +
+   geom_line() +
+   geom_point() +
+   geom_vline(xintercept = 7, linetype="dashed") +
+   theme_minimal() +
+   labs(x="K of clusters",
+      y="Within-cluster distance")
+```
+
+This appears to happen at K = 7. 
+
+## Exploring the clusters
+
+The following step is to interpret the results of the clusters using the data. We will filter and only keep the defined grouping in seven clusters.
+
+```{r}
+df_k7_clusters <- assignments %>% filter(k == 7)
+```
+
+How many observations do we have in each cluster?
+
+```{r}
+ggplot(df_k7_clusters, aes(x = as.factor(.cluster)))+
+  geom_bar()
+```
+
+It appears that the classes are pretty imbalanced. In particular we can distinguish the cluster 5, which contains the majority of the rows. Now, how are the variables distributed within each cluster? Let's do some plots to analyze them and extract some information.
+
+```{r}
+df_k7_clusters %>%
+ggplot(aes(x = as.factor(.cluster), y = locale))+
+  geom_boxplot()+
+  labs(x = 'Cluster',
+       y = 'Degree of urbanization')
+```
+
+We can distinguish that clusters 1, 2, 3, 4 and 6 have universities mainly located in places with higher level of urbanization. On the other hand, cluster 5 has a wider range of location of universities, and cluster 7 is mainly composed from rural and further from the center universities.
+
+```{r}
+df_k7_clusters %>%
+  ggplot(aes(x = as.factor(.cluster), y = enrprofile2021))+
+  geom_boxplot()+
+  labs(x = 'Cluster',
+       y = 'Profile of enrollment')
+
+```
+
+As for the profile of enrollment, there is a clear distinction between the cluster 3 and the others. This cluster has universities with the highest median level of profile enrollment, that is, mainly graduate profiles. However, clusters 1, 2 and 7 also have some universities that reach a higher level of education. The clusters that have the lowest level of enrollment profile are 4, 5 and 6.
+
+```{r}
+df_k7_clusters %>%
+  ggplot(aes(x = as.factor(.cluster), y = totdeg))+
+  geom_boxplot()+
+  scale_y_log10()+
+  labs(x = 'Cluster',
+       y = 'Total degrees emitted')
+
+```
+
+Looking at the total amount of degrees conferred by the universities, we can distinguish that clusters 4 and 5 are the ones that emit the most. On the other hand, cluster 6 is the one with the lowest median of degrees emitted.
+
+```{r}
+df_k7_clusters %>%
+  group_by(.cluster, control) %>%
+  summarise(n = n()) %>%
+  ggplot(aes(x = as.factor(.cluster), y = n, fill = as.factor(control)))+
+  geom_col(position = 'fill')+
+  scale_fill_discrete(labels=c('Public', 'Private'))+
+  labs(x = 'Cluster',
+       y = 'Proportion',
+       fill = 'Type of control')
+```
+
+Universities in clusters 2, 3, 6 and 7 are mainly private. Universities in cluster 5 are completely public, and the universities in clusters 1 and 4 are mixed.
+
+```{r}
+df_k7_clusters %>%
+  select(.cluster, hbcu, msi, hsi) %>%
+  pivot_longer(cols = hbcu:hsi) %>% 
+  group_by(.cluster, name, value) %>% 
+  summarise(n=n()) %>%
+  ggplot(aes(x = as.factor(.cluster), y = n, fill = as.factor(value)))+
+  geom_col(position = 'fill')+
+  facet_wrap(vars(name))+
+  scale_fill_discrete(labels=c('No', 'Yes'))+
+  labs(x = 'Cluster',
+       y = 'Proportion',
+       fill = 'Minority-representing University')
+
+```
+
+Clusters 1 and 4 are the ones that have a higher representation of hispanic, black or minority communities.
+
+From this information, we can infer that minority-representing universities are transversal to almost all the variables. We found that there are public and private universities for hispanic and black people, with different profiles of enrollment. However, historically black universities reach higher levels of education, the maximum value they reach is exclusively graduate. Aside from this, in both of these clusters we find mainly universities with a high level of urbanization. On the other hand, universities that are mainly in less urbanized areas, in cluster 7, have a wide range of enrollment profiles and are mostly private.
+
+# Hierarchical Clustering
+
+Now, we will perform the same clustering but using a hierarchical method. The steps to follow are quite similar. We can repeat the same recipe we used for K-means. The main difference is that in the workflow we will use the function `dist()` to calculate the distances for each of the observations.
+
+```{r}
+set.seed(123)
+
+dist <- recipe_km %>%
+           prep(df_select) %>%
+           bake(df_select) %>%
+           select(hbcu:enrprofile2021) %>%
+           dist(.x, method="euclidean")
+
+```
+
+The object `dist` will contain a large matrix that computes the euclidean distance for all the rows. Having this, we can use the function `hclust` to perform hierarchical clustering on our observations. We only have to pass by the distance matrix and define the linkage method we will use to agglomerate the observations.
+
+```{r}
+set.seed(123)
+
+hc_clust <- hclust(dist, method="complete")
+
+hc_clust
+```
+
+The following step is to elaborate the dendogram to interpret the results and define a cut for the clustering. First, we define the object `hc_clust` as a dendogram:
+
+```{r}
+dhc <- as.dendrogram(hc_clust)
+```
+
+Then, we use the function `dendro_data` to generate the input dataframe for the dendogram.
+
+```{r}
+hc_dendogram <- dendro_data(dhc, type = "rectangle")
+```
+
+Finally, we make the plot.
+
+```{r}
+ggplot(segment(hc_dendogram)) + 
+   geom_segment(aes(x = x, y = y, xend = xend, yend = yend)) + 
+   theme_minimal()
+```
+
+It appears that a good cutting point would be around the level 7 of dissimilarity, since the clusters that appear at that level seem to have a large intra-cluster distance. Let's see how our clusters look.
+
+```{r}
+df_hclust <- df_select %>%
+  mutate(hc_clust = as.factor(cutree(hc_clust, h = 7)))
+```
+
+How many observations do we have in each cluster?
+
+```{r}
+ggplot(df_hclust, aes(x = as.factor(hc_clust)))+
+  geom_bar()
+```
+
+While this returns the same number of clusters as our K-Means model, the classes are more imbalanced. In particular we can distinguish the cluster 1, which contains the majority of the rows and 7 which contains only 1 observation. Now, how are the variables distributed within each cluster? Let's do some plots to analyze them and extract information.
+
+```{r}
+df_hclust %>%
+ggplot(aes(x = as.factor(hc_clust), y = locale))+
+  geom_boxplot()+
+  labs(x = 'Cluster',
+       y = 'Degree of urbanization')
+```
+
+Clusters 4 and 6 primarily consist of universities situated in regions characterized by a higher level of urbanization. Clusters 2, 3, and 5 also feature the majority of their universities in non-central or suburban areas, but with some outliers in rural locations. In contrast, cluster 1 exhibits a diverse distribution of universities across various locations, while cluster 7 is predominantly composed of institutions in suburban areas.
+
+```{r}
+df_hclust %>%
+  ggplot(aes(x = as.factor(hc_clust), y = enrprofile2021))+
+  geom_boxplot()+
+  labs(x = 'Cluster',
+       y = 'Profile of enrollment')
+
+```
+
+As for the profile of enrollment, there is a clear distinction between the cluster 3 and the others. This cluster has universities with the highest median level of profile enrollment, that is, mainly graduate profiles. However, clusters 1, 2 and 7 also have some universities that reach a higher level of education. The clusters that have the lowest level of enrollment profile are 4, 5 and 6.
+
+```{r}
+df_hclust %>%
+  group_by(hc_clust, control) %>%
+  summarise(n = n()) %>%
+  ggplot(aes(x = as.factor(hc_clust), y = n, fill = as.factor(control)))+
+  geom_col(position = 'fill')+
+  scale_fill_discrete(labels=c('Public', 'Private'))+
+  labs(x = 'Cluster',
+       y = 'Proportion',
+       fill = 'Type of control')
+```
+
+Universities in clusters 3, 4, 6 and 7 are mainly private. Universities in cluster 5 are completely public, and the universities in clusters 1 and 2 are mixed.
+
+```{r}
+df_hclust %>%
+  select(hc_clust, hbcu, msi, hsi) %>%
+  pivot_longer(cols = hbcu:hsi) %>% 
+  group_by(hc_clust, name, value) %>% 
+  summarise(n=n()) %>%
+  ggplot(aes(x = as.factor(hc_clust), y = n, fill = as.factor(value)))+
+  geom_col(position = 'fill')+
+  facet_wrap(vars(name),
+             nrow = 3)+
+  scale_fill_discrete(labels=c('No', 'Yes'))+
+  labs(x = 'Cluster',
+       y = 'Proportion',
+       fill = 'Minority-representing University')
+
+```
+
+Lastly, we can identify minority-representing universities in the clusters 2, 5 and 6.
+
+As a conclusion, we observe that the Hierarchical Clustering model, although it generates more defined clusters, results in the formation of some clusters with only 1 or 2 observations. As explained in the theoretical section, clustering models are not designed to explain causal correlations, and this limitation is evident in this example. We cannot establish statistically representative models. However, it is noteworthy that both models identified similar patterns in relation to universities, which is interesting for analysis.

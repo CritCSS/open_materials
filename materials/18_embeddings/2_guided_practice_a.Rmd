@@ -1,0 +1,181 @@
+---
+title: "Word embeddings"
+author: ''
+date: ''
+output:
+  html_document:
+    df_print: paged
+subtitle: Guided practice
+bibliography: references.bib
+---
+
+```{r setup, message=FALSE, warning=FALSE, include=FALSE}
+knitr::opts_chunk$set(message = FALSE,warning = FALSE)
+```
+
+In this practice, we will use word embedding models in two ways. Firstly, we will use it as a source to analyze two cultural stereotypes. 
+
+## Loading word embedding (Word2Vec)
+We will use one of the most widely used word embeddings: [word2vec](https://code.google.com/archive/p/word2vec/).
+
+```{r}
+library(tidyverse)
+library(word2vec)
+```
+
+First, let's load the word2vec embedding model. Please, download the word2vec binary file from  [this link](https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit?usp=sharing) and unzip it in the `./models/` folder of this class: 
+```{r}
+w2v <- read.word2vec("./models/GoogleNews-vectors-negative300.bin",
+                     normalize = TRUE)
+```
+
+## Word analogies
+Let's start with two simple tests that will allow us to demonstrate some ways of using the embedding. First, we'll identify which words are closest to "king":
+
+We use the `predict` function with the following arguments:
+
+- the `object=w2v` model to use
+- the word (or vector of words) from which we want to get the similar terms
+- the `type="nearest"` parameter to fetch the closest words; by default, it returns the 3 closest words but we can modify it by
+- using the `top_n=10` parameter
+```{r}
+predict(object=w2v, newdata = "king", type = "nearest", top_n = 10)
+```
+
+We see that it returns a `tibble` with ten rows and four columns. In `term1` is the reference term we searched for, in `term2` are the "target" words, i.e., the closest words. `similarity` shows the cosine similarity, and `rank` is simply an identifier of the order.
+
+We can see that there are very semantically close words and n-grams to "king". Some are synonyms: "monarch", "sultan", "ruler". Others are related terms: "queen", "prince", "throne", "crown_prince".
+
+Now, let's calculate the analogy we saw in the theoretical class: what is to "woman" what "king" is to "man"?
+
+To do this, we will use the `predict` function in a different way. We will generate a matrix in which we will retrieve the embedding of the three terms. We modify the parameter `type="embedding"`, with which will get the vectors for each term
+```{r}
+gk <- predict(w2v, newdata = c("king", "man", "woman"), type="embedding")
+
+dim(gk)
+gk[,1:10]
+```
+
+We see then that gk is a matrix of `r nrow(gk)` rows - that is, each of the words we are looking for - and `r ncol(gk)` columns - the dimensionality of the embedding we are using.
+
+Now we can operate with the vectors to translate the analogy. For this, we will compute the following equation:
+
+$$
+x = \overrightarrow{king} - \overrightarrow{man} + \overrightarrow{woman} 
+$$
+
+```{r}
+new_vector=(gk["king",] - gk["man",]) + gk["woman",]
+
+predict(w2v, newdata = new_vector,type="nearest", top_n=5)
+```
+The central parameter in the preceding line is `newdata = gk["king",] - gk["man",] + gk["woman",]`. Here we are calculating an "artificial" vector that is the subtraction of the "king" vector and the "man" vector, added to the "woman" vector. We could think of it as follows: it's as if we removed the masculine component from the royalty idea and added the feminine component, what do we obtain?
+
+Finally, we request the 5 nearest words `type="nearest", top_n=5`. We see that (excluding "king") "queen" is the closest vector in the embedding.
+
+## Cultural stereotypes embedded in the embedding
+
+Lastly, we will try to address a cultural stereotype using this embedding: "affluence". For that, we will load some word pairs linked to this dimension.
+```{r}
+affluence <- read_csv('./data/affluence_words.csv')
+affluence
+```
+
+The "affluence" dimension can be constructed using a series of pairs of polar words. Since we can operate on word embeddings as we would with any vector, we can generate a new vector that is the mean of all the words in  the "rich" pole and another for the words in the "poor" pole. Then we can get the difference between them and the  resulting vector will represent the "affluence" dimension.
+
+```{r}
+rich <- predict(w2v, newdata = affluence$term1, type = "embedding") %>% 
+  colMeans(na.rm = TRUE)
+```
+
+The code above does two operations:
+- extracts the vector embeddings for all the "rich" pole of the affluence; note that we can pass a whole column of the tibble `affluence` tibble (`newdata = affluence$term1`)
+- calculates the column mean, resulting in a one dimensional vector.
+
+We repeat the operation for the "poor" pole:
+```{r}
+poor <- predict(w2v, newdata = affluence$term2, type = "embedding") %>%
+  colMeans(na.rm = TRUE)
+```
+
+Now we can calculate see which are the nearest terms for our newly built concepts. 
+
+```{r}
+predict(w2v, newdata = rich, type = "nearest", top_n = 10)
+```
+- The rich pole repeats many of the words we used to build it.
+
+```{r}
+predict(w2v, newdata = poor, type = "nearest", top_n = 10)
+```
+
+- The poor pole shows the same.
+
+### Gender stereotypes
+
+We can now find which are the words most associated with masculinity and femininity 
+
+```{r}
+# Load gender word pairs 
+gender <- read_csv('./data/gender_words.csv')
+
+# Get men and women average embeddings
+men <- predict(w2v, newdata = gender$term1, type = "embedding") %>% 
+  colMeans(na.rm = TRUE)
+
+women <- predict(w2v, newdata = gender$term2, type = "embedding") %>% 
+  colMeans(na.rm = TRUE)
+
+# Get closest words to the men pole
+predict(w2v, newdata = (men - women), type = "nearest", top_n = 30)
+```
+
+```{r}
+# Get closest words to the women pole
+predict(w2v, newdata = (women - men), type = "nearest", top_n = 30)
+```
+
+We can see how gender stereotypes are codified into professions.
+
+If we compute the vector for 'worker', and we remove and add the men and women's vectors,
+we can find the professions more associated to each gender in the corpus.
+
+```{r}
+worker <- predict(w2v, newdata = "worker", type = "embedding")
+
+# Get closest words to the worker pole
+predict(w2v, newdata = worker, type = "nearest", top_n = 5)
+
+# Get closest words to the women pole
+predict(w2v, newdata = worker - men + women, type = "nearest", top_n = 10)
+
+# Get closest words to the men pole
+predict(w2v, newdata = worker - women + men, type = "nearest", top_n = 10)
+```
+
+
+## Transforming a text into an embedding
+
+Many times we will need to use embedding as an input to generate text representations, for example, to generate characteristics of a corpus to identify clusters of similar documents or for a text classification model.
+
+The `word2vec` library offers us a function for this.
+
+Let's load the dataset "feminists"
+```{r}
+feminist <- read_csv('./data/feminists_wiki.csv')
+```
+
+Then, we use `doc2vec` function to calculate a representation for each document in the embedding space.
+
+The document vectors generated by `doc2vec` function are the sum of the vectors of the words inside the documents normalized by the scale of the vector space. This scale is the square root of the average inner product of the vector elements.
+
+```{r}
+fem_embed <- doc2vec(object=w2v, newdata = feminist$text_results)
+```
+
+```{r}
+dim(fem_embed)
+```
+
+Now each document is represented in 300 dimensions. We will use an embedding representation if this kind in the independent practice.
+

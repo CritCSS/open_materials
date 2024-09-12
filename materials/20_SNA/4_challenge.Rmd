@@ -1,0 +1,13 @@
+---
+title: "Social Network Analysis"
+subtitle: "Challenge"
+author: ""
+date: ""
+output: html_notebook
+---
+
+Use the CORA data set from the independent practice and make a deeper dive into it's relations:
+
+1.  Find communities: use different community detection algorithms.\
+2.  Compare network-based communities with the distribution of articles by subject. Compute the modularity of articles grouped by subject and by membership to a community. What are the differences?\
+3.  Study the centrality of nodes by communities and subjects. Study the overlapping between communities and subjects.

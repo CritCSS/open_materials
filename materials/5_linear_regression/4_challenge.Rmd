@@ -1,0 +1,23 @@
+---
+title: "Linear Regression"
+subtitle: "Challenge"
+author: ""
+date: ""
+output: html_notebook
+---
+
+```{r setup, message=FALSE, warning=FALSE, include=FALSE}
+knitr::opts_chunk$set(message = FALSE,warning = FALSE)
+```
+
+For this challenge, you will explore a new database. We will be using data published by [PROPUBLICA](https://www.propublica.org/article/machine-bias-risk-assessments-in-criminal-sentencing) analyzing the COMPAS Recidivism Algorithm, an algorithm designed to assess a criminal defendant's likelihood of becoming a recidivist.
+
+```{r}
+library(tidyverse)
+df <- read.csv("data/machine_bias/compas-scores-two-years.csv") %>% 
+        filter(score_text != 'N/A') %>% 
+        select(-ends_with(".1"))
+```
+
+1.  Explore the data set and build a simple linear regression using `decile_score` as outcome variable. Explore different models using different predictor variables and interpret your results.
+2.  Build a multiple linear regression using `decile_score` as outcome variable. Explore different models using different predictor variables and interpret your results.

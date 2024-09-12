@@ -1,0 +1,147 @@
+---
+title: "Version control and Documentation"
+subtitle: "Guided practice"
+author: ""
+date: ""
+output: html_notebook
+---
+
+```{r setup, message=FALSE, warning=FALSE, include=FALSE}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+```
+
+# Working with R Markdown and Git
+
+In this guided practice, we will introduce you to the basics of working with R Markdown and GitHub. After setting up your GitHub's user and creating a new repository, you will be introduced to a basic R Markdown workflow. We shall upload to a GitHub repository our first Markdown report and explore in detail some of GitHub's tools.
+
+## Setting up Git and creating our first R Markdown
+
+Create a new account in [GitHub](https://github.com/) ([this site](https://docs.github.com/en/get-started/onboarding/getting-started-with-your-github-account) might be useful if you get stuck). Once you have set up your user, create a new repository using the $+$ drop-down menu you will find in the upper-right corner (select *New repository*). Make the repository private and add a README file. Once you repository has been created, go to *Settings* \> *Collaborators* \> *Add people* and add your teacher.
+
+In RStudio, start a new Project using: File \> New Project \> Version Control \> Git. In *Repository URL*, paste the clone URL of the GitHub repository we just created. This will be your first time using Git! Make sure you install all necessary software and follow the steps described in the class notes on how to authenticate our identity when interacting with GitHub from a new device.
+
+Using *File* \> *New File* \> *R Markdown...*, create a new R Markdown file (under *Default Output Format*, choose HTML) and save it in the folder corresponding to your new repository. Also copy to this folder the summary_dataset.RDS file and create a folder called *img* and save practice_img.png inside it.
+
+## Some basic pushing and pulling
+
+Let's add our new files to the remote repository: go to the Git tab in the environment pane and stage all your changes (checking the *Staged* box). Click *Commit* and write your commit message explaining your modifications in the repository (for example: "Added new script and data set"). Once you commit your changes, use the *push* button in order to upload your changes to GitHub. Check whether you successfully uploaded your files by visiting your repository's site in GitHub's site.
+
+At your repository's site, modify the README file using the button featuring a little pencil on the upper-right corner of the screen when you open the README.md file. This file should usually contain a description of your project (such as "The aim of this project is to practice working with Git."). Once you are done modifying the file, click on *Commit changes* (green button on the upper-right corner of the screen). An automated commit message will be drafted for you: "Update README.md". You may modify it if you like, otherwise click on *Commit changes* once again. The remote repository has now been modified! Let's get our local repository up to date. In order to do this, use the *pull* button. Check whether you successfully downloaded the latest versions of your files by opening the README.md file in your computer. It should now display the message we just wrote.
+
+When working with a team, we will always pull before we start working in order to get our team's latest modifications and push our work once we are done.
+
+# R Markdown
+
+## General set up
+
+Let's get back to our .Rmd file. We can first modify the **YAML** metadata (the document's title, author, date and output); instead of using the default theme, we can change the document's appearance using a different theme. For example:
+
+``` yaml
+---
+title: "My R Markdown Report"
+author: "My name"
+output: 
+  html_document:
+    theme: cosmo
+---
+```
+
+The setup chunk can also be customized: instead of `knitr::opts_chunk$set(echo = TRUE)`, let's write `knitr::opts_chunk$set(echo = FALSE)`. Let's also erase R's example sections (everything that comes after \## R Markdown). Try using the *Knit* button to see what our output is (only the YAML information should appear).
+
+We will usually add a code chunk to load all packages we will need, setting its options to `include = FALSE`. In this case, let's import dplyr:
+
+```         
+library(dplyr)
+```
+
+## Code chunks
+
+Let's add a chunk of code to import a dataset:
+
+```         
+set1 <- readRDS("summary_dataset.RDS")
+```
+
+Notice that code chunks start with ```` ```{r} ```` because we will be writing code in R language, but R Markdown also supports other languages. If we now knit our document once more, nothing should change in the output because we created an object, but we didn't print it. If we added a chunk such as the following, information about our data set would be displayed:
+
+```         
+glimpse(set1)
+```
+
+We may also add some text *outside* the chunk explaining what our data set contains, such as the sort of analysis we plan on carrying out.
+
+## In-line code
+
+If we wanted to refer to information in our dataset in the middle of our text, we would use the syntax *\`r your_code\`*. For instance, imagine me wanted to refer to the first value in the column A_SEX: we would write *\`r set1\$A_SEX[1]\`*. Instead of our code, the value "Female" will appear in our report. This feature is useful to refer to your results with no need to manually update your observations every time your results change.
+
+## Images
+
+The syntax for images is the following `![our caption](path/to/image.png)`. For example, we can add our example image to the report (a design by Allison Horst) using the syntax `![Artwork by \@allison_horst](img/practice_image.png)`.
+
+Practice pushing all of the changes made in your report to the repository.
+
+# Advanced Git
+
+## Branches
+
+Let's now create a branch in our repository. At your repository's site, click the dropdown menu that reads *main* in the in the upper-left corner. Type a new branch name in the *Find or create a branch...* field and click on *Create branch*.
+
+We will now find ourselves in the new branch. Let's add a new line of text in the README file using the procedure we discussed earlier. GitHub will now inform us that our branch had recent pushes and offer us the option *Compare & pull request*. If we click on this option, GitHub will verify whether branches can be automatically merged and offer us the option *Create a pull request*. Once we make this request, after some additional checks GitHub will offer the option to *Merge pull request*; once we click on this option, we will be asked to *Confirm merge*.
+
+If we now check the repository's main branch, we will find the changes proposed in our branch now appear in the main README branch. Once our branch has been merged and is no longer necessary, we may delete it. In order to do so, clik on *2 branches* (next to the *main* dropdown menu). You should now be able to see all branches in the repository, as well as to rename them, view their activity or deleting them. Let's choose to delete our test branch. If we return to the repository's main site, we will find there is now only a single branch.
+
+## GitHub workflows
+
+Let's now add a GitHub workflow in order to knit our report every time we push changes in our .Rmd.
+
+We first need to add the file that will describe our workflow. In order to do so, we will use the dropdown menu *Add file* \> *Create new file* in our repository's site. In the *Name your file...* field, we will write .github/workflows/any_name_we_like.yml
+
+This is necessary in order to store our workflow in the folder where GitHub looks for workflows (that is to say, .github/workflows).
+
+The file will contain the following elements (remember changing "your name" by your name, "your email" by your email, and using the document name you chose, which might not be my_report):
+
+``` yaml
+name: Render R Markdown
+
+on:
+  push:
+    branches:
+      - main  
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install R
+      uses: r-lib/actions/setup-r@v2
+      
+    - name: Install pandoc
+      uses: r-lib/actions/setup-pandoc@v2
+
+    - name: Install R Markdown
+      run: R -e "install.packages('rmarkdown')"
+      
+    - name: Install dplyr
+      run: R -e "install.packages('dplyr')"
+
+    - name: Render R Markdown
+      run: R -e "rmarkdown::render('my_report.Rmd', output_file = 'my_report.html')"
+      
+    - name: Commit and push results
+      run: |
+          git config --global user.email "your email"
+          git config --global user.name "your name"
+          git add my_report*
+          git commit -m 'Re-build my_report' || echo "No changes to commit"
+          git push origin || echo "No changes to commit"
+```
+
+Basically, after getting the general set up ready and installing all necessary packages (the first 5 steps), the document will be knitted (step 6) and committed to your repository (step 7). The job is triggered by pushing to the repo (*on: push*), and changes are pushed to the main branch of the repo (*push: branches:- main*).
+
+Before we push, in order for the job to get done we will need to give writing permission to workflows. This can be achieved using *Settings* \> *Actions* \> *General*, and under the section *Workflow permissions* choosing **Read and write permission**.
+
+Try modifying your .Rmd file and pushing to the repository, GitHub should now knit the document, which you can later pull to your local repository (this might take some minutes).

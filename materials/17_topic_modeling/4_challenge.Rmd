@@ -1,0 +1,23 @@
+---
+title: "Topic modeling"
+subtitle: "Challenge" 
+author: ''
+date: ''
+output:
+  html_document:
+    df_print: paged
+subtitle: Challenge
+---
+
+For this challenge you can use both LDA and STM on State of the Union discourses.
+
+```{r}
+
+```
+
+Pre-process the text and answer the following questions:
+
+- How many topics can you find?
+- How themes/topics evolve through time?
+- Which are the main differences in themes between presidents?
+- Compare the results between the topics identified with LDA and the topics identified with STM. Do you see any differences?

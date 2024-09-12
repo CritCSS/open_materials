@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.549">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="">
+
+<title>Topic Modeling</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="1_class_notes_files/libs/clipboard/clipboard.min.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/quarto.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/popper.min.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/anchor.min.js"></script>
+<link href="1_class_notes_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="1_class_notes_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="1_class_notes_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="1_class_notes_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="1_class_notes_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Topic Modeling</h1>
+<p class="subtitle lead">class notes</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>In text mining, we often have collections of document that can be grouped into different topics:</p>
+<ul>
+<li>News articles are naturally divided into topics such as sports, politics, economics, or showbiz. And each of this could be further divided into more specific groups.</li>
+<li>Research articles follow a disciplinary structure, and within that they delve into specific research subjects</li>
+</ul>
+<p><strong>Topic modeling</strong> is is a statistical technique used in Natural Language Processing (NLP) to discover abstract topics within a collection of documents. By doing so, it enables both an automatic grouping of documents, and the revelation of underlying subjects or motifs discussed across the corpus without the need of prior knowledge of the topics. It can be considered as a <em>clustering algorithm</em>, given that it groups documents. It can be also consider a method of <em>dimensionality reduction</em>, similar to PCA on numeric data, because it reduces the representation of documents from all their word to a classification or distribution among a shorter group topics. You could think of topic modeling as a set of “amplified reading” techniques.</p>
+<p>As David Blei puts it:</p>
+<blockquote class="blockquote">
+<p>topic modeling algorithms do not require any prior annotations or labeling of the documents. The topics emerge from the analysis of the original texts. Topic modeling enables us to organize and summarize (…) archives at a scale that would be impossible by human annotation <span class="citation" data-cites="blei_2012">(<a href="#ref-blei_2012" role="doc-biblioref">Blei 2012</a>)</span></p>
+</blockquote>
+</section>
+<section id="latent-dirichlet-allocation-lda" class="level1">
+<h1>Latent Dirichlet Allocation LDA</h1>
+<p>There are several methods for implementing a topic model. However LDA stands out as particularly favored. LDA conceptualizes each document as a mixture of various topics, and each topic as a mixture of words. This allows documents to show overlap in terms of content.</p>
+<p>LDA is one of the most popular techniques for topic modeling. It was introduced by David Blei, Andrew Ng, and Michael Jordan in 2003 <span class="citation" data-cites="blei_2003">(<a href="#ref-blei_2003" role="doc-biblioref">Blei, Ng, and Jordan 2003</a>)</span>. This model assumes that:</p>
+<ul>
+<li>each document in a corpus is a mixture of various topics and</li>
+<li>that each word in the document has a specific probability to belong to any topic.</li>
+<li>Therefore, a <strong>topic</strong> is a <em>probability distribution</em> in the word space and a <strong>document</strong> is a <em>probability distribution</em> in the topic space.</li>
+</ul>
+<p>An intuition on LDA can be seen in the following figure:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="./img/lda_scheme_01.png" class="img-fluid figure-img" style="width:70.0%"></p>
+<figcaption><strong>Source:</strong> <span class="citation" data-cites="blei_2012">(<a href="#ref-blei_2012" role="doc-biblioref">Blei 2012</a>)</span></figcaption>
+</figure>
+</div>
+<section id="which-is-the-logic-behind-the-lda-algorithm" class="level2">
+<h2 class="anchored" data-anchor-id="which-is-the-logic-behind-the-lda-algorithm">¿Which is the logic behind the LDA algorithm?</h2>
+<p>LDA assumes that topics are pre-existent: they are defined before any data has been generated. So, the number of topics (generally, named <span class="math inline">\(k\)</span>) is an hyperparameter.</p>
+<p>The logic is that the data generating process of documents in the corpus goes as follows:</p>
+<ol type="1">
+<li><p>For every document within the corpus, we initiate the generation of its words through a two-step procedure:</p></li>
+<li><p>Initially, we randomly select a distribution over topics for the document.</p></li>
+<li><p>Then, for each word present in the document:</p>
+<ol type="a">
+<li>We randomly select a topic from the distribution over topics determined in the first step.</li>
+<li>and then, we randomly select a word from the corresponding distribution over the vocabulary associated with the chosen topic.</li>
+</ol></li>
+</ol>
+<p>This idea behind LDA can be illustrated like:</p>
+<p><img src="./img/lda_scheme.png" class="img-fluid"></p>
+<p>It is called <em>Dirichlet</em> because of <em>Dirichlet distributions</em>, which is a type of function in bayesian statistics that generates as an output a multinomial distribution (the type of distribution that we need to represent a distribution over topics for example).</p>
+<p>If we assume that the data generating process of text in documents is that described above, we can then go to our corpus to see the observed words in documents and infer backwards which are the topics that generated them.</p>
+<p>Of course, no one thinks that the authors of the text actually roll a dice for each word based on a distribution of topics. Nevertheless, the outcomes of this model have proven to be useful tools to build topics in documents.</p>
+</section>
+</section>
+<section id="outputs-and-interpretation" class="level1">
+<h1>Outputs and interpretation</h1>
+<p>There are two main outputs in LDA:</p>
+<p><strong>- Topic-Term Matrix:</strong> This matrix represents the <em>distribution of words for each topic</em>. Each row corresponds to a topic, and each column corresponds to a word in the vocabulary. The values in the matrix represent the probability of each word occurring in each topic.</p>
+<p><strong>- Document-Topic Matrix:</strong> This matrix represents <em>the distribution of topics for each document</em>. Each row corresponds to a document, and each column corresponds to a topic. The values in the matrix represent the probability of each topic occurring in each document.</p>
+<p>Based on these matrices it is possible to construct some summaries in order to gain an idea of the underlying subjects present in the corpus, understand the topics discussed in individual documents, and explore relationships between topics and documents.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="./img/lda_scheme_02.png" class="img-fluid figure-img" style="width:75.0%"></p>
+<figcaption><strong>Source:</strong> <span class="citation" data-cites="blei_2012">(<a href="#ref-blei_2012" role="doc-biblioref">Blei 2012</a>)</span></figcaption>
+</figure>
+</div>
+<p>In the left panel of the above figure, we can observe the main topics and, within them, the words with the highest probability associated to each topic, estimated from a corpus of scientific articles from Science. We can see that each distribution of words allows assigning a “label” to the topic.</p>
+<ul>
+<li>Words such as “human,” “genome,” “DNA,” suggest a topic linked to <strong>genetics</strong>.</li>
+</ul>
+<!-- -->
+<ul>
+<li>Likewise, “evolution,” “species,” “life,” seem to speak of a topic about <strong>evolution</strong>.</li>
+</ul>
+<!-- -->
+<ul>
+<li>We can repeat this exercise with each one of the topics estimated in a LDA model.</li>
+</ul>
+<p>In the left panel, we see the topic distribution of the article in the first figure. This document shows a mixture of topics. Not all topics are activated in all documents.</p>
+</section>
+<section id="how-to-select-the-number-of-topics" class="level1">
+<h1>How to select the number of topics?</h1>
+<section id="automatic-evaluation" class="level2">
+<h2 class="anchored" data-anchor-id="automatic-evaluation">Automatic evaluation</h2>
+<p>Selecting the <span class="math inline">\(k\)</span> value is not trivial, and it can create widely different results. There are various metrics that allow quantifying the fit (i.e., how “good” it is) of the number of topics defined in quantitative terms. Some of those are:</p>
+<ul>
+<li><p><strong>Perplexity</strong>: measures a model’s ability to generalize and predict newly-presented documents. It is based on the model’s likelihood; <em>lower values are better</em>.</p></li>
+<li><p><strong>Coherence</strong>: Is the average pointwise mutual information (PMI) of two words randomly taken from the same document. A coherent topic will display words that tend to occur in the same documents. This means that the most probably words in a topic should have high mutual information. <em>Higher values are better</em>, and it imply a more interpretable topic model.</p></li>
+<li><p><strong>Diversity</strong>: Is the percentage of unique words in the top 25 words of all topics. A diversity close to 0 indicates redundant topics; diversity close to 1 indicates more varied topics.</p></li>
+</ul>
+</section>
+<section id="qualitative-evaluation" class="level2">
+<h2 class="anchored" data-anchor-id="qualitative-evaluation">Qualitative evaluation</h2>
+<p>the use of these metrics leads to models that achieve good statistical performance but may not necessarily generate interpretable topics.</p>
+<p>A larger number of topics tends to yield better metrics and allows for a high resolution of the latent structure of the corpus. However, it has been observed that increasing the number of topics tends to decrease the quality of the topics in terms of interpretability <span class="citation" data-cites="mimno_2011">(<a href="#ref-mimno_2011" role="doc-biblioref">Mimno et al. 2011</a>)</span> <span class="citation" data-cites="chang_2009">(<a href="#ref-chang_2009" role="doc-biblioref">Chang et al. 2009</a>)</span>. Thus, similar to many other problems, model complexity and interpretability tend to move in opposite directions.</p>
+<p>Therefore, it is often possible to use other approaches to select the number of topics. In general, we could think of two main ways to do this:</p>
+<ul>
+<li>we could define a relatively small number of topics and try to make them all “interpretable”</li>
+<li>we could estimate a large number of topics and only consider those that are relevant to our analysis questions; this is the method that <span class="citation" data-cites="kozlowski_2023">(<a href="#ref-kozlowski_2023" role="doc-biblioref">Diego Kozlowski and Altszyler 2023</a>)</span> followed in the paper we will discuss in the next section.</li>
+</ul>
+<p>Which approach is the most suitable? This will depend on the research questions and the type of corpus in use. If it is a relatively homogeneous corpus and the interest is to have an initial overview of its content, perhaps the first approach may be more fruitful (“few but good”). If, on the other hand, it is a potentially very diverse corpus and we are looking to detect some specific topics, then the second approach might work better.</p>
+<p>Up to this point, we have thought of LDA (or any topic modeling technique) as the endpoint of the analysis. Once we train a certain <span class="math inline">\(k\)</span> that is satisfactory, we move on to model validation and interpretation. However, we can also think of it as a starting point. For example, we can use topic modeling to have an initial descriptive overview of a given corpus and to “guide” a deep reading of some documents in the corpus. Suppose we have a very large corpus of textual documents. We cannot read the entire corpus, but we would like to have an idea of how to choose which documents to read. We can train an LDA model and use it to guide our in-depth reading of the corpus. This could either be a couple of articles per topic, or as a tool to find those articles that delve into the topic of interest for our study.</p>
+<p>We can also use it as part of the preprocessing of a corpus and the feature construction process. It is common for a corpus to contain documents or parts of documents in languages other than the majority language of the corpus. If this were to happen, it is highly likely that one or several topics would concentrate terms in that language. Since we can also obtain the topic distribution per document, it would be very easy to clean the texts that do not correspond to the majority language: we simply filter out those documents with a high prevalence in the topic that groups terms in another language. Also, it can be used to build the dictionary of tokens to remove together with the stop words. For example, if some of the documents have latex or html code, they might appear as specific topics.</p>
+<p>We can also think of the topic-document matrix as features to be used. Instead of having a TDM with all the vocabulary, we can use the document-topic matrix as a dense representation of each document and use it as features for a text classification model.</p>
+</section>
+</section>
+<section id="discussion" class="level1">
+<h1>Discussion</h1>
+<p>Here we will discuss two critical applications of LDA. The first <span class="citation" data-cites="kozlowski_2023">(<a href="#ref-kozlowski_2023" role="doc-biblioref">Diego Kozlowski and Altszyler 2023</a>)</span> aims to advance the identification of gender stereotypes. For this, the authors work with a corpus of about 24,000 articles from magazines oriented towards women and men and seek to detect the main topics of each magazine and analyze their distribution over time. The results showed that topics such as Family, Business, and Women as sexual objects present a prevalence and bias that fades over time. In contrast, in topics like “Fashion” or “Science”, the differences between magazines for men and women remain. For this analysis, the authors created a corpus with both magazines, built the topics and then went through the topics to find those of interest for their study and see from which journal they belonged.</p>
+<p>In a second study <span class="citation" data-cites="kozlowski_2022">(<a href="#ref-kozlowski_2022" role="doc-biblioref">Kozlowski et al. 2022</a>)</span> shows the alignment between research topics in scientific research articles and the race and gender identity of author. The authors worked with a large-scale bibliometric database ( 5.5M articles indexed in the Web of Science and 1.5M distinct US first authors). They used LDA on the title, abstract, and keywords of each article to infer the topics of the corpus and the topic distribution per article. Strong correlations are observed both in academic impact and in topics with the identities of authors. For example, women tend to publish more in topics related with gender-based violence, while Black authors publish more on the topic of police brutality.</p>
+<section id="some-limitations-on-lda" class="level2">
+<h2 class="anchored" data-anchor-id="some-limitations-on-lda">Some limitations on LDA</h2>
+<p>We would like to emphasize some specific assumptions of LDA:</p>
+<ol type="1">
+<li>Topics are independent of each other.</li>
+<li>The distribution of words within a topic (the content of a topic) is constant. Document 1 uses the same words to compose topic 1 as documents 2, 3, etc.</li>
+<li>The estimation of topics is done exclusively based on the text of each document in the corpus, without incorporating any other type of information.</li>
+</ol>
+<p>Let’s consider, for example, a study over a long period of time, like the work by <span class="citation" data-cites="blei_2012">(<a href="#ref-blei_2012" role="doc-biblioref">Blei 2012</a>)</span> that we mentioned above containing scientific articles spanning over 100 years. There is a possibility that the vocabulary about genetics changed between the late 19th century and the present, and that different terms are used.</p>
+<section id="structural-topic-modeling-stm" class="level3">
+<h3 class="anchored" data-anchor-id="structural-topic-modeling-stm">Structural Topic Modeling (STM)</h3>
+<p>STM (Structural Topic Modeling) is a topic modeling technique that aims to address the limitations mentioned above. The main feature is that it allows the introduction of covariates, meaning it allows topics to change the model based on one or more metadata variables of the text (publication date, author’s gender, nationality, publication type, etc.). Any information about the documents can be used in STM.</p>
+<p>Thus, we first need to define two “dimensions”: topic <em>content</em> and topic <em>prevalence</em>. The former refers to the composition of words that create each topic. The latter refers to the composition of topics that constitute each document. STM will allow the introduction of covariates that affect both dimensions.</p>
+</section>
+</section>
+<section id="limitations-of-bag-of-words" class="level2">
+<h2 class="anchored" data-anchor-id="limitations-of-bag-of-words">Limitations of Bag of Words</h2>
+<p>These topic modeling techniques are based on the Bag of Words (BoW) model. This way of vectorizing text has some advantages:</p>
+<ul>
+<li>it is simple: we just count the frequency of occurrence of each word in the vocabulary in each document</li>
+<li>it is easy to implement</li>
+</ul>
+<p>However, it also comes with limitations:</p>
+<ul>
+<li>it is insensitive to the order of words</li>
+<li>it does not take into account grammatical structure</li>
+<li>it fails to fully capture semantic relationships between words: Each word is conceived independently, so this cannot consider the conceptual similarity of terms. For example, ‘dog’ will be as distant to ‘beagle’ than to ‘cat’ or ‘table’</li>
+<li>it has high dimensionality: it is common for the vocabulary size of an average corpus to be high, above 10,000 words; this means that our TFM will have about 10,000 columns</li>
+<li>it has high sparsity: in turn, since a document only uses a limited subset of terms from the vocabulary, it is expected that the TFM will contain many empty elements (zeros); this poses a problem when calculating similarity or correlation metrics between documents or words.</li>
+</ul>
+</section>
+</section>
+<section id="bertopic" class="level1">
+<h1><a href="https://maartengr.github.io/BERTopic/index.html">BERTopic</a></h1>
+<p>While we will not be using this technique in the course (since its implementation is on Python), we want to mention the existence of this new technique that uses new NLP models such as document embedding to solve some of the limitations mentioned above.</p>
+<p>BERTopic is a state-of-the-art topic modeling technique that harnesses the power of <strong>pre-trained</strong> BERT (Bidirectional Encoder Representations from Transformers) embeddings to identify coherent topics within a corpus of text data.</p>
+<p>Unlike LDA, it is a combination of pre-existing techinques more than a single model, and they can be interchanged with different alternatives:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="./img/bertopic-modularity.svg" class="img-fluid figure-img"></p>
+<figcaption><strong>Source:</strong> <a href="https://maartengr.github.io/BERTopic/algorithm/algorithm.html#visual-overview">BERTopic site</a></figcaption>
+</figure>
+</div>
+<ol type="1">
+<li><strong>Pre-trained BERT Embeddings:</strong> BERTopic starts by leveraging pre-trained BERT models, which are trained on vast amounts of textual data using a powerful Transformer architecture. These models encode each word or token in the document into dense vector representations that capture rich semantic information. The word embeddings can be aggregated into <strong>Document Embeddings</strong> that encapsulates the semantic meaning of all the words in the document.</li>
+<li><strong>Dimensionality Reduction:</strong> To reduce the dimensionality of the dense document embeddings while preserving semantic relationships, BERTopic applies dimensionality reduction techniques such as UMAP (Uniform Manifold Approximation and Projection) or t-SNE (t-distributed Stochastic Neighbor Embedding).</li>
+<li><strong>Hierarchical Clustering:</strong> The output is then clustered using hierarchical clustering algorithms such as HDBSCAN (Hierarchical Density-Based Spatial Clustering of Applications with Noise) or K-Means. Hierarchical clustering allows for the identification of coherent topic clusters based on the semantic similarity of documents.</li>
+<li><strong>Topic Representation:</strong> After clustering, each document is assigned to the most representative topic cluster. BERTopic also identifies representative keywords for each topic cluster by analyzing the most frequent words within the documents assigned to that cluster.</li>
+</ol>
+<p>One last important aspect is its modular nature. Each of the stages mentioned above can be carried out by different models. For example, instead of using S-BERT for generating embeddings, Word2Vec or a similar technique could be employed. Similarly, the dimensionality reduction stage could be performed by PCA instead of UMAP.</p>
+<section id="references" class="level2 unnumbered">
+
+
+</section>
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-blei_2012" class="csl-entry" role="listitem">
+Blei, David M. 2012. <span>“Probabilistic Topic Models.”</span> <em>Commun. ACM</em> 55 (4): 77–84. <a href="https://doi.org/10.1145/2133806.2133826">https://doi.org/10.1145/2133806.2133826</a>.
+</div>
+<div id="ref-blei_2003" class="csl-entry" role="listitem">
+Blei, David M., Andrew Y. Ng, and Michael I. Jordan. 2003. <span>“Latent Dirichlet Allocation.”</span> <em>J. Mach. Learn. Res.</em> 3 (March): 993–1022. <a href="https://doi.org/10.5555/944919.944937">https://doi.org/10.5555/944919.944937</a>.
+</div>
+<div id="ref-chang_2009" class="csl-entry" role="listitem">
+Chang, Jonathan, Sean Gerrish, Chong Wang, Jordan Boyd-graber, and David Blei. 2009. <span>“Reading Tea Leaves: How Humans Interpret Topic Models.”</span> In <em>Advances in Neural Information Processing Systems</em>, edited by Y. Bengio, D. Schuurmans, J. Lafferty, C. Williams, and A. Culotta. Vol. 22. Curran Associates, Inc. <a href="https://proceedings.neurips.cc/paper_files/paper/2009/file/f92586a25bb3145facd64ab20fd554ff-Paper.pdf">https://proceedings.neurips.cc/paper_files/paper/2009/file/f92586a25bb3145facd64ab20fd554ff-Paper.pdf</a>.
+</div>
+<div id="ref-kozlowski_2023" class="csl-entry" role="listitem">
+Diego Kozlowski, Carla M. Felcher, Gabriela Lozano, and Edgar Altszyler. 2023. <span>“Large-Scale Computational Content Analysis on Magazines Targeting Men and Women: The Case of Argentina 2008-2018.”</span> <em>Feminist Media Studies</em> 23 (5): 2235–53. <a href="https://doi.org/10.1080/14680777.2022.2047090">https://doi.org/10.1080/14680777.2022.2047090</a>.
+</div>
+<div id="ref-kozlowski_2022" class="csl-entry" role="listitem">
+Kozlowski, Diego, Vincent Larivière, Cassidy R. Sugimoto, and Thema Monroe-White. 2022. <span>“Intersectional Inequalities in Science.”</span> <em>Proceedings of the National Academy of Sciences</em> 119 (2): e2113067119. <a href="https://doi.org/10.1073/pnas.2113067119">https://doi.org/10.1073/pnas.2113067119</a>.
+</div>
+<div id="ref-mimno_2011" class="csl-entry" role="listitem">
+Mimno, David, Hanna Wallach, Edmund Talley, Miriam Leenders, and Andrew McCallum. 2011. <span>“Optimizing Semantic Coherence in Topic Models.”</span> In <em>Proceedings of the 2011 Conference on Empirical Methods in Natural Language Processing</em>, edited by Regina Barzilay and Mark Johnson, 262–72. Edinburgh, Scotland, UK.: Association for Computational Linguistics. <a href="https://aclanthology.org/D11-1024">https://aclanthology.org/D11-1024</a>.
+</div>
+</div></section></div></main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

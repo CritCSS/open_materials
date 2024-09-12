@@ -1,0 +1,66 @@
+---
+title: "Word embeddings"
+author: ''
+date: ''
+output:
+  html_document:
+    df_print: paged
+subtitle: Independent practice
+bibliography: references.bib
+---
+
+```{r setup}
+library(tidyverse)
+library(word2vec)
+```
+
+In this practice we are going to search some more cultural stereotypes.
+
+## Loading word embedding (Word2Vec) and dataset
+First, let's load the word2vec embedding model: 
+```{r}
+w2v <- read.word2vec("./models/GoogleNews-vectors-negative300.bin",
+                     normalize = TRUE)
+```
+
+Load the affluence words:
+```{r}
+affluence <- read_csv('./data/affluence_words.csv')
+```
+
+## Poverty stereotypes
+Let's recreate the `affluence` vector. First, we extract and aggregate the `rich` embeddings:
+```{r}
+```
+Now, we create the `poor` pole
+```{r}
+```
+
+### Food and poverty
+¿Which kind of food is more related to affluence? First, let's get the `food` embedding
+```{r}
+```
+
+Now, let's substract to that vector, the `poor` vector and add the `rich` vector.
+```{r}
+```
+
+Finally, we will do the inverse operation.
+```{r}
+```
+If you check the top 20 words it is possible to see that "organic food", "gourmet cousine, "nutritious food", etc. are closer to the `rich` vector. 
+
+
+### Sports and poverty
+Which sports are more related to each pole of the `affluence` vector?
+Get the `sport` vector:
+```{r}
+```
+
+Find the closest sports to the `poor` vector 
+```{r}
+```
+
+Find the closests sports to the `rich` vector:
+```{r}
+```

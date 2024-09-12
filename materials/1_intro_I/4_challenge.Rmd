@@ -1,0 +1,15 @@
+---
+title: "Introduction I"
+subtitle: "Challenge"
+author: ""
+date: ""
+output: html_notebook
+---
+
+For this challenge, you will explore a new data set:
+
+1. Import the table_2-3.csv data set. This is a .csv file, you will need to use the readr package to import it (install it). The information on how to interpret the information contained in it is in the table_2.pdf file.
+
+2. Explore and transform the data set in any way you consider necessary to understand its data. (Tip: remember you can select columns that start with some character pattern such as "kir_q").
+
+3. Draw conclusions from your empirical analysis and save your transformed data set (or data sets) as an .RDS object.

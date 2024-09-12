@@ -1,0 +1,80 @@
+---
+title: "Introduction II"
+subtitle: "Independent practice"
+author: ""
+date: ""
+output: html_notebook
+---
+
+```{r setup, message=FALSE, warning=FALSE, include=FALSE}
+knitr::opts_chunk$set(message = FALSE,warning = FALSE)
+```
+
+Save this script in the folder corresponding to the GitHub repository created during the Guided practice.
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(openxlsx)
+```
+
+## Import the dataset
+
+1. Load the summary_dataset.RDS dataset:
+
+```{r}
+
+```
+
+2. Transform the dataset column names to make your workflow easier:
+
+```{r}
+
+```
+
+## Explore and transform
+
+3. Keep only rows with values greater than 70 in 'obs'. Remove 'obs' column.
+
+```{r}
+
+```
+
+4. Generate a new column called 'f_age_grouped' that converts the existing 'age_grouped' column from a character vector to a factor vector. Ensure that the levels of the factor are ordered from youngest to oldest. Remove the original 'age_grouped' column.
+
+```{r}
+
+```
+
+5. Order rows according to sex and race.
+
+```{r}
+
+```
+
+6. Keep rows where average income is greater then 60,000 or smaller than 55,000.
+
+```{r}
+
+```
+
+7. Order rows according to average income in ascending order and analyze the relationship between age group and income. Can you point out any particularly interesting or noteworthy cases?
+
+```{r}
+
+```
+
+## Export and upload
+
+8. Export your results as an excel file called "my_independent_analysis".
+
+```{r}
+
+```
+
+9. Push all changes to your GitHub repository. Verify all files were successfully uploaded by visiting your repository's site in GitHub's site.
+
+```{r}
+#see the class notes for a detailed description on how to achieve this step.
+```
+

@@ -1,0 +1,14 @@
+---
+title: "Preprocessing"
+subtitle: "Challenge"
+author: ""
+date: ""
+output: html_notebook
+---
+
+For this challenge, you will take the US housing dataset and imagine you want to design a regression to predict the value of the SalePrice. Write the code for the preprocessing workflow, taking into account:
+
+- missing values
+- outliers
+- other feature engineering steps you think are appropriate for this model
+

@@ -1,0 +1,18 @@
+---
+title: "Tidyverse + Dataviz"
+subtitle: "Challenge"
+author: ""
+date: ""
+output: html_notebook
+---
+
+For this challenge, you will address the relationship between COVID cases and poverty in US counties. 
+
+1. Read the dataset `Mroz87` contained in the package `sampleselection`. It collects information within the  "Panel Study of Income Dynamics" (PSID) from 753 married women in 1976. It contains information about labor-force participation, years of work experience, college attendance, highest level of education achieved by their parents, hourly earnings, and more. The full documentation of the dataset can be found [here.](https://vincentarelbundock.github.io/Rdatasets/doc/sampleSelection/Mroz87.html) 
+
+2. Using tidyverse and ggplot, explore the relationship between:
+  - hours worked by women and their wage. 
+  - participation in labor force for women and for men and having children. 
+  - educational attainment of the woman compared to the one of their parents and of their husbands.
+  
+3. What can you infer from these results?

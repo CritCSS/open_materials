@@ -1,0 +1,24 @@
+---
+title: "Word embeddings"
+author: ''
+date: ''
+output:
+  html_document:
+    df_print: paged
+subtitle: Challenge
+---
+
+For this challenge, you will have to think a research question regarding the use of language in State of Union discourses, and address that research question with embeddings.
+
+---
+
+**Hint:** you could try to clusterize discourses or you could try to classify the discourses based on the partisan orientation of the government administration.
+
+---
+
+
+```{r}
+###
+```
+
+

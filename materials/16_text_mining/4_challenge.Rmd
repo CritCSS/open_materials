@@ -1,0 +1,22 @@
+---
+title: "Text Mining"
+subtitle: "Challenge"
+author: ""
+date: ""
+output: html_notebook
+---
+
+For this challenge, you will use Text Mining tools to analyze State of the Union Messages from Presidents across time. 
+
+```{r}
+library(tidyverse)
+
+data <- read_csv('data/state_ofthe_union_texts.csv')
+```
+
+Pre-process the text and answer the following questions:
+
+1. What are corpus-specific stop words? 
+2. What are the most common words across the entire corpus? What can you infer from these?
+3. How do the discourses vary amongst the different presidents? And over decades?
+

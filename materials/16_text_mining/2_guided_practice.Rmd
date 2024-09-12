@@ -1,0 +1,272 @@
+---
+title: "Text Mining"
+author: ''
+date: ''
+output:
+  html_document:
+    df_print: paged
+subtitle: Guided practice
+---
+
+In this guided practice, we will delve into text mining in R using Wikipedia pages related to discrimination in the United States.
+
+```{r setup, message=FALSE, warning=FALSE, include=FALSE}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE, out.width = 200)
+
+library(tidyverse)
+library(tidytext)
+library(textstem)
+
+data <- read_csv('data/discrimination_wiki_scraping.csv')
+```
+
+Recall that this dataset contains 55 rows with 3 variables. It contains information about articles about discrimination in the U.S.: the name of the article, the Wikipedia link and the full text in the data.
+
+```{r}
+head(data)
+```
+
+# Typical NLP Workflow
+
+## Normalization
+
+In text mining, the preprocessing phase is crucial for standardizing text into a consistent format suitable for analysis. This process is iterative, evolving as we delve deeper into the data analysis. As we start analyzing the text, we may discover overlooked stop words or find better approaches for data cleaning. Consequently, we revisit the cleaning and removal steps, iterating to refine the data before continuing with further analysis.
+
+The initial step is to convert all text to lowercase using the `tolower()` function.
+
+```{r}
+data <- data %>% mutate(text_proc = tolower(text_results))
+```
+
+Next, we'll proceed to remove punctuation marks and numerical digits. This task involves utilizing regular expressions (regex) in conjunction with the `str_replace_all()` function. Regex allows us to construct patterns for identifying particular text elements. The `[:punct:]` class is utilized to identify punctuation marks, whereas `[:digit:]` is employed to target numerical digits. By combining both classes within the function, we'll search for these patterns and replace them with white spaces.
+
+```{r}
+data <- data %>% mutate(text_proc = str_replace_all(text_proc, "[:punct:]", " "))
+
+data <- data %>% mutate(text_proc = str_replace_all(text_proc, "[:digit:]", " "))
+```
+
+Subsequently, our focus will shift towards eliminating characters that are infrequent and potentially lack informational value. We will base our criteria on words containing 1 to 3 characters, as these are likely to represent stop words or abbreviations. To accomplish this, we'll employ regex, utilizing the following special characters:
+
+-   `\\b` indicates the beginning and ending of a word.
+-   `\\w` matches any alphanumeric character. When combined with the quantifier `{1,3}`, it denotes a word with 1-3 characters.
+
+```{r}
+data <- data %>% mutate(text_proc = str_replace_all(text_proc, "\\b\\w{1,3}\\b", ""))
+```
+
+## Tokenization
+
+After completing the initial text cleansing process, the next step involves converting the corpus into a tidy text format, with one token per row. Remember that tokens are defined as "*meaningful units of text*", which, in this context, we define as words. To achieve this, we utilize the `unnest_tokens()` function from the `tidytext` package.
+
+```{r}
+token_unigrams <- data %>%
+  select(page_titles, text_proc) %>% 
+  unnest_tokens(word, text_proc, drop = F)
+
+token_unigrams
+```
+
+To observe Zipf's Law in action, we employ the `count()` function to calculate the frequency of occurrence for each token in the corpus. By sorting these frequencies in descending order, we can assign ranks to the tokens using the `row_number()` function.
+
+```{r}
+unigrams_count <- token_unigrams %>%
+  count(word, sort = TRUE)%>% 
+  mutate(rank = row_number()) 
+
+unigrams_count
+```
+
+Plotted in a graph:
+
+```{r}
+ggplot(unigrams_count, aes(x = n, y = rank))+
+  geom_line()+ 
+  scale_x_log10() +
+  scale_y_log10()
+```
+
+## Cleaning words: stop words, stemming and lemmatization
+
+What are the most common words?
+
+```{r}
+unigrams_count %>%
+  slice(1:10) %>%
+  ggplot(aes(y = reorder(word, n), x = n))+
+  geom_point()
+```
+
+\
+It's evident that many of the frequent tokens are *stop words*, which are typically uninformative common words such as verbs, determiners, and pronouns. Additionally, there are corpus-specific stop words such as "discrimination" or "states" (pertaining to the U.S.). These terms were initially the focus of our search in Wikipedia and are ubiquitous across all documents, thus lacking relevance for our analysis.
+
+Fortunately, the `tidytext` package provides a pre-built dataset of English `stop_words`. We'll augment this list with the additional corpus-specific stop words.
+
+```{r}
+stop_words_data <- stop_words
+
+stop_words_data <- stop_words_data %>% add_row(word = c('discrimination', 'united', 'states'))
+
+stop_words_data
+```
+
+To remove the stop words from the token list, we can use the function `anti_join()`.
+
+```{r}
+token_unigrams <- token_unigrams %>%
+  anti_join(stop_words_data)
+```
+
+How do our most common words look like now?
+
+```{r}
+unigrams_count <- token_unigrams %>%
+  count(word, sort = TRUE)
+
+unigrams_count %>%
+  slice(1:10) %>%
+  ggplot(aes(y = reorder(word, n), x = n))+
+  geom_point()
+```
+
+It looks better. This analysis reveals numerous references to racial and gender discrimination, as well as discrimination within the legal system. However, we've also identified new stop words: "American" and "americans". Both variations of the same word, we aim to standardize them to a single token for removal. This is where lemmatization and stemming techniques prove valuable. Lemmatization reduces words to their base form, while stemming removes suffixes to retain the base form. We'll leverage the functions `stem_words()` and `lemmatize_words()` from the `textstem` package to execute these processes.
+
+```{r}
+unigrams_count <- unigrams_count %>% 
+  mutate(stem_words = stem_words(word),
+         lemma_words = lemmatize_words(word))
+
+unigrams_count %>% select(word:lemma_words)
+```
+
+You can see that the words were transformed into different forms. How do words that start with "america" look like now?
+
+```{r}
+unigrams_count %>% filter(str_starts(word, 'america'))
+```
+
+In this scenario, the lemmatization and stemming for americans and american look the same. However, how do variations of the word 'discrimination' look like?
+
+```{r}
+unigrams_count %>% filter(str_starts(word, 'discrimi'))
+```
+
+This shows clearly the differences between stemming and lemmatization. While lemmatization keeps the original form of the word ('discriminate'), stemming just removes the final part of the word to shape it into the same form.
+
+We can add those new words to the stop words list, and remove them from the lemmatization.
+
+```{r}
+stop_words_data <- stop_words_data %>% add_row(word = c('discriminate', 'american', 'america'))
+
+token_unigrams <- token_unigrams %>% 
+  mutate(word = lemmatize_words(word)) %>%
+  anti_join(stop_words_data)
+```
+
+How do our top words vary now?
+
+```{r}
+unigrams_count_filtered <- token_unigrams %>%
+  count(word, sort = T)
+
+unigrams_count_filtered %>%
+  slice(1:10) %>%
+  ggplot(aes(y = reorder(word, n), x = n))+
+  geom_point()
+```
+
+In both the lemmatized words and their original forms, we observe that the most frequent types of discrimination addressed remain consistent. Additionally, we note the emergence of the word "school", likely indicative of discrimination within the educational context.
+
+## Bigrams
+
+Up to this point, each word has been treated as a token, also known as unigrams. However, it's important to remember that we have the flexibility to consider different units of text as tokens, thereby delineating distinct units of analysis. Through the parameters `token` and `n` in the `unnest_tokens()` function, we can specify the number of n-grams into which we wish to segment our text.
+
+```{r}
+token_bigrams <- data %>%
+  unnest_tokens(bigram, text_proc, 
+                token = 'ngrams', n = 2,
+                drop = F)
+```
+
+We can lemmatize the bigrams using the function `lemmatize_strings()`.
+
+```{r}
+token_bigrams <- token_bigrams %>% 
+  mutate(lemma_words = lemmatize_strings(bigram))
+```
+
+What are the most common bigrams?
+
+```{r}
+bigram_counts <- token_bigrams  %>%
+  count(lemma_words, sort = TRUE)
+
+ggplot(bigram_counts %>% slice(1:10), aes(y = reorder(lemma_words, -n), x = n))+
+  geom_point()
+```
+
+Looks like we have to do some stop words cleaning here as well. First, we will split the bigrams into two columns using the function `separate()` to get the words that make each token.
+
+```{r}
+token_bigrams <- token_bigrams %>%
+  separate(lemma_words, c("word1", "word2"), sep = " ", remove = F)
+```
+
+Subsequently, we will filter out rows containing any bigrams that match a stop word.
+
+```{r}
+token_bigrams <- token_bigrams %>%
+  filter(!word1 %in% stop_words_data$word) %>%
+  filter(!word2 %in% stop_words_data$word)
+```
+
+What are the most frequent bigrams now?
+
+```{r}
+bigram_counts <- token_bigrams  %>%
+  count(lemma_words, sort = TRUE)
+
+ggplot(bigram_counts %>% slice(1:10), aes(y = reorder(lemma_words, -n), x = n))+
+  geom_point()
+```
+
+## Quantitative representations of text
+
+So far, we've observed how tokens are represented as individual words with document IDs. However, we can also create a Document-Term Matrix using the **`cast_dtm()`** function in `tidytext`.
+
+```{r}
+document_tokens_count <- token_unigrams %>%
+  group_by(page_titles) %>%
+  count(word)
+
+dtm <- document_tokens_count %>%
+  cast_dtm(page_titles, word, n)
+
+dtm
+```
+
+This returns a special `DocumentTermMatrix` object containing the following information:
+
+-   There are 55 documents and 7,126 distinct words.
+-   Sparcity: 94% of document-word pairs are zero.
+
+We can also calculate the TF-IDF values using the **`bind_tf_idf()`** function. This function returns the relative term frequency of the word in the document and the TF-IDF value for each word in the document as output.
+
+```{r}
+tf_idf <- document_tokens_count %>%
+  bind_tf_idf(word, page_titles, n) 
+
+tf_idf
+```
+
+We can explore more information about the different articles looking at the words with the highest tf-idf.
+
+```{r}
+tf_idf %>% 
+  filter(page_titles %in% c("Baker Roll", "Executive Order 12968")) %>% 
+  group_by(page_titles) %>%
+  slice_max(order_by = tf_idf, n = 10) %>%
+  ggplot(aes(x = tf_idf, y = reorder(word, tf_idf)))+
+  geom_col()+
+  facet_wrap(vars(page_titles), scales = 'free')
+```

@@ -1,0 +1,23 @@
+---
+title: "Descriptive statistics"
+subtitle: "Challenge"
+author: ""
+date: ""
+output: html_notebook
+---
+
+For this challenge, you will explore a new dataset: the [COVID-19 cases in USA dataset](https://www.kaggle.com/datasets/sudalairajkumar/covid19-in-usa?select=us_counties_covid19_daily.csv) at state level.
+
+1. Import the us_states_covid19_daily.csv file.
+
+2. Analyze individually the distribution of the following set of variables: state, positive, death, hospitalized (feel free to explore other variables you are curious about).
+
+3. Analyze (and quantify) the relation between *positive* and *death*, and the relationship between *positive* and *hospitalized* (be careful with the NAs!). Interpret your results.
+
+4. Design a test to evaluate the following hypothesis: 
+
+-the distribution of the variable *positive* has *equal* mean for California (CA) and Mississippi (MS)
+
+-the distribution of the variable *death* has *equal* mean for California (CA) and Mississippi (MS)
+
+Interpret your results.

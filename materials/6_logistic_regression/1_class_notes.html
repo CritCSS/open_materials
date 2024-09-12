@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.549">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Logistic Regression</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="1_class_notes_files/libs/clipboard/clipboard.min.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/quarto.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/popper.min.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/anchor.min.js"></script>
+<link href="1_class_notes_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="1_class_notes_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="1_class_notes_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="1_class_notes_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="1_class_notes_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="1_class_notes_files/libs/kePrint/kePrint.js"></script>
+<link href="1_class_notes_files/libs/lightable/lightable.css" rel="stylesheet">
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Logistic Regression</h1>
+<p class="subtitle lead">class notes</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="building-a-logistic-regression-model" class="level1">
+<h1>Building a logistic regression model</h1>
+<p>The linear regression model discussed in previous classes assumes that the dependent variable Y is <em>quantitative</em>. The logistic regression model will help us in those situations where Y is <em>qualitative</em> and our aim is to compute the probability of each observation belonging to each possible category of Y. The process of predicting qualitative responses is known as <strong>classification</strong> (since it involves assigning the observation to a category or class) <span class="citation" data-cites="james2013">(<a href="#ref-james2013" role="doc-biblioref">James et al. 2013</a>)</span>.</p>
+<section id="why-cant-we-use-a-linear-regression-in-a-classification-problem" class="level2">
+<h2 class="anchored" data-anchor-id="why-cant-we-use-a-linear-regression-in-a-classification-problem">Why can’t we use a linear regression in a classification problem?</h2>
+<p>Drawing on the synthesis proposed by <span class="citation" data-cites="molnar_interpretable_2022">Molnar (<a href="#ref-molnar_interpretable_2022" role="doc-biblioref">2022</a>)</span>, the main reasons why linear regression is not suitable in this context are:</p>
+<ol type="1">
+<li><p>A linear model does <em>not</em> output <strong>probabilities</strong>, and thus, interpreting its results in such a manner is incorrect.</p></li>
+<li><p>A linear model also extrapolates and gives you values <strong>below zero and above one</strong><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p></li>
+<li><p>Since the predicted outcome is not a probability, but a linear interpolation between points, there is no meaningful <strong>threshold</strong> at which you can distinguish one class from the other.</p></li>
+</ol>
+<p>Consider, for example, a problem where <span class="math inline">\(Y\)</span> presents two distinct categories (represented here with values 0 and 1):</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Each observation will belong to one of these categories, and therefore present values of either <span class="math inline">\(Y = 1\)</span> or <span class="math inline">\(Y = 0\)</span>.</p>
+<p>Suppose we tried to model the relationship between <span class="math inline">\(x\)</span> and <span class="math inline">\(Y\)</span> using a linear regression model. The following visualization provides a depiction of the results we would obtain through linear regression:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The problems mentioned above are clearly illustrated: how could we interpret predicted values below zero? How could we define a threshold to classify our predictions as belonging to each category?</p>
+</section>
+<section id="formula.-coefficient-interpretation" class="level2">
+<h2 class="anchored" data-anchor-id="formula.-coefficient-interpretation">Formula. Coefficient interpretation</h2>
+<p>Instead of the linear equation we used when building a linear regression model, in this case we will make use of the <strong>logistic function</strong>, which constrains our output (the probability of <span class="math inline">\(x\)</span> belonging to one of <span class="math inline">\(Y\)</span>’s categories) between 0 and 1:</p>
+<p><span class="math display">\[
+P(x)= \frac{e^{\beta_0 + \sum\limits_{j=1}^p \beta_j X}}{1+e^{\beta_0 + \sum\limits_{j=1}^p \beta_j X}}
+\]</span></p>
+<p>A logistic curve<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> typically exhibits the following shape:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>By employing this method, we effectively address the problem of obtaining probabilities outside the range of 0 to 1.</p>
+<p>Following a series of transformations, we can arrive at the following expression:</p>
+<p><span class="math display">\[
+\frac{P(x)}{1-P(x)}= e^{\beta_0 + \sum\limits_{j=1}^p \beta_j X}
+\]</span></p>
+<p>The quantity <span class="math inline">\(\frac{P(x)}{1-P(x)}\)</span> is called the <strong>odds</strong> (probability of event divided by probability of no event<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>), and can take on any value between <span class="math inline">\(0\)</span> and <span class="math inline">\(\infty\)</span>. Values of the odds close to <span class="math inline">\(0\)</span> and <span class="math inline">\(\infty\)</span> indicate very low and very high probabilities of <span class="math inline">\(x\)</span>, respectively<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>.</p>
+<p>Finally, by taking the logarithm of both sides of our last expression, we arrive at:</p>
+<p><span class="math display">\[
+\log {\frac{P(x)}{1-P(x)}}= \beta_0 + \sum\limits_{j=1}^p \beta_j X
+\]</span></p>
+<p>The left-hand side is the logarithm of the odds and is referred to as the <em>log-odds</em> or <em>logit</em><a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>.</p>
+<p>Recall from previous classes that in a linear regression model, <span class="math inline">\(\beta_{j}\)</span> indicates the average change in <span class="math inline">\(Y\)</span> associated with a one-unit increase in <span class="math inline">\(x_{j}\)</span>. On the other hand, in a logistic regression model, increasing <span class="math inline">\(x_{j}\)</span> by one unit changes the log-odds by <span class="math inline">\(\beta_{j}\)</span>, as shown in the last formula presented <span class="citation" data-cites="james2013">(<a href="#ref-james2013" role="doc-biblioref">James et al. 2013</a>)</span>.</p>
+<p>In order to properly interpret the model’s coefficients, you should keep in mind that the relationship between <span class="math inline">\(P(x)\)</span> and <span class="math inline">\(x\)</span> in is <strong>not</strong> a straight line<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>: the amount that <span class="math inline">\(P(x)\)</span> changes due to a one-unit change in <span class="math inline">\(x\)</span> depends on the <em>value</em> of <span class="math inline">\(x\)</span>. However, a basic interpretation rule to remember is that, regardless of the value of <span class="math inline">\(x\)</span> <span class="citation" data-cites="james2013">(<a href="#ref-james2013" role="doc-biblioref">James et al. 2013</a>)</span>:</p>
+<ol type="1">
+<li><p>if <span class="math inline">\(\beta_{j}\)</span> is <strong>positive</strong> then increasing <span class="math inline">\(x_{j}\)</span> will be associated with increasing <span class="math inline">\(P(x)\)</span></p></li>
+<li><p>if <span class="math inline">\(\beta_{j}\)</span> is <strong>negative</strong> then increasing <span class="math inline">\(x_{j}\)</span> will be associated with decreasing <span class="math inline">\(P(x)\)</span></p></li>
+</ol>
+<p>A graphical representation of the logistic curves we would obtain in simple logistic regressions with different values of <span class="math inline">\(\beta\)</span>:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>On the other hand, a change in a feature <span class="math inline">\(x_{j}\)</span> by one unit (<span class="math inline">\(\Delta x_{j} = 1\)</span>) in a logistic regression results in a change in the log-odds of the event by an amount equal to the coefficient <span class="math inline">\(\beta_{j}\)</span> associated with that feature.</p>
+</section>
+<section id="categorical-predictors" class="level2">
+<h2 class="anchored" data-anchor-id="categorical-predictors">Categorical predictors</h2>
+<p>One can also use categorical predictors in the logistic regression model. However, in order to incorporate qualitative variables into regression analysis, we must first transform them into numerical values by creating dummy variables.</p>
+<p>Let’s start with the simplest case: a binary qualitative variable that can only take on two categories (e.g., a sex variable indicating whether a person is male or female<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a>). In this case, we will assign a value of 1 to indicate the presence of the attribute represented by one of the variable’s possible values (for example: to be male), and 0 to represent the absence of the attribute (for example: not to be male). The group identified with a 0 is referred to as the <strong>base</strong> or <strong>reference</strong> category (in this case, females).</p>
+<p>For a qualitative variable with <span class="math inline">\(n\)</span> categories, we will need to create <span class="math inline">\(n−1\)</span> dummy variables that take on values of 0 or 1 (the base category will be the same for all dummy variables).</p>
+<p>In terms of coefficient interpretation, if the coefficient <span class="math inline">\(\beta_{j}\)</span> associated with the dummy variable is positive, the group identified by the dummy variable has a greater possibility of being classified as <span class="math inline">\(Y=1\)</span> (that is to say, a bigger <span class="math inline">\(P(x)\)</span>) than the reference category.</p>
+</section>
+<section id="statistical-significance" class="level2">
+<h2 class="anchored" data-anchor-id="statistical-significance">Statistical significance</h2>
+<p>How can we test if the relationship between <span class="math inline">\(x\)</span> and <span class="math inline">\(Y\)</span> is statistically significant or not? We can formulate a <strong>hypothesis test</strong> with the following hypotheses <span class="citation" data-cites="james2013">(<a href="#ref-james2013" role="doc-biblioref">James et al. 2013</a>)</span>:</p>
+<p><span class="math inline">\(H_{0}\)</span>: “There is no relationship between <span class="math inline">\(x\)</span> and <span class="math inline">\(Y\)</span>”</p>
+<p><span class="math inline">\(H_{A}\)</span>: “There is a relationship between <span class="math inline">\(x\)</span> and <span class="math inline">\(Y\)</span>”</p>
+<p>We will consider the relationship between <span class="math inline">\(x\)</span> and <span class="math inline">\(Y\)</span> to be statistically significant when the p-value of the test is close to 0.</p>
+</section>
+<section id="model-assumptions" class="level2">
+<h2 class="anchored" data-anchor-id="model-assumptions">Model assumptions</h2>
+<p>The logistic regression model involves a series of underlying assumptions regarding the variables involved. It is therefore fundamental to assess the following main assumptions before drawing conclusions from a regression analysis <span class="citation" data-cites="harrison2020">(<a href="#ref-harrison2020" role="doc-biblioref">Harrison and Pius 2020</a>)</span>:</p>
+<ol type="1">
+<li><p>Binary dependent variable (the number of outcomes or categories is two).</p></li>
+<li><p>Independence of observations.</p></li>
+<li><p>Linearity of continuous independent variables and the <em>log odds</em> outcome.</p></li>
+<li><p>No multicollinearity (that is to say, explanatory variables should not be highly correlated with each other).</p></li>
+</ol>
+</section>
+</section>
+<section id="generalization-multinomial-logistic-regression" class="level1">
+<h1>Generalization: multinomial logistic regression</h1>
+<p>We sometimes wish to classify a response variable that has more than two classes. It is possible to extend the two-class logistic regression approach to the setting of <span class="math inline">\(K &gt; 2\)</span> classes <span class="citation" data-cites="james2013">(<a href="#ref-james2013" role="doc-biblioref">James et al. 2013</a>)</span>.</p>
+<p>For these purposes, we will resort to the <strong>softmax regression</strong>. Note that this classifier should only be used with dependent variables that have <span class="math inline">\(K\)</span> <em>mutually exclusive</em> classes. For each observation, this model essentially computes a score for every class of the dependent variable and, based on this information, defines the most probable class for each observation using a softmax function<a href="#fn8" class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a>.</p>
+</section>
+<section id="evaluation-and-predictions" class="level1">
+<h1>Evaluation and predictions</h1>
+<p>Keep in mind that the model’s output will consist of the <em>probabilities</em> associated with each observation belonging in each category of the dependent variable. In this context, to translate this output into a classification, we must establish a <strong>threshold</strong> beyond which each observation will be assigned to a specific category. The threshold is often set at <span class="math inline">\(0.5\)</span>, but its determination may vary depending on the specific nature of the problem we are addressing<a href="#fn9" class="footnote-ref" id="fnref9" role="doc-noteref"><sup>9</sup></a> <span class="citation" data-cites="james2013">(<a href="#ref-james2013" role="doc-biblioref">James et al. 2013</a>)</span>.</p>
+<p>On the other hand, recall from previous lessons that models can be classified into two main categories <span class="citation" data-cites="james2013">(<a href="#ref-james2013" role="doc-biblioref">James et al. 2013</a>)</span>:</p>
+<ul>
+<li><p>Inference: these models aim to understand and describe the relationships and patterns within a given data set.</p></li>
+<li><p>Prediction: these models are used in situations where we have a set of inputs <span class="math inline">\(X\)</span>, but obtaining the output <span class="math inline">\(y\)</span> is not feasible. The aim of these models is to generate accurate predictions of <span class="math inline">\(y\)</span>.</p></li>
+</ul>
+<p>Logistic regression models are mainly considered <strong>inference</strong> models, but are still frequently used for predicting purposes. Fundamentally, this can be explained by the fact that gaining insights regarding the relationships between variables might constitute an important first step when building <em>or improving</em> a predictive model.</p>
+<section id="confusion-matrix" class="level2">
+<h2 class="anchored" data-anchor-id="confusion-matrix">Confusion matrix</h2>
+<p>A <strong>confusion matrix</strong> is a fundamental tool used to assess the model’s performance in classification tasks. It provides a clear and concise representation of the model’s ability to make correct and incorrect predictions. The confusion matrix is a 2x2 matrix that categorizes the model’s predictions into four categories: True Positives (TP), True Negatives (TN), False Positives (FP), and False Negatives (FN).</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="lightable-classic table table-sm table-striped small" data-quarto-postprocess="true">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th" style="text-align: left; empty-cells: hide;"></th>
+<th colspan="2" data-quarto-table-cell-role="th" style="text-align: center; padding-bottom: 0; padding-left: 3px; padding-right: 3px;"><div style="border-bottom: 1px solid #111111; margin-bottom: -1px; ">
+**Predicted value**
+</div></th>
+</tr>
+<tr class="odd">
+<th style="text-align: left;" data-quarto-table-cell-role="th">**Actual value**</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">1</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">0</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">True Positive</td>
+<td style="text-align: left;">False Negative</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">False Positive</td>
+<td style="text-align: left;">True Negative</td>
+</tr>
+</tbody><tfoot>
+<tr class="even">
+<td style="text-align: left; padding: 0;"><span style="font-style: italic;">Source:</span> <sup></sup> @james2013</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+</tfoot>
+
+</table>
+
+
+</div>
+</div>
+<p>For a dependent variable with two categories (1 and 0):</p>
+<ul>
+<li><p>True Positives are those observations where the model <em>correctly</em> predicts positive outcomes: <span class="math inline">\(Y_{Act}=1\)</span> and <span class="math inline">\(Y_{Pred}=1\)</span></p></li>
+<li><p>True Negatives are those where it <em>correctly</em> predicts negative outcomes: <span class="math inline">\(Y_{Act}=0\)</span> and <span class="math inline">\(Y_{Pred}=0\)</span></p></li>
+<li><p>False Positives are instances where it <em>incorrectly</em> predicts positive outcomes: <span class="math inline">\(Y_{Act}=0\)</span> and <span class="math inline">\(Y_{Pred}=1\)</span></p></li>
+<li><p>False Negatives are instances where it <em>incorrectly</em> predicts negative outcomes: <span class="math inline">\(Y_{Act}=1\)</span> and <span class="math inline">\(Y_{Pred}=0\)</span></p></li>
+</ul>
+<p>By examining the values within the confusion matrix, we can gain insights into the model’s strengths and weaknesses, and therefore improve fundamental parameters such as the decision threshold.</p>
+<p>Some performance metrics such as the following can guide our analysis:</p>
+<p><em>Sensitivity</em> <span class="math inline">\(= \frac{TP}{P} = \frac{TP}{TP + FN}\)</span></p>
+<p><em>Specificity</em> <span class="math inline">\(= \frac{TN}{N} = \frac{TN}{TN + FP}\)</span></p>
+<p><em>False positive rate</em> <span class="math inline">\(= \frac{FP}{N} = \frac{FP}{TN + FP}\)</span></p>
+<p><em>Accuracy</em> <span class="math inline">\(= \frac{TN + TP}{N+P} = \frac{TN + TP}{TN + FP + TN + FP}\)</span></p>
+<p><em>Precision</em> <span class="math inline">\(= \frac{TP}{TP+FP}\)</span></p>
+<p><em>Negative predictive value</em> <span class="math inline">\(= \frac{TN}{TN+FN}\)</span></p>
+<p>Each of these metrics will help us quantify the performance of our model by highlighting different strengths and weaknesses. For example, does the model excel at identifying true positives? (analyze sensitivity!) At the expense of an elevated rate of false positives? (analyze false positive rate!)</p>
+</section>
+<section id="other-representations" class="level2">
+<h2 class="anchored" data-anchor-id="other-representations">Other representations</h2>
+<section id="roc-curves" class="level3">
+<h3 class="anchored" data-anchor-id="roc-curves">ROC curves</h3>
+<p>The ROC curve graphically illustrates two types of errors for all potential decision thresholds, depicting the trade-off that emerges when trying to correctly identify true positive cases while also avoiding incorrect predictions of the positive class when the actual class is negative. Sensitivity is depicted on the y-axis, and the false positive rate is represented on the x-axis <span class="citation" data-cites="james2013">(<a href="#ref-james2013" role="doc-biblioref">James et al. 2013</a>)</span>.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>An ideal ROC curve should closely follow the top-left corner of the visualization, signifying high sensitivity and a low false positive rate. The overall performance of a classifier is given by the area under the ROC curve (AUC). ROC curves will prove to be specially useful when comparing different classifiers, since they consider all possible thresholds <span class="citation" data-cites="james2013">(<a href="#ref-james2013" role="doc-biblioref">James et al. 2013</a>)</span>.</p>
+</section>
+<section id="hosmer-lemeshow-plot" class="level3">
+<h3 class="anchored" data-anchor-id="hosmer-lemeshow-plot">Hosmer-Lemeshow plot</h3>
+<p>The <strong>Hosmer-Lemeshow plot</strong> is a graphical tool used to assess the goodness of fit of a logistic regression model. The basic principle behind this plot is that, within a group of observations, we can expect a good-fitting model to produce predicted probabilities that are similar to the observed proportion of <span class="math inline">\(Y=1\)</span> values within that group <span class="citation" data-cites="nahhas">(<a href="#ref-nahhas" role="doc-biblioref">Nahhas, n.d.</a>)</span>.</p>
+<p>This assumption is tested by splitting the data into 10 groups based on their predicted probabilities and then, within groups, comparing the observed and expected proportions. The first group will contain the 10% of observations with the lowest predicted probabilities, the second the 10% with the next lowest, and so on. If the model fits well, the observed proportions of <span class="math inline">\(Y=1\)</span> in these groups should be similar to their within-group average predicted probabilities <span class="citation" data-cites="nahhas">(<a href="#ref-nahhas" role="doc-biblioref">Nahhas, n.d.</a>)</span>.</p>
+</section>
+</section>
+</section>
+<section id="discussion" class="level1">
+<h1>Discussion</h1>
+<p>It is worth noting that classification models might <strong>reinforce prejudices</strong>, and we should therefore always interpret their outputs with care. If a model’s training data contains biases or reflects historical inequalities, the model may inadvertently perpetuate these biases by making predictions based on these patterns.</p>
+<p>For instance, consider a scenario where historical loan default data shows a higher default rate among individuals from marginalized groups. Based on this information, a model will probably recommend denying loans to individuals from these groups, perpetuating long-standing disparities in access to financial opportunities.</p>
+<p>While explicit prohibitions against the use of variables like race are established to curb discrimination and uphold fairness, paradoxically, they often prompt the adoption of proxy or surrogate variables, such as neighborhood, education, income, or ZIP code, to indirectly capture the information originally linked to the prohibited variable.</p>
+<p>This workaround practice exemplifies the enduring challenge of preventing models from mirroring historical inequities. Hence, it becomes imperative to place a strong emphasis on how we interpret the results generated by these models, considering the potential biases embedded in these proxies to ensure a more equitable and just decision-making process.</p>
+</section>
+<section id="references" class="level1 unnumbered">
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-harrison2020" class="csl-entry" role="listitem">
+Harrison, Ewen, and Riinu Pius. 2020. <em>R for Health Data Science</em>. 1st ed. Chapman &amp; Hall/CRC Statistics in Social and Behavioural Science. Boca Raton: Taylor; Francis.
+</div>
+<div id="ref-james2013" class="csl-entry" role="listitem">
+James, G, D Witten, T Hastie, and R Tibshirani. 2013. <em>An Introduction to Statistical Learning with Applications in r</em>. 2nd ed. Springer.
+</div>
+<div id="ref-molnar_interpretable_2022" class="csl-entry" role="listitem">
+Molnar, Christoph. 2022. <em>Interpretable Machine Learning: A Guide for Making Black Box Models Explainable</em>. Second edition. Munich, Germany: Christoph Molnar.
+</div>
+<div id="ref-nahhas" class="csl-entry" role="listitem">
+Nahhas, Ramzi W. n.d. <em>Introduction to Regression Methods for Public Health Using r</em>. <a href="https://www.bookdown.org/rwnahhas/RMPH/">https://www.bookdown.org/rwnahhas/RMPH/</a>.
+</div>
+</div></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Remember that probabilities can never fall outside the range of 0 to 1!<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>To be more precise: a sigmoid curve.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>For example, odds of 4 would mean it is 4 times more likely for an event to happen than for it not to happen.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>For example: <br>For <span class="math inline">\(P(x) = 0.2\)</span>: <span class="math inline">\(\frac{P(x)}{1-P(x)} = \frac{0.2}{0.8} = 0.25\)</span> <br>For <span class="math inline">\(P(x) = 0.8\)</span>: <span class="math inline">\(\frac{P(x)}{1-P(x)} = \frac{0.8}{0.2} = 4\)</span> <br>For <span class="math inline">\(P(x) = 0.98\)</span>: <span class="math inline">\(\frac{P(x)}{1-P(x)} = \frac{0.98}{0.02} = 49\)</span><a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>This expression highlights the fact that the logistic regression model has a logit that is linear in <span class="math inline">\(x\)</span> <span class="citation" data-cites="james2013">(<a href="#ref-james2013" role="doc-biblioref">James et al. 2013</a>)</span>.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>See the first equation of this section, where we first presented the relationship between <span class="math inline">\(P(x)\)</span> and <span class="math inline">\(x\)</span>.<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>This would be a dataset that omits or invisibilizes, for example, intersex people.<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn8"><p>A function used to convert a vector of <span class="math inline">\(K\)</span> real numbers into a probability distribution of <span class="math inline">\(K\)</span> possible outcomes.<a href="#fnref8" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn9"><p>Fundamentally, this will depend on the <strong>type of error</strong> we want to avoid. Consider, for example, a model that predicts whether a tumor is benign or malignant. Misclassifying a malignant tumor as benign is much more detrimental to the patient’s health than the reverse scenario. Therefore, in this case, instead of classifying tumors with a probability of 0.5 or higher of being malignant as malignant, we might classify those with a probability greater than 0.1 of being malignant as malignant.<a href="#fnref9" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

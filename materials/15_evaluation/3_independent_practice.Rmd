@@ -1,0 +1,43 @@
+---
+title: "Evaluation"
+subtitle: "Independent practice"
+author: ""
+date: ""
+output: html_notebook
+---
+
+```{r setup, message=FALSE, warning=FALSE, include=FALSE}
+knitr::opts_chunk$set(message = FALSE,warning = FALSE)
+```
+
+For this independent practice, you will work with the Gapminder dataset to predict life expectancy of countries based on other variables using a KNN model. 
+
+1. Import the dataset and libraries you will need. 
+
+```{r}
+
+```
+
+2. Split the data using a validation set approach.
+
+```{r}
+
+```
+
+2. Build a linear regression model to predict life expectancy based on the other variables. 
+
+```{r}
+
+```
+
+3. Assess the performance of the model.
+
+```{r}
+
+```
+
+4. Build a KNN model to predict the same variable, and compare the results with the linear model. Which one had a better performance?
+
+```{r}
+
+```

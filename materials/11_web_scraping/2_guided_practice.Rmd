@@ -1,0 +1,133 @@
+---
+title: "Web Scraping"
+subtitle: "Guided practice"
+author: ""
+date: ""
+output: html_notebook
+bibliography: references.bib
+---
+
+In this guided practice we will use different R packages to extract information about types of discrimination in the United States.
+
+```{r setup, message=FALSE, warning=FALSE, include=FALSE}
+knitr::opts_chunk$set(message = FALSE,warning = FALSE)
+```
+
+# The packages: `polite`, `rvest`
+
+In this example we will scrape a static website. The packages that we will use in order to do so are `polite` and `rvest`. Each package will have a different role:
+
+-   `rvest` will be used to do the parsing and scraping of the information. It provides functions and tools for web scraping, data extraction, and manipulation. It is also designed to work with `magrittr`, so we can use the well-known pipes in this workflow.
+-   `polite` is a package that helps us to do 'respectful' web scraping. That is, it ensures that our code is introduced to the scraping session, it seeks permission to scrape the data, it takes the data slowly (it doesn't iterate very quickly on many pages) and never asks twice (it doesn't duplicate the requests).
+
+```{r}
+library(rvest)
+library(polite)
+library(tidyverse)
+```
+
+# The Web Page
+
+It is necessary to open and look at the source of information in the web browser. We will use as input the main page about [Discrimination in the U.S. in Wikipedia](https://en.wikipedia.org/wiki/Category:Discrimination_in_the_United_States). The webpage has two sections, **Subcategories** and **Pages in category "Discrimination in the United States"**. Our goal for this class is to extract all the pages.
+
+How do we parse the content of the webpage into R? We will use the function `read_html()`. This function takes as input a link in a string format, and parses the HTML structure into a R object.
+
+```{r}
+website <- read_html('https://en.wikipedia.org/wiki/Category:Discrimination_in_the_United_States')
+
+class(website)
+```
+
+This returns a `xml_document` object which we will manipulate using `rvest` functions. To extract the information we need, rvest provides two options: CSS selectors and XPath expressions, which we went over in the first part of the class. We will use the Selenium IDE to interact with the webpage and extract the XPath to the titles with the link. With the function `html_elements()` we will access the elements of the HTML structure located in said XPath.
+
+```{r}
+xpath_links <- website %>% 
+  html_elements(xpath = "//div[@id='mw-pages']/div/div/div/ul/li/a")
+
+length(xpath_links)
+```
+
+Note that we can use the pipes to access the elements. At the moment of elaboration of this material, this returns a list of 55 elements, the 55 articles that are located in the following place of the HTML structure:
+
+-   under the main div element with id mw-pages,
+
+-   under another div element, under another and another,
+
+-   below an a element, under a li element, under a ul element.
+
+Since we are interested in extracting the name of the page, which is in the text contained in the elements, we can use the function `html_text()`. This function takes as input one or several HTML elements and extracts the text contained in them.
+
+```{r}
+page_titles <- xpath_links %>% 
+  html_text()
+
+page_titles
+```
+
+To extract the link for all the news, we should use the function `html_attr()`. This function extracts the specific value of an attribute inside of a set of elements.
+
+```{r}
+page_links <- xpath_links %>% 
+  html_attr('href')
+
+page_links
+```
+
+Easy enough. However, we are also interested in extracting the first paragraph of description for each kind of discrimination in the articles. As we have the links, we need to iterate over all of them in order to parse them and extract the information located in the page. We can do this by updating the link that is parsed each time.
+
+This is where the `polite` package comes in. It contains functions that will allow us to go over many sub-links in a session, and to make sure that we are *politely* scraping the web site. In other terms, it makes sure that we don't make too many fast requests (that will make the website think we are a bot) on a site that doesn't permit it. By using this package, we also protect the website, since a lot of fast requests contribute to overloading the website demand.
+
+First, we will create an object called `session` which is a call to the function `bow`. `bow` is used to introduce the client to the host and ask for permission to scrape (by inquiring against the host's `robots.txt`[^1] file). Once the connection is established, there's no need to `bow` again.
+
+[^1]: **robots.txt** is the filename used for implementing the **Robots Exclusion Protocol**, a standard used by websites to indicate to visiting web crawlers and other web robots which portions of the website they are allowed to visit. [@robots.t2023]
+
+```{r}
+session <- bow("https://en.wikipedia.org/")
+```
+
+Meanwhile, `scrape` is the function from the package we will use to retrieve data from the remote server.
+
+```{r}
+scrape_example <- scrape(session)
+
+scrape_example
+```
+
+Note that this returns the parsed HTML content from the scraped page. However, we are not interested in scraping the main Wikipedia page, we want the content of all the elements in the pages.
+
+The function `nod` is used to modify paths within a host. With the parameter `path`, we can change the suffix we will add to a URL to modify the search. We have the list of suffixes that we want to append in the `page_links` object, which was extracted in the first part of the scraping, so now we only have to iterate over these links to get the parsed content for all the pages.
+
+```{r}
+library(purrr)
+
+host <- "https://en.wikipedia.org/"
+
+pages <- page_links
+
+responses <- map(pages, 
+               ~bow(host) %>%
+                 nod(path=.x) %>%
+                 scrape())
+
+```
+
+The object `responses` contains the parsed HTML structures for the 55 pages about discrimination in the U.S. Now, we can map `rvest` functions to extract the text content from each page.
+
+```{r}
+
+text_results <- map_chr(responses, ~html_elements(.x, xpath = "//p") %>%
+                 html_text2() %>% 
+                 paste(collapse = " "))
+```
+
+Now, we only have to join the results into three objects to a dataframe.
+
+```{r}
+discrimination_data <- tibble(page_titles, page_links, text_results)
+
+discrimination_data
+
+write_csv(discrimination_data, 'data/discrimination_wiki_scraping.csv')
+```
+
+And we're done! Let's move on to the independent practice.

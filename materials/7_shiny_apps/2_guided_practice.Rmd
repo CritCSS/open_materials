@@ -1,0 +1,411 @@
+---
+title: "Shiny Apps"
+subtitle: "Guided practice"
+author: ""
+date: ""
+output: html_notebook
+---
+
+In this guided practice we will build two shiny apps. You can find the `app.R` files in the *folders 2_gapminder* and *2_Old_Faithful_Geyser*.
+
+```{r setup, message=FALSE, warning=FALSE, include=FALSE}
+knitr::opts_chunk$set(message = FALSE,warning = FALSE)
+```
+
+## Old Faithful Geyser
+
+Our first shiny app is inspired on the example provided by <https://shiny.posit.co/r/gallery/start-simple/faithful/>. We will be displaying eruption data for the Old Faithful geyser.
+
+Let's start by building the basic structure of our app:
+
+```{r,eval=FALSE, include=TRUE}
+library(shiny)
+
+# Define the ui object and it's basic layout, as well as the title
+ui <- fluidPage(
+  
+  # Application title
+  titlePanel("Old Faithful Geyser Data"),
+  sidebarLayout(
+     # Sidebar 
+    sidebarPanel(
+      
+    ),
+    # Main panel
+    mainPanel(
+      
+    )
+  )
+)
+
+# Define server object
+server <- function(input, output) {
+  
+  
+}
+
+# Combine ui and server 
+shinyApp(ui = ui, server = server)
+```
+
+You should be able to run the app and see the title, as well as the empty panels.
+
+We can now proceed to design our **ui** by defining our input and output. Our app will display a histogram, allowing users to determine the number of bars (or bins) on the visualization. We therefore need to define a numeric input (where the user will tell us the desired number of bars) and a plot output (our histogram). If you are not familiar with histograms, you can use `?hist()` to find out more about the function we will be using to draw our plot.
+
+In this case, we will employ the `sliderInput`, a frequently used widget that enables users to choose a number within a defined interval (in this case, numbers between 1 and 50). The default value will be set to 30.
+
+```{r,eval=FALSE, include=TRUE}
+library(shiny)
+
+# Develop the ui 
+ui <- fluidPage(
+  titlePanel("Old Faithful Geyser Data"),
+  sidebarLayout(
+    sidebarPanel(
+      #our input
+      sliderInput(inputId = "bins",
+                  label ="Number of bins:",
+                  min = 1,
+                  max = 50,
+                  value = 30)
+    ),
+    mainPanel(
+      #our output
+       plotOutput(outputId = "distPlot")
+    )
+  )
+)
+
+server <- function(input, output) {
+  
+  
+}
+
+shinyApp(ui = ui, server = server)
+```
+
+Note that, even although the app may not yet fulfill its purpose, we can now interact with the input widget.
+
+Let's make the app actually do it's job by designing the server. Remember we will need to refer to the ids we defined in the ui (`distPlot` for the output and `bins` for the input).
+
+Given our intention to generate a plot output, the suitable render function is `renderPlot()`. We can call this toy data set using *faithful*; in this case, we are interested on its second column, which contains information on eruptions. In order to generate a plot with the number of columns the user will decide, we will include this input in the function defining the histogram breaks.
+
+```{r,eval=FALSE, include=TRUE}
+library(shiny)
+
+ui <- fluidPage(
+  titlePanel("Old Faithful Geyser Data"),
+  sidebarLayout(
+    sidebarPanel(
+      sliderInput(inputId = "bins",
+                  label ="Number of bins:",
+                  min = 1,
+                  max = 50,
+                  value = 30)
+    ),
+    mainPanel(
+       plotOutput(outputId="distPlot")
+    )
+  )
+)
+
+# Define server logic required to draw a histogram
+server <- function(input, output) {
+  output$distPlot <- renderPlot({
+    # generate bins based on input$bins from ui
+    x    <- faithful[, 2]
+    bins <- seq(min(x), max(x), length.out = input$bins + 1)
+    
+    # draw the histogram with the specified number of bins
+    hist(x, breaks = bins, col = 'darkgray', border = 'white')
+  })
+}
+
+shinyApp(ui = ui, server = server)
+```
+
+We are done! Let's move on to a more complex app.
+
+## gapminder
+
+Our second shiny app is inspired on the example provided by <https://akshi8.shinyapps.io/Gapminder/>
+
+In this case, we will be exploring the population, life-expectancy and GDP per capita for different countries over the years. Users can select the indicator to compare, choose specific countries, and specify the years they wish to examine.
+
+We will include plots and a table, and we will also organize the information in our app using tabs.
+
+Let's start by building the basic structure of our app:
+
+```{r,eval=FALSE, include=TRUE}
+library(tidyverse)
+library(shiny)
+library(gapminder)
+library(countrycode)
+library(plotly)
+library(scales)
+library(DT)
+
+#our dataset, imported from the gapminder package:
+
+gapminder <- gapminder
+
+#some preprocessing: as Kuwuait will break the scale for some years, let's remove it from the database
+
+gapminder <- gapminder %>% 
+  filter(country!='Kuwait')
+
+#### our ui
+
+ui <- fluidPage(
+  titlePanel("Gapminder Data"),
+  tabsetPanel(
+    tabPanel(title = 'time series',
+             #a layout option: sidebar and main panel
+             sidebarLayout(
+               sidebarPanel(
+
+               ),
+               mainPanel(
+                 tabsetPanel(type = "tabs",
+                             tabPanel("Plot"), 
+                             tabPanel("Table")
+                 )
+                 
+               )
+             )
+    ),
+    tabPanel(title = 'distribution by year',
+             #a different option: using a well panel
+             wellPanel(
+               
+             )
+    )
+  )
+)
+
+
+#### Server
+
+server <- function(input, output) {
+  
+}
+
+shinyApp(ui = ui, server = server)
+```
+
+You should be able to run the app and view the app's title, along with the two primary tabs and the two sub-tabs nested within the first main tab.
+
+We can now proceed to design our **ui** by defining our input and output, as well as subtitles explaining more clearly the content of each tab (using `h3()`). In the first main tab, our app will display an option to choose the country (note that in this case the user can select multiple options; this becomes explicitly clear when defining `multiple = TRUE`) and the variable to display (in this case a single option; this becomes explicitly clear when stating `multiple = FALSE`).
+
+On the other hand, in our second tab the user will have the option of selecting the year of the data. By setting `animate = TRUE`, we provide users with the option to view an animation that automatically cycles through all available years in succession by pressing on the play button at the bottom right corner of the widget.
+
+While we will determine our outputs (and their ids!) at this stage, we won't be able to visualize them until after designing the app's server.
+
+```{r,eval=FALSE, include=TRUE}
+library(tidyverse)
+library(shiny)
+library(gapminder)
+library(countrycode)
+library(plotly)
+library(scales)
+library(DT)
+
+gapminder <- gapminder
+
+gapminder <- gapminder %>% 
+  filter(country!='Kuwait')
+
+#### ui
+
+ui <- fluidPage(
+  titlePanel("Gapminder Data"),
+  tabsetPanel(
+    tabPanel(title = 'time series',
+             sidebarLayout(
+               sidebarPanel(
+                selectizeInput(inputId ='countries', 
+                                label='Choose the countries', 
+                                choices = unique(gapminder$country), 
+                                multiple = TRUE, 
+                                selected = "United States") ,  
+                
+                 selectizeInput(inputId ='inputvariable', 
+                                label='Choose the variable to display', 
+                                choices =  c("lifeExp","pop","gdpPercap"),
+                                multiple = FALSE,
+                                selected = "lifeExp")
+               ),
+               mainPanel(
+                 tabsetPanel(type = "tabs",
+                              tabPanel("Plot", 
+                                       h3("Time series plot"),
+                                       plotlyOutput("plot_1")), 
+                              tabPanel("Table", 
+                                       h3("Time series table"),
+                                       dataTableOutput("table"))
+                 )
+                 
+               )
+             )
+    ),
+    tabPanel(title = 'distribution by year',
+             wellPanel(
+                 sliderInput(inputId ='yr', 
+                             label='Choose the year',
+                             min = min(gapminder$year),
+                             max = max(gapminder$year),
+                             value = min(gapminder$year),
+                             step = 5,
+                             animate = TRUE)
+                 ),
+                 h3("Distribution by year of life-expectancy and GDP per capita"),
+                 plotlyOutput("plot_2") 
+          
+    )
+  )
+)
+
+
+#### Server
+
+server <- function(input, output) {
+  
+}
+
+shinyApp(ui = ui, server = server)
+```
+
+Let's make the app actually do it's job by designing the server:
+
+```{r,eval=FALSE, include=TRUE}
+library(tidyverse)
+library(shiny)
+library(gapminder)
+library(countrycode)
+library(plotly)
+library(scales)
+library(DT)
+
+gapminder <- gapminder
+
+gapminder <- gapminder %>% 
+  filter(country!='Kuwait')
+
+#one of the options when designing a server is to predefine functions our server will draw on when producing our outputs:
+
+plot_1 <- function(countries, var){
+  
+  plt <- gapminder %>%
+    pivot_longer(lifeExp:gdpPercap) %>% 
+    filter(country %in% countries, name==var) %>%  
+    ggplot(aes(year, value, color = continent,group = country))+ 
+    geom_line()+
+    geom_point()
+  
+  ggplotly(plt)
+}
+
+plot_2 <- function(yr){
+  
+  plt <- gapminder %>%
+    filter(year==yr) %>% 
+    ggplot(aes(gdpPercap, lifeExp, color=continent,size=pop, text = paste(country,
+                                                                          '<br>GDP per capita: ',number(gdpPercap, 1),
+                                                                          '<br>Population: ', number(pop/10000,1),'M'))) +
+    geom_point()+
+    theme_minimal()
+  
+  ggplotly(plt, tooltip = 'text')
+}
+
+#### ui
+
+ui <- fluidPage(
+  titlePanel("Gapminder Data"),
+  tabsetPanel(
+    tabPanel(title = 'time series',
+             sidebarLayout(
+               sidebarPanel(
+                selectizeInput(inputId ='countries', 
+                                label='Choose the countries', 
+                                choices = unique(gapminder$country), 
+                                multiple = TRUE, 
+                                selected = "United States") ,  
+                
+                 selectizeInput(inputId ='inputvariable', 
+                                label='Choose the variable to display', 
+                                choices =  c("lifeExp","pop","gdpPercap"),
+                                multiple = FALSE,
+                                selected = "lifeExp")
+               ),
+               mainPanel(
+                 tabsetPanel(type = "tabs",
+                              tabPanel("Plot", 
+                                       h3("Time series plot"),
+                                       plotlyOutput("plot_1")), 
+                              tabPanel("Table", 
+                                       h3("Time series table"),
+                                       dataTableOutput("table"))
+                 )
+                 
+               )
+             )
+    ),
+    tabPanel(title = 'distribution by year',
+             wellPanel(
+                 sliderInput(inputId ='yr', 
+                             label='Choose the year',
+                             min = min(gapminder$year),
+                             max = max(gapminder$year),
+                             value = min(gapminder$year),
+                             step = 5,
+                             animate = TRUE)
+                 ),
+                 h3("Distribution by year of life-expectancy and GDP per capita"),
+                 plotlyOutput("plot_2") 
+          
+    )
+  )
+)
+
+
+#### Server
+
+server <- function(input, output) {
+  ## first plot
+  output$plot_1 <- renderPlotly({ 
+    plot_1(countries = input$countries, var = input$inputvariable)
+  })
+  
+  ## table
+  output$table <- renderDataTable({
+    gapminder %>%
+      filter(country %in% input$countries) %>% 
+      select(country,continent, year, input$inputvariable )
+  }, 
+  extensions = 'Buttons',
+  options = list(
+    paging = TRUE,
+    searching = TRUE,
+    fixedColumns = TRUE,
+    autoWidth = TRUE,
+    ordering = TRUE,
+    dom = 'tB',
+    buttons = c('copy', 'csv', 'excel')
+  ),
+  class = "display")
+  
+  ## second plot
+  output$plot_2 <- renderPlotly({ plot_2(yr = input$yr)})
+}
+
+shinyApp(ui = ui, server = server)
+```
+
+Note that there should be a correspondence between render functions and the type of output (`plotlyOutput` and `renderPlotly`, `dataTableOutput` and `renderDataTable`). As is customary, each output will be defined using its unique ID, and a render function will be applied, invoking the relevant inputs (of course, also through their ids).
+
+Note that `plotly` visualizations offer users even more freedom to explore our data as they come equipped with a wide range of functionalities. These include the ability to zoom in and examine specific portions of the visualization, or filter a continent of interest by simply clicking on the legends.
+
+Moreover, within `renderDataTable`, we've incorporated additional arguments that enable users to copy the table information or export it in CSV or Excel formats. This allows users to utilize the data for creating their own visualizations.
+
+Feel free to add new elements or improve those already in the app to practice!

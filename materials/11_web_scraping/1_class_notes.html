@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.551">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Web Scraping</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="1_class_notes_files/libs/clipboard/clipboard.min.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/quarto.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/popper.min.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/anchor.min.js"></script>
+<link href="1_class_notes_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="1_class_notes_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="1_class_notes_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="1_class_notes_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="1_class_notes_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Web Scraping</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>The internet is a vast repository of information, making it invaluable for various fields of study. To harness this wealth of data, web scraping tools become essential. Web scraping involves automating the process of extracting data from websites. The fundamental logic of web scraping includes:</p>
+<ol type="1">
+<li>Entering a Page: Navigating to a specific webpage.</li>
+<li>Searching in HTML Code: Locating desired information within the HTML code.</li>
+<li>Tabular Transformation: Converting the extracted data into a tabular format, typically rows and columns.</li>
+</ol>
+<section id="html-structure" class="level2">
+<h2 class="anchored" data-anchor-id="html-structure">HTML structure</h2>
+<p>The content and structure of a web page is written in HTML code. HTML code follows a tree-like structure, with parent nodes that open child ones and are composed by different objects. These different objects are called <strong>tags</strong>. Tags are essentially special keywords or code enclosed in angle brackets (<code>&lt; &gt;</code>) that indicate how the content on a web page should be displayed or formatted.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="https://es.m.wikipedia.org/wiki/Archivo:HTML_source_code_example.svg"><img src="img/00_html_source_code.png" class="img-fluid figure-img" alt="Source: Wikipedia"></a></p>
+<figcaption>Source: Wikipedia</figcaption>
+</figure>
+</div>
+<p>HTML tags come in pairs: an opening tag and a closing tag. The opening tag tells the browser when to start applying a specific formatting or structure, and the closing tag indicates when to stop applying that formatting or structure.</p>
+<p>Here’s the basic structure of an HTML tag:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="sc">&lt;</span>tagname<span class="sc">&gt;</span>Content goes here<span class="sc">&lt;</span><span class="er">/</span>tagname<span class="sc">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Note that the HTML tag has three elements. First, an <strong>opening tag</strong>, which is the first part of the tag and specifies the beginning of an element. It consists of the tag name enclosed in angle brackets. Afterwards, it contains the <strong>content</strong>, which is the the information or text that you want to include within the element. This content is displayed or affected by the tag. Finally, the <strong>closing tag</strong> is the final part of the tag and indicates the end of the element. It also consists of the tag name enclosed in angle brackets but with a forward slash (/) before the tag name.</p>
+<p>Some common HTML tags include:</p>
+<ul>
+<li><p><code>&lt;html&gt;</code>: The root element that contains the entire HTML document.</p></li>
+<li><p><code>&lt;head&gt;</code>: Contains metadata about the document, such as the title and links to external resources.</p></li>
+<li><p><code>&lt;title&gt;</code>: Sets the title of the web page, which appears in the browser’s title bar or tab.</p></li>
+<li><p><code>&lt;body&gt;</code>: Contains the main content of the web page that is visible to users.</p></li>
+<li><p><code>&lt;h1&gt;, &lt;h2&gt;, &lt;h3&gt;</code>, etc.: Define headings of different levels, with &lt;h1&gt; being the highest level.</p></li>
+<li><p><code>&lt;p&gt;</code>: Defines a paragraph of text.</p></li>
+<li><p><code>&lt;a&gt;</code>: Creates hyperlinks to other web pages or resources.</p></li>
+<li><p><code>&lt;img&gt;</code>: Embeds images in the web page.</p></li>
+<li><p><code>&lt;ul&gt;</code>: Creates an unordered (bulleted) list.</p></li>
+<li><p><code>&lt;ol&gt;</code>: Creates an ordered (numbered) list.</p></li>
+<li><p><code>&lt;li&gt;</code>: Defines list items within &lt;ul&gt; or &lt;ol&gt; elements.</p></li>
+<li><p><code>&lt;div&gt;</code>: A generic container for grouping and styling elements.</p></li>
+</ul>
+<p>Aside from the <strong>tags</strong>, the elements of an HTML structure contain <strong>attributes</strong>. HTML attributes are special characteristics or properties that can be added to provide additional information about those elements. Attributes are used to modify or enhance the behavior and appearance of HTML elements. They are always specified within the opening tag of an HTML element and are defined as name-value pairs, separated by an equal sign (=).</p>
+<p>Here’s the basic syntax of an HTML attribute:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="sc">&lt;</span>tagname attribute<span class="ot">=</span><span class="st">"value"</span><span class="sc">&gt;</span>Content goes here<span class="sc">&lt;</span><span class="er">/</span>tagname<span class="sc">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>It is important to note that the attributes have a <em>name</em> and a <em>value</em>. The value is typically enclosed in double or single quotes, though in some cases, it can be unquoted.</p>
+<p>Some attributes can be used on almost any HTML element and are known as global attributes, while others are specific to certain elements. For instance, the <code>id</code> attribute can be used on most HTML elements, but the <code>src</code> attribute is specific to <code>&lt;img&gt;</code> elements.</p>
+<p>Some of the most commonly used HTML attributes are:</p>
+<ul>
+<li><code>id</code>: Specifies a unique identifier for an element.</li>
+<li><code>class</code>: Assigns one or more class names to an element.</li>
+<li><code>style</code>: Allows inline CSS styling to be applied directly to an element.</li>
+<li><code>src</code>: Specifies the source URL for elements like <code>&lt;img&gt;</code>, <code>&lt;script&gt;</code>, and <code>&lt;iframe&gt;</code>.</li>
+<li><code>href</code>: Defines the URL of a linked resource for elements like <code>&lt;a&gt;</code>, <code>&lt;link&gt;</code>, and <code>&lt;area&gt;</code>.</li>
+<li><code>title</code>: Specifies additional information about an element, often displayed as a tooltip when the mouse hovers over it.</li>
+<li><code>name</code>: Used with form elements to identify and access their data when submitted.</li>
+<li><code>value</code>: Sets the initial value of form elements like <code>&lt;input&gt;</code> and <code>&lt;textarea&gt;</code>.</li>
+</ul>
+<p>It is important to note that the names of the attributes will be useful in selecting the elements of the webpage we want to scrape.</p>
+</section>
+</section>
+<section id="accessing-elements" class="level1">
+<h1>Accessing elements</h1>
+<p>So far, we addressed how the elements of a webpage appear in an HTML structure. But, how can we use this structure to select elements we want to extract? How do we make code that understands where a certain information is located in a webpage?</p>
+<p>To do so, we use <strong>selectors</strong>. In this class, we will see an overview on how to use <strong>XPATH</strong> and <strong>CSS</strong> selectors to get the elements of a webpage.</p>
+<section id="xpath-selectors" class="level2">
+<h2 class="anchored" data-anchor-id="xpath-selectors">XPath selectors</h2>
+<p>XPath selectors are a set of expressions and patterns used to navigate and select elements or data within an HTML document. XPath selectors allow you to target specific elements or data within the document’s tree-like structure <span class="citation" data-cites="xpathsy">(<a href="#ref-xpathsy" role="doc-biblioref"><span>“XPath Syntax,”</span> n.d.</a>)</span>. Some of the most commonly used XPath selectors are:</p>
+<ul>
+<li><code>tagname</code>: Selects all nodes with the tag “tagname”.</li>
+<li><code>/</code>: Selects from the root node.</li>
+<li><code>//</code>: Selects nodes in the document from the current node that match the selection no matter where they are.</li>
+<li><code>.</code>: Selects the current node.</li>
+<li><code>..</code>: Selects the parent of the current node.</li>
+<li><code>@attribute</code>: Selects attributes named “attribute”.</li>
+</ul>
+<p>These selectors can be combined to make complex element searches:</p>
+<ul>
+<li><code>element1/element2</code>: Selects element2 that is a child of element1.</li>
+<li><code>//element</code>: Selects all elements with the specified name anywhere in the document.</li>
+<li><code>element[@attribute="value"]</code>: Selects elements with a specific attribute and attribute value.</li>
+<li><code>element[@attribute]</code>: Selects elements with a specific attribute (regardless of the value).</li>
+</ul>
+<p>These selectors can be built manually, however nowadays there are many tools and plugins one can use to click on different elements of a website and get the XPath. A good tool is the plugin <a href="https://chrome.google.com/webstore/detail/xpath-finder/ihnknokegkbpmofmafnkoadfjkhlogph">xPath Finder</a>, or the <a href="https://chrome.google.com/webstore/detail/selenium-ide/mooikfkahbdckldjjndioackbalphokd">Selenium IDE</a> for Google Chrome. However, there are many other options for other browsers or to install in the computer. You can also continue to explore <a href="https://www.w3schools.com/xml/xpath_syntax.asp">XPath Selectors</a> in this website.</p>
+</section>
+<section id="css-selectors" class="level2">
+<h2 class="anchored" data-anchor-id="css-selectors">CSS Selectors</h2>
+<p>These are selectors that are based on CSS (Cascading Style Sheets) styling. CSS styling is a technology used in web development to control the presentation and visual design of HTML elements on a web page.</p>
+<p>CSS uses selectors to target HTML elements and properties to define how those elements should be styled. Selectors can target specific elements or groups of elements based on their tags, classes, IDs, or other attributes. Properties specify aspects of an element’s appearance, such as color, size, spacing, and more. However, for our case, we will use CSS selectors as patterns to locate HTML elements and extracting the content of these elements <span class="citation" data-cites="csssele">(<a href="#ref-csssele" role="doc-biblioref"><span>“CSS Selectors Reference,”</span> n.d.</a>)</span>.</p>
+<p>Some of the most common CSS selectors are:</p>
+<ul>
+<li><code>.class1</code>: Selects all elements with class=“class1”.</li>
+<li><code>.class1.class2</code>: Selects all elements with both class1 and class2 set within its class attribute.</li>
+<li><code>#firstname</code>: Selects the element with id=“firstname”.</li>
+<li><code>*</code>: Selects all elements.</li>
+<li><code>element1</code>: Selects all <element1> elements.</element1></li>
+<li><code>element1.class1</code>: Selects all <element1> elements with class=“class1”.</element1></li>
+</ul>
+<p>As in the case of XPath selectors, CSS selectors can be built manually or automatically with a tool. The <code>rvest</code> package for web scraping has the plugin <a href="https://rvest.tidyverse.org/articles/selectorgadget.html"><code>selectorGadget</code></a> to build CSS selectors.</p>
+</section>
+</section>
+<section id="extracting-data" class="level1">
+<h1>Extracting data</h1>
+<p>So far, we went over how the unstructured data appears in websites: in the shape of an HTML structure. To extract information from the different webpages, we must use selectors to access the elements of this structure. The extraction of data can consist in three different activities: <em>crawling</em>, <em>parsing</em> and <em>scraping</em>.</p>
+<ul>
+<li><strong>Crawling</strong>: is the process of systematically navigating through a website or the internet to discover and index web pages. It’s often performed by web crawlers or bots, also known as “spiders” or “web robots.” Crawlers follow links on a website to move from one page to another, mapping out the site’s architecture.</li>
+<li><strong>Parsing:</strong> is the process of analyzing structured data (e.g., HTML, XML, JSON) to extract specific elements or information. In the context of web development, parsing is often used to traverse and extract data from structured documents like HTML or XML.</li>
+<li><strong>Scraping:</strong> is the process of extracting specific data from web pages. It involves downloading web pages and then extracting the desired information, such as text, images, or structured data (e.g., tables) from the HTML source code.</li>
+</ul>
+<p>In summary, crawling is the process of systematically exploring websites to map their structure and content, scraping involves extracting specific data from web pages, and parsing is the act of analyzing structured documents to extract meaningful information. While these activities are related and may often be performed together, they serve different purposes and involve distinct steps in the process of obtaining and working with web data.</p>
+<p>The methodology to extract online data will depend on how this data appears. This can be in a <strong>static website</strong>, a <strong>dynamic website</strong> or an <strong>API</strong>.</p>
+<section id="static-websites" class="level2">
+<h2 class="anchored" data-anchor-id="static-websites">Static websites</h2>
+<p>Static websites, often referred to as static web pages, are digital platforms composed of unchanging web pages. The content on a static website remains constant for all visitors and is impervious to alterations driven by user interactions or dynamic data sourced from a database. A good example of static websites are <a href="https://en.wikipedia.org/wiki/W._E._B._Du_Bois">Wikipedia pages</a>.</p>
+<p>The content on static websites remains invariable until a developer intervenes to manually update it. These websites are particularly conducive to web scraping, given their lack of dynamically generated elements in response to user interactions. Extracting information from them primarily entails parsing the HTML structure, employing selectors to pinpoint the desired elements, and subsequently scraping the content.</p>
+<p>Inspecting the HTML structure of a web page can be initiated through a simple process of right-clicking and selecting “Inspect” within the web browser, allowing deeper exploration.</p>
+<p><img src="img/01_html_cnn.png" class="img-fluid"></p>
+</section>
+<section id="dynamic-websites" class="level2">
+<h2 class="anchored" data-anchor-id="dynamic-websites">Dynamic websites</h2>
+<p>Dynamic websites are websites that generate web pages on-the-fly, customizing content and appearance for each user or interaction. Unlike static websites, where the content is fixed and unchanging, dynamic websites use server-side scripting, databases, and other technologies to deliver content that can vary based on user input, user profiles, real-time data, or other factors. Dynamic websites are highly interactive and provide a personalized and data-driven experience for users. A good example of this kind of website is the <a href="https://www.moma.org/artists/">MoMA page</a> of artists in collection, where you have to click on the button ‘Show more results’ several times to get the entire list of artists. It is impossible to scrape the entire list of artists parsing the HTML structure as it appears, because it is updated every time the button ‘Show more results’ is clicked.</p>
+<p>To scrape this kind of websites, we must use <strong>automated web browsers</strong> to make a script that interacts with the browser in the way a human would do and scrape the data. The most commonly used is the <a href="https://www.selenium.dev/documentation/webdriver/"><strong>Selenium WebDriver</strong></a>, which can be integrated via Python. Some of the characteristics of automated web browsers are:</p>
+<ol type="1">
+<li><p><strong>Programmatic Interaction:</strong> These browsers can perform actions such as loading web pages, clicking on links, filling out forms, and submitting data, just like a human user would. They do so through code or scripts.</p></li>
+<li><p><strong>Data Extraction:</strong> They can scrape text, images, links, and other information from web pages.</p></li>
+<li><p><strong>Headless Mode:</strong> Many modern web browsers, such as Google Chrome and Mozilla Firefox, offer a headless mode that allows them to run without a visible GUI. This makes them suitable for automation tasks.</p></li>
+<li><p><strong>Scripting Languages:</strong> Automated web browsers are often controlled using scripting languages, with the help of libraries or frameworks specifically designed for web automation.</p></li>
+<li><p><strong>Scheduled Tasks:</strong> They can be used to schedule repetitive tasks, such as checking for updates on websites, monitoring stock prices, or automating social media posts.</p></li>
+</ol>
+</section>
+<section id="api" class="level2">
+<h2 class="anchored" data-anchor-id="api">API</h2>
+<p>API stands for Application Programming Interface. It is a server that provides access to the data of an application or service. It is a set of rules, protocols, and tools that allows different software applications to communicate with each other. APIs define the methods and data formats that applications can use to request and exchange information, making it possible for various systems to work together and share data and functionality.</p>
+<p>APIs depend on the owners of the applications, and they can offer access to them for free, charge for them partially or totally or not offer them at all. In most services, one will have to create a developer account in order to access the API. After gaining access, the user has to make a set of HTTPS requests to the API endpoints specified in the documentation. The output will be an API response, usually in JSON format. This output will have to be parsed in order to extract the needed data, since the result will be a set of nested data structures which may contain the required information in different levels.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="https://www.encodeproject.org/help/rest-api/"><img src="img/02_api_example.png" class="img-fluid figure-img" width="387" alt="API example"></a></p>
+<figcaption>API example</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="discussion" class="level1">
+<h1>Discussion</h1>
+<section id="legal-considerations" class="level2">
+<h2 class="anchored" data-anchor-id="legal-considerations">Legal Considerations</h2>
+<p>The legality of web data scraping is a complex topic, which depends a lot on where you live. However, by general principle, “if the data is public, non-personal, and factual, you’re likely to be ok” <span class="citation" data-cites="wickham2023">(<a href="#ref-wickham2023" role="doc-biblioref">Wickham, Çetinkaya-Rundel, and Grolemund 2023</a>)</span>. These aspects are the most important to take into account, because they are directly attached to a site’s terms and conditions, personal identifiable information and copyright. The importance of these points is the following:</p>
+<ol type="1">
+<li><strong>Terms and conditions:</strong> In here, companies establish the regulations governing the usage of their websites. While scrutinizing these pages, you may notice explicit prohibitions against web scraping.</li>
+<li><strong>Personally identifiable information:</strong> Data elements like names, email addresses, phone numbers, and dates of birth are profoundly sensitive and should not be collected lightly. Even if this information is publicly accessible on a profile, it is crucial to handle such data with the utmost care and ensure that personal information remains anonymized and unidentifiable.</li>
+<li><strong>Copyright:</strong> When collecting data, one should also exercise caution with regard to copyrighted materials, including images, books, and other content that belongs to an author. Respecting copyright laws is imperative to avoid legal complications.</li>
+</ol>
+</section>
+<section id="scraped-data-as-open-data" class="level2">
+<h2 class="anchored" data-anchor-id="scraped-data-as-open-data">Scraped Data as Open Data</h2>
+<p>While we should take into account the previous considerations in terms of the ethical aspects of scraping web data, it is important to note that web data is often a source of accessing data that wouldn’t be available in any other way. For example, in the field of study of public opinion, scraping online news’ portals is a way of getting information about media coverage of certain topics straight from the source. This can also be done manually, doing a qualitative collection, but scraping data allows us to systematically extract more data, which makes us gain more coverage.</p>
+<p>In this sense, scraping can be thought as a way of democratizing access to data. Of course, it still maintains certain level of elitism, because one needs to know how to code in order to scrape. However, it is a good tool in order to conquer back the data collected by monopolies of companies. A good example of data that used to be democratized but turned back to elitist and private is Twitter data <span class="citation" data-cites="twitter2023">(<a href="#ref-twitter2023" role="doc-biblioref"><span>“Twitter Is Closing Free Access to Its API Starting Feb. 9”</span> 2023</a>)</span>. When Elon Musk acquired Twitter, one of the first policies he adopted was to make the Twitter API a paid service. Twitter data, which used to be a free, open source of data to fuel innovative research topics, became an elitist tool and database which now can only be accessed by a few.</p>
+</section>
+</section>
+<section id="references" class="level1 unnumbered">
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-csssele" class="csl-entry" role="listitem">
+<span>“CSS Selectors Reference.”</span> n.d. <a href="https://www.w3schools.com/cssref/css_selectors.php">https://www.w3schools.com/cssref/css_selectors.php</a>.
+</div>
+<div id="ref-twitter2023" class="csl-entry" role="listitem">
+<span>“Twitter Is Closing Free Access to Its API Starting Feb. 9.”</span> 2023. <a href="https://siliconangle.com/2023/02/02/twitter-closing-free-access-api-starting-february-9/">https://siliconangle.com/2023/02/02/twitter-closing-free-access-api-starting-february-9/</a>.
+</div>
+<div id="ref-wickham2023" class="csl-entry" role="listitem">
+Wickham, Hadley, Mine Çetinkaya-Rundel, and Garrett Grolemund. 2023. <em>R for Data Science: Import, Tidy, Transform, Visualize, and Model Data</em>. 2nd edition. Beijing Boston Farnham Sebastopol Tokyo: O’Reilly Media.
+</div>
+<div id="ref-xpathsy" class="csl-entry" role="listitem">
+<span>“XPath Syntax.”</span> n.d. <a href="https://www.w3schools.com/xml/xpath_syntax.asp">https://www.w3schools.com/xml/xpath_syntax.asp</a>.
+</div>
+</div></section></div></main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

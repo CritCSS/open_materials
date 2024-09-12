@@ -1,0 +1,21 @@
+---
+title: "Logistic Regression"
+subtitle: "Challenge"
+author: ""
+date: ""
+output: html_notebook
+---
+
+For this challenge, you will build a logistic regression model using the **Home Mortgage Disclosure Act Data, NY, 2015** provided and compiled by the [Consumer Finance Protection Board](https://www.kaggle.com/datasets/jboysen/ny-home-mortgage?resource=download)
+
+```{r}
+dataset <- readRDS("data/sample_mortgage.RDS")
+```
+
+Choose a better set of predictor variables than those selected in the guided practice (start your modelling process including all variables and consecutively exclude those that do not provide meaningful information to the model). In order to do so, rely on the performance metrics or visualizations you consider appropriate.
+
+Once you reach the final version of your model, interpret your results.
+
+*Bonus:*
+Try applying the following test: if you removed the variables stating the race and ethnicity of the applicants, would the results change substantially? How can you explain this?
+

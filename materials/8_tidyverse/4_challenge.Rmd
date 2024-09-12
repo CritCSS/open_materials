@@ -1,0 +1,17 @@
+---
+title: "Tidyverse"
+author: ''
+date: ''
+output:
+  html_document:
+    df_print: paged
+subtitle: Challenge
+---
+
+For this challenge, you will address the relationship between COVID cases and poverty in US counties. 
+
+1. Read the dataset `us_counties_covid19_daily.csv` and `SAIPE_2020.csv`, which contains information regarding estimates of poverty for 2020.
+
+2. Explore the relationship between cases, deaths and poverty in US states. Were states with higher poverty rates more affected by COVID than others? Elaborate your hypothesis and/or conclusions.
+
+3. Do you think other variables could affect this relationship too?

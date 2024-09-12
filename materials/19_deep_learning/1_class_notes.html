@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.549">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="">
+
+<title>Deep learning</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="1_class_notes_files/libs/clipboard/clipboard.min.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/quarto.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/popper.min.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/anchor.min.js"></script>
+<link href="1_class_notes_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="1_class_notes_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="1_class_notes_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="1_class_notes_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="1_class_notes_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Deep learning</h1>
+<p class="subtitle lead">class notes</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="what-is-deep-learning" class="level1">
+<h1>What is deep learning?</h1>
+<p>Deep learning is a subset of machine learning that is somehow inspired by the structure and function of the human brain. Following the logic of small units interconnected, like neurons in the brain, these models are called <em>deep</em> neural networks because they have many layers of interconnected nodes, or “neurons,” that allow them to learn increasingly complex patterns from the data. Deep learning is used in a variety of applications such as image recognition or natural language processing.</p>
+<p>A good way to understand the novelty of these models is to compare them with the simplest and most widespread model that we know, linear regressions. There are several key differences between neural networks and linear regression. Many of these concepts are specific to deep learning, and we will learn about them in this module:</p>
+<ol type="1">
+<li><p><strong>Complexity</strong>: Neural networks are capable of modeling a much wider range of problems than linear regression.</p></li>
+<li><p><strong>Inputs and outputs</strong>: Neural networks can have multiple inputs and multiple outputs, whereas linear regression typically has only one output. This also applies to the dimensions of both input and outputs: while linear models can only have a vector as input, neural networks can receive and produce all sorts of data, like images or text.</p></li>
+<li><p><strong>Non-linearity</strong>: Neural networks are non-linear models, meaning that the outputs are not directly proportional to the inputs, as it happens with the linear regressions.</p></li>
+<li><p><strong>Number of layers</strong>: Neural networks can have multiple layers, each with its own set of weights and biases. Linear regression, on the other hand, has only one layer.</p></li>
+<li><p><strong>Training</strong>: Neural networks require a lot of data to be trained, and this is done through an iterative process known as backpropagation. Linear regressions, on the other hand, can be trained with a smaller amount of data and it is typically trained using a closed-form solution.</p></li>
+<li><p><strong>Flexibility</strong>: Neural networks are more flexible and can be adapted to different tasks, such as image classification, speech recognition, or natural language processing. Linear regression is a simpler model and it is mostly used for predicting numerical values.</p></li>
+<li><p><strong>Explainability</strong>: Linear regression models are considered to be more explainable than neural networks because the relationships between inputs and outputs are easy to understand. The coefficients of the linear regression model can be used to determine the relative importance of the inputs to the output. On the other hand, the inner workings of a neural network, such as the values of the weights and biases, are difficult to interpret and understand. There are techniques that aim to make neural networks explainable, but they are limited.</p></li>
+</ol>
+</section>
+<section id="fully-connected-neural-networks" class="level1">
+<h1>Fully connected neural networks</h1>
+<p>Deep learning models are composite models. Also known as neural networks, these models have a simple unit —the neuron—, that is used several times to build the full model.</p>
+<section id="the-neuron" class="level2">
+<h2 class="anchored" data-anchor-id="the-neuron">The neuron</h2>
+<p>In the traditional neural networks, the basic unit of computation is really simple. The neuron starts with the weighted sum of all the inputs it receives. These <strong>weights</strong> are the <em>parameters</em> of the model, which need to be <em>optimized</em>. A <strong>bias</strong> is added to this sum —also a parameter of the model—, and this sum goes through a non-linear <strong>activation function.</strong> This means that if the input is sufficiently strong, the neuron will <em>activate</em>, and will create an output.</p>
+<p><img src="img/neuron.png" class="img-fluid"></p>
+<p>In summary, a neuron has:</p>
+<ul>
+<li><p><strong>Inputs</strong>: Usually, features of a dataset.</p></li>
+<li><p><strong>Weights</strong> (to be optimized through training): The real values associated with the features, expressing their relative importance.</p></li>
+<li><p>A <strong>bias</strong> (also to be optimized): Allows to shift the activation function towards the positive or negative side (it is the equivalent to the constant in a linear function).</p></li>
+<li><p>An <strong>activation function</strong> (there are several possible activation functions, and the choosing one is an hyper-parameter of the model): Required to add non-linearity to the model.</p></li>
+</ul>
+</section>
+<section id="the-network" class="level2">
+<h2 class="anchored" data-anchor-id="the-network">The network</h2>
+<p>A fully connected neural network (FCNN) contains:</p>
+<ol type="1">
+<li><p>An <strong>input layer</strong> that has the input data of the observation. The size of this layer is determined by the dimensionality of the input.</p></li>
+<li><p>An <strong>output layer</strong> which encodes the predicted values. The size of this layer is determined by the dimensionality of the output.</p></li>
+<li><p>A number of <strong>hidden layers</strong>. The first hidden layer receives the original inputs, while the following layers receive as inputs the outputs of the previous layers. This composition of layers creates a system with increasing levels of abstraction. The number of nodes in each hidden layer as well as the number of hidden layers is arbitrary (a hyper-parameter).</p></li>
+</ol>
+<p><img src="img/nn.png" class="img-fluid"></p>
+</section>
+<section id="activation-functions" class="level2">
+<h2 class="anchored" data-anchor-id="activation-functions">Activation functions</h2>
+<p>The activation functions are a central element of a network because they introduce the <em>non-linearity</em> into the model. This allows the neural networks to be more expressive, in the sense that they can represent complex relations between the combination of different inputs and the output.</p>
+<p>When they are used as part of a large network, each node in a hidden layer receives a linear combination of the non-linear output of the previous hidden layer, and creates a new non-linear signal —using its activation function— to be sent to the next hidden layer. This process allows the network to capture multiple complex relations.</p>
+<p>Some of the most common functions used are the Rectified Linear Unit (ReLU), the Sigmoid, and the Softmax<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
+<p>Their definitions are actually quite simple, and we can write a one-line function for each of them to see how they look.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>relu <span class="ot">&lt;-</span> <span class="cf">function</span>(x) <span class="fu">ifelse</span>(x <span class="sc">&gt;=</span> <span class="dv">0</span>, x, <span class="dv">0</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>sigmoid <span class="ot">&lt;-</span> <span class="cf">function</span>(x) <span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span>x))</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>softmax <span class="ot">&lt;-</span> <span class="cf">function</span>(x) <span class="fu">exp</span>(x) <span class="sc">/</span> <span class="fu">sum</span>(<span class="fu">exp</span>(x))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+<blockquote class="blockquote">
+<p><em><strong>Which activation function to use?</strong> There is no single answer, but here are some tips:</em></p>
+<p><em><strong>ReLU’s</strong> are really popular, but they are only meant to be used on hidden layers.</em></p>
+<p><em>The crucial decision is which activation function to use for the final (output) layer, and this depends of the type of problem:</em></p>
+<ul>
+<li><p><em>If your prediction is a binary classification, you can map to the probability space using a <strong>Sigmoid</strong>.</em></p></li>
+<li><p><em>If you have a classification problem with multiple categories, you can use a <strong>Softmax</strong>, as this will create a probability vector.</em></p></li>
+<li><p><em>If the problem is a regression, you can use the <strong>Identity</strong> (which is actually linear).</em></p></li>
+</ul>
+</blockquote>
+<hr>
+</section>
+</section>
+<section id="optimization" class="level1">
+<h1>Optimization</h1>
+<section id="backpropagation" class="level2">
+<h2 class="anchored" data-anchor-id="backpropagation">Backpropagation</h2>
+<ol type="1">
+<li><p>The weights of the network are initialized with random values, and are used to make a prediction based on the input data.</p></li>
+<li><p>A <strong>loss function</strong><a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> is defined to measure how well the model is performing. This loss function takes the predicted output and the true output, and returns a value that indicates how far is the prediction from the true output (the <em>error</em>).</p></li>
+<li><p>The error is then <em>backpropagated</em> through the network, which means that the error is used to adjust the weights of the network in a way that reduces the error. This is made using an optimization algorithm, such as <strong>gradient descent</strong>. This process is repeated until the error is minimized to an acceptable level.</p></li>
+</ol>
+</section>
+<section id="gradient-descent" class="level2">
+<h2 class="anchored" data-anchor-id="gradient-descent">Gradient descent</h2>
+<p>There are several possible optimizers used in deep learning. One of the first to be used was gradient descent, which takes the following steps:</p>
+<ol type="1">
+<li><p>The gradients of the loss with respect to the parameters are calculated using the <em>chain rule</em><a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>. The gradients indicate the direction in which the parameters should be adjusted in order to minimize the loss.</p></li>
+<li><p>The parameters are updated in the direction that minimizes the loss. This is done by taking a small step (called the <strong>learning rate</strong>) in the opposite direction of the gradients.</p></li>
+</ol>
+<p><em>In practice</em>, the gradient descent is very costly and it’s not used. But several different implementations that share it’s spirit, such as <em>Stochastic Gradient Descent</em> or <em>Adam</em> are used.<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a></p>
+</section>
+<section id="batches" class="level2">
+<h2 class="anchored" data-anchor-id="batches">Batches</h2>
+<p>When training a neural network, the backpropagation is done through batches of data. This means that the computation of the loss, the gradient, and the update of the parameters is done over a subset of the training data. The amount of observations used at each step is known as <strong>batch size,</strong> and it can be adjusted as an hyper-parameter<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>.</p>
+<p>Once the training has done enough batches to go through all the data points, it has completed an <strong>epoch</strong>. But the training does not stop there. We can train the model by running several epochs. This is yet another hyper-parameter to set<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>.</p>
+</section>
+<section id="dropout" class="level2">
+<h2 class="anchored" data-anchor-id="dropout">Dropout</h2>
+<p>Neural networks are very flexible models<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a> and have a lot of parameters. This makes them <em>prone to overfitting</em>. One of the most important techniques to prevent this is the dropout, which limits the learning capacity that the model has over the training data on every batch, randomly, so it can learn a more general representation of the process.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/dropout.png" class="img-fluid figure-img"></p>
+<figcaption>Dropout <span class="citation" data-cites="srivastava2014">(<a href="#ref-srivastava2014" role="doc-biblioref">Srivastava et al. 2014</a>)</span></figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="convolutional-neural-networks" class="level1">
+<h1>Convolutional neural networks</h1>
+<p>Convolutional neural networks (CNN) are a type of network that uses <em>convolutions</em> to extract abstract features of the previous layer, which makes them particularly good to work with 2 dimensional data —like images— as they can capture spacial patterns.</p>
+<section id="images-as-data" class="level2">
+<h2 class="anchored" data-anchor-id="images-as-data">Images as data</h2>
+<p>Before we move into CNNs, we need to understand how images can be represented as data.</p>
+<p>The MNIST database is a large database of handwritten digits that is commonly used for training various image processing systems. This classic benchmark has 60K images of 28x28 pixels.</p>
+<p><img src="img/mnist_sample.png" class="img-fluid"></p>
+<p>Each black &amp; white image can be thought of as a matrix. Each cell of the matrix represents a pixel, and the value is a representation of the grey scale, between 0 (white) and 255 (black).</p>
+<p><img src="img/matrix_sample.png" width="480" height="480"></p>
+<p>This will completely change the logic of machine learning models. Until now, the observations had a vector of features <span class="math inline">\({x_1,x_2,x_3...x_n}\)</span> and a expected output <span class="math inline">\({y}\)</span>. Now, an image (matrix) can be an observation’s set of features. Convolutions are operations over matrices, and hence can deal with this new type of data.</p>
+</section>
+<section id="what-is-a-convolution" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-a-convolution">What is a convolution?</h2>
+<p>A convolution is a mathematical operation between two matrices, where a small matrix, the <strong>filter</strong> or <strong>kernel</strong>, is slid over the input data. At each position, the dot product is computed, and its sum is the value used on that position on the resulting matrix.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/convolution.png" class="img-fluid figure-img" width="500"></p>
+<figcaption>Convolution operation <span class="citation" data-cites="bluche2017">(<a href="#ref-bluche2017" role="doc-biblioref">Bluche 2017</a>)</span></figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/convolutional_movement.gif" class="img-fluid figure-img" width="250"></p>
+<figcaption>Movement <span class="citation" data-cites="bansac2018">(<a href="#ref-bansac2018" role="doc-biblioref">Bansac 2018</a>)</span></figcaption>
+</figure>
+</div>
+<ul>
+<li><p>The values of the filter are like the weights of the FCNN, they are trained through backpropagation.</p></li>
+<li><p>Each layer of the network will have a set of filters.</p></li>
+<li><p>The number of filters per layer, their dimension, the activation function used over the output of the convolution, and the <em>stride</em><a href="#fn8" class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a> of the convolution are hyper-parameters to define.</p></li>
+</ul>
+<p>The filters are combined with activation functions, to work as detectors of an attribute in a region of image. They usually start by recognizing simple features, like lines and diagonals, and build up more complex representations in the final layers, such as faces (on face-recognition problems).</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/hierarchical_features.png" class="img-fluid figure-img" width="600"></p>
+<figcaption>Filters <span class="citation" data-cites="harris2015">(<a href="#ref-harris2015" role="doc-biblioref">Harris 2015</a>)</span></figcaption>
+</figure>
+</div>
+<p>The image received as input creates a new representation for each filter the layer has. These are aggregated through a sum, and the bias is added before going through the activation function.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/Dimensiones_conv.png" class="img-fluid figure-img" width="800"></p>
+<figcaption>Filter composition<span class="citation" data-cites="bai2019">(<a href="#ref-bai2019" role="doc-biblioref">Bai 2019</a>)</span></figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/conv2d.gif" class="img-fluid figure-img" width="400"></p>
+<figcaption>Kernels’ sum <span class="citation" data-cites="shafkat2018">(<a href="#ref-shafkat2018" role="doc-biblioref">Shafkat 2018</a>)</span></figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/bias_conv2d.gif" class="img-fluid figure-img" width="400"></p>
+<figcaption>Bias <span class="citation" data-cites="shafkat2018">(<a href="#ref-shafkat2018" role="doc-biblioref">Shafkat 2018</a>)</span></figcaption>
+</figure>
+</div>
+</section>
+<section id="max-pooling" class="level2">
+<h2 class="anchored" data-anchor-id="max-pooling">Max-pooling</h2>
+<p>CNN layers are usually combined with a dimensionality reduction technique called max-pooling. This helps to reduce the size of the input, so the following layers just focus on the perceived attributes. Max-pooling also slides through the matrix and picks the maximum value of each region of the matrix. The size of the window and the stride are hyper-parameters of the network. For example, a 2x2 window would reduce the size of the matrix by half.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/MaxpoolSample2.png" class="img-fluid figure-img"></p>
+<figcaption>Max-pooling <span class="citation" data-cites="max-pool">(<a href="#ref-max-pool" role="doc-biblioref"><span>“Max-Pooling / Pooling - Computer Science Wiki”</span> n.d.</a>)</span></figcaption>
+</figure>
+</div>
+<hr>
+<blockquote class="blockquote">
+<p><em><strong>Summary</strong>: In this lecture, we explored the basics of artificial neural networks (ANNs) and their architectures, with a focus on fully connected neural networks (FCNNs) and convolutional neural networks (CNNs). We began by discussing the fundamental building blocks of ANNs, including neurons, weights, biases, and activation functions. We then delved into FCNNs, which are composed of multiple layers of neurons that are fully connected to each other. We discussed how these networks learn the relationships between input and output data using backpropagation and gradient descent algorithms. Next, we explored CNNs, which are specifically designed to process image and video data. We discussed the intuition behind convolutional layers, which use filters to extract features from input data, and pooling layers, which reduce the spatial dimensionality of the data.</em></p>
+</blockquote>
+<hr>
+</section>
+</section>
+<section id="discussion" class="level1">
+<h1>Discussion</h1>
+<p>Image recognition technologies bring two types of wrongs that reinforce social inequality:</p>
+<ol type="1">
+<li>Technologies that are wrongly done.</li>
+<li>Technologies that are wrong to exist in the first place.</li>
+</ol>
+<p>Among the first type of problems, there are many cases where the systemic inequalities that surround the design of the models create the conditions that reinforce inequalities.</p>
+<blockquote class="blockquote">
+<p><em>Imagine a tech company building a facial recognition software in Silicon Valley. All the employees working on R&amp;D are cisgender white men graduated from Ivy League universities. They need to build a dataset with faces, so they crowd-source images among their friends, family and their contacts on social media. Given that they relate mostly with other cis white men, in their training data there is an over representation of this group, while other races and genders are not well covered. While they work on the development, they do small tests using their own faces; they can see that the model has a high performance, and it is capable of recognizing all members of the team. They also split the gathered data into train and test. Given that the bias is present in the entire dataset, and that it did not occur to them that they should test the accuracy of the model on different demographics, they randomly split the data and, as the bias is both in train and test, they corroborate that the model has a high accuracy.</em></p>
+<p><em>The outcome would be a model that has a high performance on cis white men, a lower performance on white women and black or brown men, and an even worse performance on black and brown women.</em></p>
+</blockquote>
+<p>This outcome is what <span class="citation" data-cites="buolamwini2018">(<a href="#ref-buolamwini2018" role="doc-biblioref"><strong>buolamwini2018?</strong></a>)</span> found in their work Gender Shades<a href="#fn9" class="footnote-ref" id="fnref9" role="doc-noteref"><sup>9</sup></a>.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/gender_shades.webp" class="img-fluid figure-img"></p>
+<figcaption>Gender Shades <span class="citation" data-cites="buolamwini2019">(<a href="#ref-buolamwini2019" role="doc-biblioref">Buolamwini 2019</a>)</span></figcaption>
+</figure>
+</div>
+<blockquote class="blockquote">
+<p><em>Now imagine that this tech company, knowing that their product is good, gets hired by the police department to build an automatic street patrol that matches the faces of people walking on the streets. They are given the face images of some fugitives, in order to make an automatic check of every person that walks by the camera.</em></p>
+<p><em>The outcome is that they have many more false matches on racialized people, and especially racialized women, which results in arbitrary detentions and background checks.</em></p>
+</blockquote>
+<p>This is the case with facial matching algorithms.</p>
+<p><a href="."><img src="img/false_positives.png" class="img-fluid"></a></p>
+<p>Another problem with this type of technology is <strong>where it gets applied</strong>.</p>
+<p>As shown by <span class="citation" data-cites="najibi2020">Najibi (<a href="#ref-najibi2020" role="doc-biblioref">2020</a>)</span>, the implementation of the Project Green Light (PGL) surveillance program is a striking example: The distribution of high-definition cameras installed throughout the city of Detroit (used for face recognition) highly correlates with primarily Black communities.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/project_green.webp" class="img-fluid figure-img"></p>
+<figcaption>Project Green Light</figcaption>
+</figure>
+</div>
+<p>This example reflects on the problems of wrongly done AI, but also raises other questions:</p>
+<blockquote class="blockquote">
+<p><em>Is it correct to have automatic surveillance of the population? Who decides on the uses of AI? Shouldn’t the subjects of AI —in this case the people walking on the streets— have a call on this?</em></p>
+<p><em>Who implements AI? What happens if racist institutions decide where and how to use AI?</em></p>
+</blockquote>
+<p>The unbalanced distribution over the <em>harms made by AI</em> are not the only problem. The benefits of AI are also unbalanced. For example, if a model for skin-cancer detection is based on a biased dataset, then it’s predictions will be less useful for the underrepresented populations.</p>
+</section>
+<section id="references" class="level1 unnumbered">
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-bai2019" class="csl-entry" role="listitem">
+Bai, Kunlun. 2019. <span>“A Comprehensive Introduction to Different Types of Convolutions in Deep Learning. Medium.”</span> February 11, 2019. <a href="https://towardsdatascience.com/a-comprehensive-introduction-to-different-types-of-convolutions-in-deep-learning-669281e58215">https://towardsdatascience.com/a-comprehensive-introduction-to-different-types-of-convolutions-in-deep-learning-669281e58215</a>.
+</div>
+<div id="ref-bansac2018" class="csl-entry" role="listitem">
+Bansac, Florian. 2018. <span>“Computer Vision and Convolutional Neural Networks. <span>AILEPHANT</span>.”</span> October 10, 2018. <a href="https://ailephant.com/computer-vision-convolutional-neural-networks/">https://ailephant.com/computer-vision-convolutional-neural-networks/</a>.
+</div>
+<div id="ref-bluche2017" class="csl-entry" role="listitem">
+Bluche, Théodore. 2017. <span>“Deep Neural Networks – Applications in Handwriting Recognition.”</span> São Paulo, Brasil. <a href="http://www.tbluche.com/presentations.html">http://www.tbluche.com/presentations.html</a>.
+</div>
+<div id="ref-buolamwini2019" class="csl-entry" role="listitem">
+Buolamwini, Joy. 2019. <span>“Response: Racial and Gender Bias in Amazon Rekognition — Commercial <span>AI</span> System for Analyzing Faces. Medium.”</span> April 24, 2019. <a href="https://medium.com/@Joy.Buolamwini/response-racial-and-gender-bias-in-amazon-rekognition-commercial-ai-system-for-analyzing-faces-a289222eeced">https://medium.com/@Joy.Buolamwini/response-racial-and-gender-bias-in-amazon-rekognition-commercial-ai-system-for-analyzing-faces-a289222eeced</a>.
+</div>
+<div id="ref-harris2015" class="csl-entry" role="listitem">
+Harris, Mark. 2015. <span>“Hierarchical Features. <span>NVIDIA</span> Technical Blog.”</span> November 4, 2015. <a href="https://developer.nvidia.com/blog/deep-learning-nutshell-core-concepts/hierarchical_features/">https://developer.nvidia.com/blog/deep-learning-nutshell-core-concepts/hierarchical_features/</a>.
+</div>
+<div id="ref-max-pool" class="csl-entry" role="listitem">
+<span>“Max-Pooling / Pooling - Computer Science Wiki.”</span> n.d. Accessed January 10, 2023. <a href="https://computersciencewiki.org/index.php/Max-pooling_/_Pooling">https://computersciencewiki.org/index.php/Max-pooling_/_Pooling</a>.
+</div>
+<div id="ref-najibi2020" class="csl-entry" role="listitem">
+Najibi, Alex. 2020. <span>“Racial Discrimination in Face Recognition Technology. Science in the News.”</span> October 24, 2020. <a href="https://sitn.hms.harvard.edu/flash/2020/racial-discrimination-in-face-recognition-technology/">https://sitn.hms.harvard.edu/flash/2020/racial-discrimination-in-face-recognition-technology/</a>.
+</div>
+<div id="ref-shafkat2018" class="csl-entry" role="listitem">
+Shafkat, Irhum. 2018. <span>“Intuitively Understanding Convolutions for Deep Learning. Medium.”</span> June 7, 2018. <a href="https://towardsdatascience.com/intuitively-understanding-convolutions-for-deep-learning-1f6f42faee1">https://towardsdatascience.com/intuitively-understanding-convolutions-for-deep-learning-1f6f42faee1</a>.
+</div>
+<div id="ref-srivastava2014" class="csl-entry" role="listitem">
+Srivastava, Nitish, Geoffrey Hinton, Alex Krizhevsky, Ilya Sutskever, and Ruslan Salakhutdinov. 2014. <span>“Dropout: A Simple Way to Prevent Neural Networks from Overfitting.”</span> <em>Journal of Machine Learning Research</em> 15 (56): 1929–58. <a href="http://jmlr.org/papers/v15/srivastava14a.html">http://jmlr.org/papers/v15/srivastava14a.html</a>.
+</div>
+</div></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>But there are many others, you can check them here <a href="https://keras.io/api/layers/activations/" class="uri">https://keras.io/api/layers/activations/</a><a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>The loss function is a function composed by the model’s predicted output and the true output <span class="math inline">\(f(\hat{y}\ ,y)\)</span>. The model’s output is itself a composite function of the <em>inputs</em> and the model’s parameters <span class="math inline">\(f(X,P)\)</span>.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>The <em>chain rule</em> states that the derivative of a composite function is equal to the product of the derivative of the outer function with respect to the inner function and the derivative of the inner function with respect to the parameter <span class="math inline">\(h(x)=f(g(x)) \rightarrow h'(x) =f'(g(x))g'(x)\)</span>. This is used to disentangle the composite nature of the nested layers of the model.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>Check <a href="https://keras.io/api/optimizers/" class="uri">https://keras.io/api/optimizers/</a> for the explanation of the different implementations<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>There is a trade-off. A very small batch-size would allow to use all the information that each observation provides, but it would be computationally expensive, and prone to overfitting.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>A nice trick is to use <em>early stopping</em>, which automatically stops the training when there are no more significant improvements. Check it here: <a href="https://keras.io/api/callbacks/early_stopping/" class="uri">https://keras.io/api/callbacks/early_stopping/</a><a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>They are so flexible that they are <em>universal aproximators</em>, which means that no matter which is the real data generating process, there is a neural network that can approximately approach to it, replicating the results.<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn8"><p>The number of pixels to move when sliding through the input matrix. For example, if a neural network’s stride is set to 2, the filter will move two pixels at a time.<a href="#fnref8" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn9"><p><a href="http://gendershades.org/" class="uri">http://gendershades.org/</a><a href="#fnref9" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

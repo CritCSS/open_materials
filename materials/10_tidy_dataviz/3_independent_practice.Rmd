@@ -1,0 +1,51 @@
+---
+title: "Tidyverse + Dataviz"
+subtitle: "Independent practice"
+author: ""
+date: ""
+output: html_notebook
+---
+
+```{r setup, message=FALSE, warning=FALSE, include=FALSE}
+knitr::opts_chunk$set(message = FALSE,warning = FALSE)
+```
+
+# COVID-19 in USA
+
+In this independent practice, you will use the tools presented in class to process, transform, summarize and visualize information using `tidyverse`.
+
+First, we will load the libraries and the datasets. We will use the datasets `us_covid19_daily.csv`, `us_counties_covid19_daily.csv` and `acs2017_county_data.csv`. To answer the questions, look at the information regarding the [data definitions](https://covidtracking.com/about-data/data-definitions) for the dataframes.
+
+```{r}
+
+```
+
+1.  Which state has the most counties?
+
+```{r}
+
+```
+
+2.  What are the 5 counties with highest count of COVID-related deaths?
+
+```{r}
+
+```
+
+3.  What was the month of the year with highest count of people hospitalized? And in ICU?
+
+```{r}
+
+```
+
+4.  Convert the columns of the COVID dataset to their correct format, and express the columns of numeric values in thousands.
+
+```{r}
+
+```
+
+5.  What is the state with highest number of deaths per capita (in 2017 population)?
+
+```{r}
+
+```

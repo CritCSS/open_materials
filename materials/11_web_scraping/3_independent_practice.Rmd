@@ -1,0 +1,32 @@
+---
+title: "Web Scraping"
+subtitle: "Independent practice"
+author: ""
+date: ""
+output: html_notebook
+---
+
+```{r setup, message=FALSE, warning=FALSE, include=FALSE}
+knitr::opts_chunk$set(message = FALSE,warning = FALSE)
+```
+
+For this independent practice, you will build a data frame that contains information about feminists across the world. You will use as input the [main page of Wikipedia about feminists.](https://en.wikipedia.org/wiki/List_of_feminists)
+
+1. Scrape into a dataframe all the tables that contain information about feminists. 
+
+```{r}
+
+```
+
+2. Scrape from the website the links to the Wikipedia page of the feminists listed and add them as a column of the dataframe. 
+
+```{r}
+
+```
+
+3. Scrape the text content of the first 50 feminists that have Wikipedia pages in the dataframe. 
+
+```{r}
+
+```
+

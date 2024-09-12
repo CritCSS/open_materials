@@ -1,0 +1,44 @@
+---
+title: "Data Storytelling"
+subtitle: "Independent practice"
+author: ""
+date: ""
+output: html_notebook
+---
+
+```{r setup, message=FALSE, warning=FALSE, include=FALSE}
+knitr::opts_chunk$set(message = FALSE,warning = FALSE)
+```
+
+In this independent practice, you will use the tools presented in class to visualize information using `tidyverse` and `ggplot2`.
+
+First, we will load the libraries and the datasets. We will use the dataset compiled by Gapminder, a non-profit organisation dedicated to explaining the world with data. It contains development indicators for countries around the world, with observations at 5-year intervals. You will have to load the libraries `ggplot2`, `gapminder`, and create the object `data` with the assigned dataframe `gapminder`.  
+
+```{r}
+
+```
+
+1. Create a graph that can answer the question: What is the continent with most observations in the year 2007? 
+
+```{r}
+
+```
+
+2. Create a graph that can answer the question: What continent has the most differences or variability of wealth in its countries for the year 2007?
+
+```{r}
+
+```
+
+3. Create a graph that can answer the question: What is the relationship between life expectancy and wealth for the year 2007?
+
+```{r}
+
+```
+
+4. Create a graph that can answer the question: What country or countries were the most wealthy in Europe for the years 1952 and 2007?
+
+```{r}
+
+```
+

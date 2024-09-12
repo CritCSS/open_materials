@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.353">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Introduction I</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="1_class_notes_files/libs/clipboard/clipboard.min.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/quarto.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/popper.min.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/anchor.min.js"></script>
+<link href="1_class_notes_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="1_class_notes_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="1_class_notes_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="1_class_notes_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="1_class_notes_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Introduction I</h1>
+<p class="subtitle lead">class notes</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="why-should-data-science-be-critical" class="level1">
+<h1>Why should data science be critical?</h1>
+<p>Quantitative analysis can be a very powerful tool to understand <strong>systemic</strong> phenomena. By translating similar <strong>experiences</strong> shared by large groups of people into data, we can identify repeating <strong>patterns</strong>. This allows us to contextualize our personal experiences and address issues from a systemic perspective<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>, leading to more effective solutions and positive change for ourselves and the communities we are a part of.</p>
+<p>However, data are not neutral or objective. They are the products of unequal social relations, and understanding this <strong>context</strong> is essential for conducting accurate, ethical analysis.</p>
+<p>It is important to critically analyze data in order to avoid replicating the biases that may be inherent in the data. Standard practices in data science may serve to <strong>reinforce</strong> these existing inequalities <span class="citation" data-cites="dignazioDataFeminism2023">(<a href="#ref-dignazioDataFeminism2023" role="doc-biblioref">D’ignazio and Klein 2023</a>)</span>.</p>
+<section id="biases-and-objectivity" class="level2">
+<h2 class="anchored" data-anchor-id="biases-and-objectivity">Biases and “objectivity”</h2>
+<p>The demographics of data science, as well as related occupations such as software engineering and artificial intelligence research, are not representative of the population as a whole. The vast majority of individuals working in these fields are elite white men.</p>
+<p>It is important to keep in mind that science is shaped by the unique perspectives of individual scientists, and therefore researchers’ subjectivities and <strong>biases</strong> can influence the way data sets are built and later analyzed. Therefore, it is necessary to be <strong>transparent</strong> about the context in which research is conducted as well as potential sources of bias, thus acknowledging the partiality of our perspectives.</p>
+<p>The following example illustrates the biases that may result from the work of non-diverse groups. A Ghanaian-American graduate student at MIT, Joy Buolamwini, experienced a problem when working on a class project using facial-analysis software, as the software could not detect her face but had no problem detecting the faces of her lighter-skinned collaborators. She discovered that the system’s facial recognition features worked perfectly when she put on a white mask. Later, she found the data set on which many of facial-recognition algorithms are tested contains 78 percent male faces and 84 percent white faces <span class="citation" data-cites="dignazioDataFeminism2023">(<a href="#ref-dignazioDataFeminism2023" role="doc-biblioref">D’ignazio and Klein 2023</a>)</span>.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/Joy_Buolamwini%20.png" class="img-fluid figure-img" width="800"></p>
+<figcaption class="figure-caption"><a href="https://mitpress.mit.edu/9780262358538/data-feminism/">Joy Buolamwini’ experiment</a></figcaption>
+</figure>
+</div>
+</section>
+<section id="what-gets-counted-and-what-doesnt" class="level2">
+<h2 class="anchored" data-anchor-id="what-gets-counted-and-what-doesnt">What gets counted and what doesn’t?</h2>
+<p>Data that could be used to address critical social issues may be <strong>missing</strong><a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>, but powerful institutions may also create databases and data systems through <strong>excessive surveillance</strong> of marginalized groups.</p>
+<p>Having more data on a subject may not always have a positive impact. The <strong>paradox of exposure</strong> illustrates the complexity of this matter. This term describes a paradoxical situation in which individuals who have the most to gain from being counted or classified are also the most vulnerable to the potential dangers posed by that very act of counting or classifying. For example: undocumented immigrants are less likely to complete the census questionnaire due to fear of deportation, which leads to undercounting in the census. This results in less political representation and federal funding being allocated to these groups, and therefore less voting power and fewer resources for them <span class="citation" data-cites="dignazioDataFeminism2023">(<a href="#ref-dignazioDataFeminism2023" role="doc-biblioref">D’ignazio and Klein 2023</a>)</span>.</p>
+<p>Furthermore, the effectiveness of data analysis in addressing societal issues is heavily influenced by the <strong>quality</strong> of the input data. In this regard, it is fundamental to analyze which variables are selected, as well as their categories. A clear example of this challenge is <strong>racial classification</strong>: while it can help understanding and fighting racial stratification, it can also be used to preserve it. The interpretation and impact of these types of variables on data analysis are dependent on various factors, such as the role of critical or intersectional perspectives within research teams, the causal theories guiding the empirical analysis or the contextualized or decontextualized nature of the interpretation of results. Therefore, racial data can play a crucial role in addressing racial inequality, but this does not mean every statistic should be presented racially. In fact, some racial statistics have contributed to racial conflict by implying that race determines behavior <span class="citation" data-cites="zuberiThickerBloodHow2001">(<a href="#ref-zuberiThickerBloodHow2001" role="doc-biblioref">Zuberi 2001</a>)</span>.</p>
+<hr>
+</section>
+</section>
+<section id="working-with-data" class="level1">
+<h1>Working with data</h1>
+<p>The first step for working with data is <em>data tidying</em>: structuring data sets in a standarized way. A well prepared data set will simplify the data analysis process and help us avoid common mistakes.</p>
+<p><strong>Tidy data</strong> is a standard way of mapping the meaning of a data set to its structure<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>. In tidy data <span class="citation" data-cites="wickhamTidyData2014">(<a href="#ref-wickhamTidyData2014" role="doc-biblioref">Wickham 2014</a>)</span>:</p>
+<ol type="1">
+<li><p>Every <strong>column</strong> is a <strong>variable</strong>.</p></li>
+<li><p>Every <strong>row</strong> is an <strong>observation</strong>.</p></li>
+<li><p>Every <strong>cell</strong> is a <strong>single value</strong>.</p></li>
+</ol>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/tidy_data.jpg" class="img-fluid figure-img" width="800"></p>
+<figcaption class="figure-caption">Artwork by @allison_horst</figcaption>
+</figure>
+</div>
+<p>To manipulate these tidy data sets we code: we write instructions that enable the machine or software to process our data precisely as we require. Programming languages provide us with a structured framework for communicating to the computer the specific actions to be executed or the methods by which to carry them out in order to meet our specific needs.</p>
+<p>A second fundamental principle when working with data is making your code easy to understand (for your future self or others). Writing a readable code will make it <strong>reusable</strong>: comments and documentation are fundamental to show the decisions you made, the limitations of your code, etc.<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> <span class="citation" data-cites="benureauRerunRepeatReproduce2018">(<a href="#ref-benureauRerunRepeatReproduce2018" role="doc-biblioref">Benureau and Rougier 2018</a>)</span>.</p>
+</section>
+<section id="working-with-r" class="level1">
+<h1>Working with R</h1>
+<section id="why-r" class="level2">
+<h2 class="anchored" data-anchor-id="why-r">Why R?</h2>
+<ul>
+<li><p>R is an <strong>open source</strong> software, which means that anyone can use, modify, and distribute it without cost. Additionally, R can easily be integrated with other programming languages (such as Python).</p></li>
+<li><p>R has a wide variety of functions that make it easy to import, manipulate, and analyze data. It is particularly useful for <strong>statistical analysis, data visualization, and machine learning</strong>.</p></li>
+<li><p>It also has a large and active <strong>community</strong> of developers who contribute to the language and create useful packages (and who can help and support you when you encounter problems or have questions about the language!).</p></li>
+</ul>
+</section>
+<section id="the-basics" class="level2">
+<h2 class="anchored" data-anchor-id="the-basics">The basics</h2>
+<p>We will be using <strong>RStudio</strong>, an integrated development environment (IDE) designed to work with R (or Python).</p>
+<p>The RStudio layout<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>:</p>
+<p><img src="img/r_workspace_numbered.png" class="img-fluid" width="800"></p>
+<p>When working with R, the code is typically written in the source pane (<strong>1</strong>), although it is also possible to write code directly into the console (<strong>2</strong>). However, it is important to note that any code written in the console will not be saved.</p>
+<p>To execute a line (or lines) of code, simply select the code chunk and press <em>Ctrl + Enter</em> (Windows) or <em>Command + Return</em> (Mac). It is also possible to run all the code on the file using the <em>Source</em> command (top right).</p>
+<p>The results of the executed code are displayed in the console (<strong>2</strong>).</p>
+<p>The environment pane (<strong>3</strong>) displays currently imported and created R objects.</p>
+<p>The output pane (<strong>4</strong>) displays the generated plots, file tabs, packages, and help information. The basic command to find out what a function does or simply ask for help is help(“function name”) or ?(“function name”).</p>
+<p>To modify the appearance of the execution environment, such as changing the colors or switching to “dark mode”, use Tools &gt; Global Options &gt; Appearance<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>.</p>
+<p>To create a new script to work on, you can click on File &gt; New File &gt; R Script, or use the keyboard shortcut <em>Ctrl + Shift + N</em> (Windows) or <em>Shift + Command + N</em> (Mac)<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a>.</p>
+<p>Keep in mind that objects created in R are not automatically saved on your computer. Specific functions must be used depending on the object type and the desired format for exporting it (e.g.: .xlsx tables, .png plots, etc.).</p>
+<p>For more information on RStudio’s panes, visit <a href="https://docs.posit.co/ide/user/ide/guide/ui/ui-panes.html">this site</a></p>
+<p>RStudio also has a feature called <strong>projects</strong>, which is a way of compartmentalizing your R code and keeping all the files associated with a project together — input data, R scripts, analytical results, figures. Each project is linked to a <strong>working directory</strong>, which is the folder where R searches when loading and saving files<a href="#fn8" class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a><a href="#fn9" class="footnote-ref" id="fnref9" role="doc-noteref"><sup>9</sup></a>. Keep in mind that file paths will be expressed in relation to the project’s location on the computer, but it’s also possible to specify absolute paths (from the C: or D: drive of our computer).</p>
+<p>You can create an RStudio project using File &gt; <em>New Project</em>:</p>
+<ul>
+<li><p>In a brand new directory</p></li>
+<li><p>In an existing directory where you already have R code and data</p></li>
+<li><p>By cloning a version control (Git or Subversion) repository</p></li>
+</ul>
+<p>This action will create a project file (with an .Rproj extension), which you can later open in order to open your project.</p>
+</section>
+<section id="structuring-a-project" class="level2">
+<h2 class="anchored" data-anchor-id="structuring-a-project">Structuring a project</h2>
+<p>A good practice to structure a project directory is keeping your input, code and outputs in separate folders. Folder and file names should always be descriptive and easy to remember. For example:</p>
+<p>my_project/</p>
+<p>&nbsp;&nbsp;&nbsp; data/</p>
+<p>&nbsp;&nbsp;&nbsp; code/</p>
+<p>&nbsp;&nbsp;&nbsp; results/</p>
+<p>&nbsp;&nbsp;&nbsp; report/</p>
+<p>This folder arrangement will simplify the file import and export process.</p>
+</section>
+<section id="final-general-setup-advice" class="level2">
+<h2 class="anchored" data-anchor-id="final-general-setup-advice">Final general setup advice</h2>
+<p>By default, R will save your environment to a .RData file after you quit a session and reload it when you start a new session. This is not recommended because it might delay start-up, or even generate an endless crash cycle if a previous session crashed. It might also make your work harder to reproduce. To change this setting, got to: Tools &gt; Global Options &gt; General, and untick “Restore .RData into workspace at startup” and select the option “Never” for “Save workspace to .RData on exit:”.</p>
+<p>R will also save a log of all commands entered into the console during an R session in a .Rhistory file. To change this setting untick the “Always save history (even when not saving .RData)” option in the same menu.</p>
+</section>
+<section id="file-types-.r-and-.rmd" class="level2">
+<h2 class="anchored" data-anchor-id="file-types-.r-and-.rmd">File types: .R and .Rmd</h2>
+<ol type="1">
+<li><strong>.R files</strong> contain plain code that can be executed by R (including commands you create objects, transform them, create visualizations, save objects, etc.).</li>
+</ol>
+<blockquote class="blockquote">
+<p><strong><em>When should we use .R files?</em></strong></p>
+<p><em>.R files are useful to carry out the first steps of our data-processing workflow: importing and exploring the data base, and starting to designing the elements we will use to communicate our results (tables, graphs, etc.).</em></p>
+</blockquote>
+<ol start="2" type="1">
+<li><strong>.Rmd</strong> files integrate the <em>R</em> and <em>Markdown</em> languages<a href="#fn10" class="footnote-ref" id="fnref10" role="doc-noteref"><sup>10</sup></a>. Markdown is a markup language for creating formatted text using a plain-text editor with simple, unobtrusive syntax.<a href="#fn11" class="footnote-ref" id="fnref11" role="doc-noteref"><sup>11</sup></a></li>
+</ol>
+<blockquote class="blockquote">
+<p><strong><em>When should we use .Rmd files?</em></strong></p>
+<p><em>.Rmd files are designed to contain your code and also the narrative surrounding the data. Therefore, they facilitate teamwork and are also useful to communicate our results.</em></p>
+</blockquote>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/rmarkdown_wizards.png" class="img-fluid figure-img" width="800"></p>
+<figcaption class="figure-caption">Artwork by @allison_horst</figcaption>
+</figure>
+</div>
+<blockquote class="blockquote">
+<p><em><strong>Why use RMarkdown?</strong><span class="citation" data-cites="alzahawishilaanWritingReproducibleManuscripts2021">(<a href="#ref-alzahawishilaanWritingReproducibleManuscripts2021" role="doc-biblioref">Alzahawi 2021</a>)</span></em></p>
+<ul>
+<li><p><em>Avoid the common errors (and time consumed) that result from analyzing data using a different software from the one used to communicate your results (no more copy/pasting and/or reformatting all results after every modification!). All results and citations in your reports will be automatically updated after any modification.</em></p></li>
+<li><p><em>Improve your team-work and code reproducibility by using a report structure specially designed for you to clearly explain your methodology and result interpretation as you navigate your way through the data analysis process.</em></p></li>
+<li><p><em>Some arguments against RMarkdown:</em></p>
+<ul>
+<li><em>The learning curve can be steep.</em></li>
+<li><em>Barriers to collaborating with others: all your team must be able to use R/RMarkdown (and additional tools such as GitHub).</em></li>
+</ul></li>
+</ul>
+</blockquote>
+</section>
+<section id="packages" class="level2">
+<h2 class="anchored" data-anchor-id="packages">Packages</h2>
+<p>In R, the fundamental unit of shareable code is the <strong>package</strong>. A package bundles together code, data, documentation, and tests, and is easy to share with others. As of March 2023, there were over 19,000 packages available on the <strong>Comprehensive R Archive Network</strong>, or CRAN, the public clearing house for R packages <span class="citation" data-cites="wickhamPACKAGESOrganizeTest2023">(<a href="#ref-wickhamPACKAGESOrganizeTest2023" role="doc-biblioref">Wickham 2023</a>)</span>.</p>
+<blockquote class="blockquote">
+<p><strong><em>Why are packages useful?</em></strong></p>
+<p><em>Someone has probably already solved the problem you’re working on, and you can benefit from their work by downloading their package</em><a href="#fn12" class="footnote-ref" id="fnref12" role="doc-noteref"><sup>12</sup></a>.</p>
+</blockquote>
+</section>
+<section id="r-syntax" class="level2">
+<h2 class="anchored" data-anchor-id="r-syntax">R syntax</h2>
+<p>Before we start coding, some general rules about the R language<a href="#fn13" class="footnote-ref" id="fnref13" role="doc-noteref"><sup>13</sup></a>:</p>
+<ul>
+<li><p>R is <strong>case-sensitive</strong>: variable1 and VARIABLE1 will be interpreted as two different objects.</p></li>
+<li><p><strong>Whitespaces and new lines</strong>: R will ignore whitespaces and new lines inside an expression, using them to delimit expressions only in case of ambiguity. If an expression can terminate at the end of the line the parser will assume it does so. Neutral new lines will be useful to make our code easier to understand.</p></li>
+<li><p><strong>Comments</strong> in our code should be preceded by #. Otherwise, every line we write will be evaluated as a line of code. Comments will be useful to explain our code to future users.</p></li>
+</ul>
+</section>
+<section id="operators" class="level2">
+<h2 class="anchored" data-anchor-id="operators">Operators</h2>
+<p><strong>Assignment</strong></p>
+<p>Assignment operators are used to define objects, that is, to assign them a value.</p>
+<p>-&gt;: Right assignment</p>
+<p>&lt;-: Left assignment</p>
+<p>=: Left assignment</p>
+<p>For left (right) assignment operators, the name of the object should be placed to the left (right) of the operator, while the definition of the object should be placed to the right (left). For example:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>value_1 <span class="ot">&lt;-</span> <span class="dv">1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>When an object is defined in R, it is saved in the program’s environment and can be accessed and used later in the code. When running a line with the name of an object, its content is displayed in the console.</p>
+<div class="cell" data-null_prefix="true">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>value_1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> 1</code></pre>
+</div>
+</div>
+<p>It is important to keep in mind that if an object is defined with the same name as a previously existing object, the latter replaces the former.</p>
+<div class="cell" data-null_prefix="true">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>value_1 <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>value_1 <span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>value_1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> 2</code></pre>
+</div>
+</div>
+<p><strong>Relational</strong></p>
+<p>Relational operators are used to describe relationships between objects, which are expressed as true (TRUE) or false (FALSE)<a href="#fn14" class="footnote-ref" id="fnref14" role="doc-noteref"><sup>14</sup></a>.</p>
+<p>&gt;: Greater than</p>
+<p>&gt;=: Greater than or equal to</p>
+<p>&lt;: Less than</p>
+<p>&lt;=: Less than or equal to</p>
+<p>==: Equal to</p>
+<p>!=: Not-equal to</p>
+<p>For example:</p>
+<div class="cell" data-null_prefix="true">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="dv">4</span><span class="sc">==</span><span class="dv">5</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> FALSE</code></pre>
+</div>
+</div>
+<div class="cell" data-null_prefix="true">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="dv">4</span><span class="sc">==</span><span class="dv">4</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> TRUE</code></pre>
+</div>
+</div>
+<div class="cell" data-null_prefix="true">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="dv">4</span><span class="sc">&gt;=</span><span class="dv">5</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> FALSE</code></pre>
+</div>
+</div>
+<p><strong>Logical</strong></p>
+<p>Logical operators are used to combine logical expressions.</p>
+<p>!: Not</p>
+<p>&amp;: And</p>
+<p>|: Or</p>
+<p>Considering the examples mentioned above, these are some of the expressions we can create combining them:</p>
+<div class="cell" data-null_prefix="true">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="dv">4</span><span class="sc">==</span><span class="dv">5</span> <span class="sc">&amp;</span> <span class="dv">4</span><span class="sc">==</span><span class="dv">4</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> FALSE</code></pre>
+</div>
+</div>
+<div class="cell" data-null_prefix="true">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="dv">4</span><span class="sc">==</span><span class="dv">5</span> <span class="sc">|</span> <span class="dv">4</span><span class="sc">==</span><span class="dv">4</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> TRUE</code></pre>
+</div>
+</div>
+<div class="cell" data-null_prefix="true">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="dv">4</span><span class="sc">==</span><span class="dv">5</span> <span class="sc">|</span> <span class="sc">!</span>(<span class="dv">4</span><span class="sc">==</span><span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> FALSE</code></pre>
+</div>
+</div>
+<p><strong>Arithmetic</strong></p>
+<p>Some of R’s basic arithmetic operators:</p>
+<p>+: Plus</p>
+<p>-: Minus</p>
+<p>*: Multiplication</p>
+<p>/: Division</p>
+<p>^: Exponentiation</p>
+<p>Example of usage:</p>
+<div class="cell" data-null_prefix="true">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>(<span class="dv">4</span><span class="sc">+</span><span class="dv">4</span>)<span class="sc">*</span><span class="dv">8</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> 64</code></pre>
+</div>
+</div>
+<p><strong>Combinations!</strong></p>
+<p>Operators can be combined to create increasingly complex expressions:</p>
+<div class="cell" data-null_prefix="true">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>(<span class="dv">2</span><span class="sc">*</span><span class="dv">8</span> <span class="sc">==</span> <span class="dv">4</span><span class="sc">^</span><span class="dv">2</span> <span class="sc">|</span> <span class="dv">3</span><span class="sc">*</span><span class="dv">3</span> <span class="sc">&lt;=</span> <span class="dv">2</span><span class="sc">^</span><span class="dv">3</span>) <span class="sc">&amp;</span> <span class="dv">3</span> <span class="sc">!=</span> <span class="dv">2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> TRUE</code></pre>
+</div>
+</div>
+</section>
+<section id="r-objects" class="level2">
+<h2 class="anchored" data-anchor-id="r-objects">R objects</h2>
+<p>While R objects might appear somewhat abstract at this point, we will delve into specific examples during the guided practice to provide a clearer understanding.</p>
+<p><strong>Values</strong></p>
+<p>Values in R are the smallest objects, which will be used as building blocks for everything else. The main value types are:</p>
+<ul>
+<li><p>“numeric” for any numerical value (such as 3.5, -.4).</p></li>
+<li><p>“character” for text values, denoted by using quotes around a value (for example: “x” or ‘x’). They can include any printable character (for example: “a”, “Hi!” or “#2.5%jk%?”).</p></li>
+<li><p>“logical” for TRUE and FALSE (the Boolean data type).</p></li>
+<li><p>“integer” for integer numbers (the qualifier L at the end of a number indicates to R that it’s an integer, for example: 4L).</p></li>
+<li><p>“complex” to represent complex numbers with real and imaginary parts (such as 2i or 3+8i).</p></li>
+</ul>
+<p><strong>Vectors</strong></p>
+<p>A vector is a set of values of the <em>same class</em>. There may be numeric, character, etc. vectors. To create a vector, we use the <strong>c()</strong> command (which stands for ‘combine’).</p>
+<p>A special case is the <em>factor</em> type vectors. They are generally used for ordinal data. That is, for a qualitative variable for which we need to establish a certain order in its possible values.</p>
+<p><strong>Data Frames</strong></p>
+<p>A data frame is a two-dimensional data structure or <strong>table</strong>, where each column represents a <strong>variable</strong>, and each row represents an <strong>observation</strong>. Data frames can contain data of different classes.</p>
+<p>It can be considered as a set of equally sized vectors, where each vector (column) should contain data of the same type. However, the classes of vectors that make up the table can be different. Therefore, each observation (row) can be composed of data that can be of different types.</p>
+<p>Data frames are a fundamental object in the R programming language, as they are the most commonly used structure for data analysis. Data frames are also typically used for loading external data into the R environment and for exporting the results of our work.</p>
+<p><strong>Lists</strong></p>
+<p>A list is a collection of objects of <strong>any type</strong>, including other lists, data frames, vectors, or individual values. While a vector contains values of a single type, a data frame contains vectors of different types. Similarly, a list can contain data frames, but can also contain other lists, vectors, or individual values, all at the same time. Lists are a flexible and powerful data structure in R that can be used to organize complex and diverse data.</p>
+</section>
+</section>
+<section id="references" class="level1 unnumbered">
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-alzahawishilaanWritingReproducibleManuscripts2021" class="csl-entry" role="listitem">
+Alzahawi, Shilaan. 2021. <span>“Writing Reproducible Manuscripts in <span>R</span>.”</span>
+</div>
+<div id="ref-benureauRerunRepeatReproduce2018" class="csl-entry" role="listitem">
+Benureau, Fabien C. Y., and Nicolas P. Rougier. 2018. <span>“Re-Run, <span>Repeat</span>, <span>Reproduce</span>, <span>Reuse</span>, <span>Replicate</span>: <span>Transforming Code</span> into <span>Scientific Contributions</span>.”</span> <em>Frontiers in Neuroinformatics</em> 11 (January): 69. <a href="https://doi.org/10.3389/fninf.2017.00069">https://doi.org/10.3389/fninf.2017.00069</a>.
+</div>
+<div id="ref-dignazioDataFeminism2023" class="csl-entry" role="listitem">
+D’ignazio, Catherine, and Lauren F. Klein. 2023. <em>Data Feminism</em>. <span>S.l.</span>: <span>MIT PRESS</span>.
+</div>
+<div id="ref-wickhamTidyData2014" class="csl-entry" role="listitem">
+Wickham, Hadley. 2014. <span>“Tidy <span>Data</span>.”</span> <em>Journal of Statistical Software</em> 59 (10). <a href="https://doi.org/10.18637/jss.v059.i10">https://doi.org/10.18637/jss.v059.i10</a>.
+</div>
+<div id="ref-wickhamPACKAGESOrganizeTest2023" class="csl-entry" role="listitem">
+———. 2023. <em>R <span>PACKAGES</span>: Organize, Test, Document, and Share Your Code</em>. <span>S.l.</span>: <span>O’REILLY MEDIA</span>.
+</div>
+<div id="ref-zuberiThickerBloodHow2001" class="csl-entry" role="listitem">
+Zuberi, Tukufu. 2001. <em>Thicker Than Blood: How Racial Statistics Lie</em>. <span>Minneapolis</span>: <span>University of Minnesota Press</span>.
+</div>
+</div></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Is data enough? In 2015, communications researcher Candice Lanius wrote a widely shared blog post, <a href="https://thesocietypages.org/cyborgology/2015/01/12/fact-check-your-demand-for-statistical-proof-is-racist/">Fact Check: Your Demand for Statistical Proof is Racist</a> in which she summarizes the ample research on how those in positions of power accept anecdotal evidence from those like themselves, but demand endless statistics from minoritized groups. In those cases, she argues, more data will never be enough.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>“<a href="https://mimionuoha.com/the-library-of-missing-datasets">The Library of Missing Datasets</a> is a physical repository of those things that have been excluded in a society where so much is collected. The word <em>missing</em> is used to imply both a lack and an ought: something does not exist, but it should.”<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>You can find some solutions to frequent problems <a href="https://cran.r-project.org/web/packages/tidyr/vignettes/tidy-data.html">here</a>.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p><a href="https://gist.github.com/peterhurford/3ad9f48071bd2665a8af">Here</a> you can find some suggestions on how to write more readable code.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p><a href="http://www.rstudio.com/ide/docs/using/customizing#pane-layout">It is possible to change the default location of the panes.</a><a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p><a href="https://support.posit.co/hc/en-us/articles/200549016-Customizing-RStudio">More info on customizing RStudio.</a><a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>For more keyboard shortcuts got to: Help &gt; Keyboard Shortcuts Help. Note that Mac and Windows users have different shortcuts.<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn8"><p><a href="https://support.posit.co/hc/en-us/articles/200526207-Using-RStudio-Projects">What happens when a project is opened?</a><a href="#fnref8" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn9"><p>When we position ourselves between the quotation marks that define the location for searching or saving a file, pressing <em>Tab</em> in R will reveal the documents or folders residing within the folder we are actively working in. It’s always a good practice to search for files or folders in this manner instead of manually typing their names in order to prevent errors.<a href="#fnref9" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn10"><p>These class notes were written using an .Rmd file!<a href="#fnref10" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn11"><p><a href="https://bookdown.org/yihui/rmarkdown/">Resources on how to use RMarkdown.</a><a href="#fnref11" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn12"><p><em>How can I find the package I’m looking for? <a href="https://cran.r-project.org/web/views/" class="uri">https://cran.r-project.org/web/views/</a></em><a href="#fnref12" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn13"><p>For a more exhaustive description of the R language, visit <a href="https://cran.r-project.org/doc/manuals/r-release/R-lang.html">this site.</a><a href="#fnref13" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn14"><p>Remember R is case-sensitive!<a href="#fnref14" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

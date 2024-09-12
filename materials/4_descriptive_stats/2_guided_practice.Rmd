@@ -1,0 +1,222 @@
+---
+title: "Descriptive statistics"
+author: ''
+date: ''
+output: html_notebook
+subtitle: Guided practice
+---
+
+In this guided practice we will introduce R's functions for sampling and random data generation, as well as a series of tools to describe datasets's variables and the relationships between them.
+
+```{r setup, message=FALSE, warning=FALSE, include=FALSE}
+knitr::opts_chunk$set(message = FALSE,warning = FALSE, error = FALSE)
+```
+
+```{r}
+library(stats)
+```
+
+Let's open the file we will be using for this class and store it in an object called "dataset":
+
+```{r}
+dataset <- readRDS("data/asec/sub_dataset.RDS")
+```
+
+The database we will be using contains a subset of the information contained in the Annual Social and Economic (ASEC) Supplement conducted by the Bureau of the Census for the Bureau of Labor Statistics in 2022.
+You can find the ASEC 2022 Public Use Data Dictionary in the file cpsmar22.pdf
+
+# Data generating functions
+
+R's base language provides various functions for sampling and random data generation. Random data generation functions allow us to specify the parameters of probability distributions and obtain random elements from these distributions.
+
+The `set.seed()` function can be used to ensure reproducibility when generating random series of numbers. It requires an integer (the *seed*), which will be used to initialize the number generation process. We shall set a seed before every random data generation function.
+
+```{r}
+set.seed(123)
+```
+
+
+The `sample()` function will take a random sample of the specified size from the elements of a vector with or without replacement.
+
+When sampling without replacement, once an observation is selected it can not be selected again:
+
+```{r}
+vec <- 1:100
+
+set.seed(123)
+
+sample(vec,20, replace = FALSE)
+```
+When sampling with replacement, the same observation can be selected more than once For instance, in the following example number 14 is selected more than once: 
+
+```{r}
+set.seed(123)
+
+sample(vec,20, replace = TRUE)
+```
+
+## Some useful probability distributions
+
+We will now present some of the main functions provided by base R in order to randomly generate series of numbers according to the parameters of a probability distribution:
+
+- `runif()`: uniform distribution. The parameters of this distribution are its maximum and minimal values.
+
+```{r}
+set.seed(123)
+
+unif <- runif(10, min = 0, max = 1)
+
+unif
+```
+
+
+- `rnorm()`: normal distribution. The parameters of this distribution are the mean (mean argument) and the standard deviation (sd argument)
+
+```{r}
+set.seed(123)
+
+normal <- rnorm(10, mean = 0, sd = 1)
+
+normal
+```
+
+
+- `rbinom()`: binomial distribution. The parameters of this distribution are the number of independent Bernoulli trials (size argument) and the probability of success (prob argument).
+
+```{r}
+set.seed(123)
+
+binom <- rbinom(10, size=10, prob=.5)
+
+binom
+```
+
+
+- `rpois()`: Poisson distribution. This distribution depends on the   lambda parameter (which is equal to its mean)
+
+```{r}
+set.seed(123)
+
+pois <- rpois(10, lambda = 5)
+
+pois
+```
+
+
+# Relationships between variables
+
+`t.test()` performs an hypothesis test where the null hypothesis is that two population distributions have *equal* means.
+
+Let's test whether the mean income distribution of people identified as male and female in our dataset is equal:
+
+```{r}
+female_income <- dataset$WSAL_VAL[dataset$A_SEX == "Female"]
+male_income <- dataset$WSAL_VAL[dataset$A_SEX == "Male"]
+
+
+t.test(female_income, y = male_income) 
+```
+
+Considering our p-value, the probability of incorrectly rejecting the null hypothesis is extremely small. The test results therefore allow us to confidently deny that both groups present equal average incomes.
+
+The `cor()` function of the *stats* package computes the correlation of x and y if these are vectors. If x and y are matrices then correlations between the columns of x and the columns of y are computed. It allows us to chose our preferred correlation calculation method.
+
+For instance:
+
+```{r}
+cor(x = 1:5, y = 5:1,
+    method ="spearman")
+```
+Note that in this example both vectors have a perfect negative relation that can be described by $y = 6 - x$. We therefore obtain one of the extreme correlation values: -1.
+
+Let's build a dataframe containing the random distributions we generated:
+
+```{r}
+distributions_dataframe <- data.frame("binom" = binom,
+                            "normal" = normal,
+                            "pois" = pois,
+                            "unif"= unif)
+```
+
+
+And generate a correlation matrix:
+
+```{r}
+cor(distributions_dataframe,
+    method ="spearman")
+```
+Each element of the matrix represents the correlation between two of its columns (it is therefore a symmetrical matrix). Note that the main diagonal contains values equal to 1 because each column presents a perfect positive linear relation with itself.
+
+# Descriptive functions
+
+The `summary()` function computes a series of descriptive measures of a quantitative variable: its minimum, maximum, median, mean, first quartile and third quartile.
+
+```{r}
+summary(dataset$WSAL_VAL)
+```
+More generally, the `quantile()` function computes quantiles corresponding to any given probabilities. The smallest observation corresponds to a probability of 0 and the largest to a probability of 1.
+
+```{r}
+quantile(dataset$WSAL_VAL, probs = c(0,0.3,0.6,1))
+```
+
+Complementarily, the `mean()` function calculates the arithmetic mean:
+
+```{r}
+mean(dataset$WSAL_VAL, trim = 0)
+```
+For values different from 0 in the trim argument, it computes the trimmed arithmetic mean. For example:
+
+```{r}
+mean(dataset$WSAL_VAL, trim = 0.2)
+
+```
+Additionally, the `median()` function computes the median.
+
+```{r}
+median(dataset$WSAL_VAL)
+```
+Note that the arithmetic mean is much more sensible to outliers than the median, and therefore the trimmed mean (which removes extreme values before computing the mean) presents a result similar to the median.
+
+In order to analyze the variability of the observations, the `sd()` function computes the standard deviation of the values in a vector:
+
+```{r}
+sd(dataset$WSAL_VAL)
+```
+
+---
+
+Exercise: manually create functions to calculate the mean and standard deviation of the observations in a vector
+
+```{r eval=FALSE}
+mean = function(){
+  
+}
+```
+
+```{r eval=FALSE}
+sd = function(){
+  
+}
+```
+
+---
+
+## Visualization
+
+```{r}
+library(GGally)
+```
+
+
+The `ggpairs()` function of the *GGally* package is a powerful tool to create a matrix of plots describing the information within a given data set. For example, lets create this visualization for our dataset:
+
+```{r fig.height=8} 
+ggpairs(dataset)+
+   theme_minimal()+
+  theme(strip.text.x = element_text(size = 10),
+           strip.text.y = element_text(size = 10))
+```
+
+Other visualizations we will present in the following courses, such as the boxplot and violin plot will allow us to easily analyze the distribution of a single variable.
+

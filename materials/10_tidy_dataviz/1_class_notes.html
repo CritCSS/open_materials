@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.353">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Tidyverse and dataviz</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="1_class_notes_files/libs/clipboard/clipboard.min.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/quarto.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/popper.min.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/anchor.min.js"></script>
+<link href="1_class_notes_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="1_class_notes_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="1_class_notes_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="1_class_notes_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="1_class_notes_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Tidyverse and dataviz</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<section id="packages" class="level2">
+<h2 class="anchored" data-anchor-id="packages">Packages</h2>
+<p>One of the main advantages that R has as a software for statistic analysis is its incremental syntax. This means that the things you can do in R are constantly updated and expanded through the creation of new <strong>packages</strong>, developed by researchers, users or private companies.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="https://gist.github.com/daroczig/3cf06d6db4be2bbe3368"><img src="img/packages.png" class="img-fluid figure-img" width="641"></a></p>
+<figcaption class="figure-caption">Source: Gergely Daróczi</figcaption>
+</figure>
+</div>
+<p>These packages contain <em>code</em>, <em>data</em>, and <em>documentation</em> in a standardized collection that can be installed by users of R. Most of the time, we will install them in order to use <em>functions</em> that will do certain tasks that help us work with our data. So far, we were using functions contained in R base: such as <code>mean()</code>, <code>median()</code>, <code>quantile()</code>, etc. But as we dive deep into the data science life cycle, we might address certain challenges that require more complex, or specific, functions. We will need to import the data, tidy the data into a format that is easy to work with, explore the data, generate visualizations, carry out the analysis and communicate the insights. The tidyverse ecosystem provides a powerful tool for streamlining the workflow in a coherent manner that can be easily connected with other data science tools.</p>
+</section>
+</section>
+<section id="tidyverse-data-workflow" class="level1">
+<h1><code>tidyverse</code> + Data workflow</h1>
+<p>The tidyverse is a set of R packages designed for data science. The main idea behind tidyverse is to contain in a single installation line, a set of tools that contain the entire data analysis workflow: from the importation of data to the communication of results.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="https://r4ds.had.co.nz/explore-intro.html"><img src="img/data-science-explore.png" class="img-fluid figure-img"></a></p>
+<figcaption class="figure-caption">Source: R for Data Science</figcaption>
+</figure>
+</div>
+<section id="tidy-data" class="level2">
+<h2 class="anchored" data-anchor-id="tidy-data">Tidy data</h2>
+<p>All packages share an underlying design philosophy, grammar, and data structures. These structures refer to the format of <strong>tidy datasets</strong>. But, what is tidy data? It is a way to describe data that’s organized with a particular structure: a rectangular structure, where each variable has its own column and each observation has its own row <span class="citation" data-cites="wickham_tidy_2014 peng_tidyverse_nodate">(<a href="#ref-wickham_tidy_2014" role="doc-biblioref">Wickham 2014a</a>; <a href="#ref-peng_tidyverse_nodate" role="doc-biblioref">Peng n.d.</a>)</span>.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="https://www.openscapes.org/blog/2020/10/12/tidy-data/"><img src="img/tidydata_1.jpg" class="img-fluid figure-img" width="653"></a></p>
+<figcaption class="figure-caption">Julie Lowndes and Allison Horst</figcaption>
+</figure>
+</div>
+<p>According to <span class="citation" data-cites="wickham2014">(<a href="#ref-wickham2014" role="doc-biblioref">Wickham 2014b</a>)</span>,</p>
+<blockquote class="blockquote">
+<p>“Tidy datasets are easy to manipulate, model and visualize, and have a specific structure: each variable is a column, each observation is a row, and each type of observational unit is a table.”</p>
+</blockquote>
+<p>Working with tidy data means that we work with information that has a consistent data structure. The main benefit behind this is that we will have to spend less time thinking how to process and clean data, because we can use existing tools instead of starting from scratch each time we work with a new dataset. In other words, we only require a small set of tools to be learned, since we can reuse them from one project to the other.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="https://www.openscapes.org/blog/2020/10/12/tidy-data/"><img src="img/tidydata_3.jpg" class="img-fluid figure-img"></a></p>
+<figcaption class="figure-caption">Julie Lowndes and Allison Horst</figcaption>
+</figure>
+</div>
+</section>
+<section id="tidyverse-ecosystem" class="level2">
+<h2 class="anchored" data-anchor-id="tidyverse-ecosystem"><code>tidyverse</code> ecosystem</h2>
+<p>We can think of the tidyverse ecosystem <span class="citation" data-cites="grolemund_welcome_nodate">(<a href="#ref-grolemund_welcome_nodate" role="doc-biblioref">Grolemund n.d.</a>)</span> as the set of tools we can reuse in our tidy data. It is an ecosystem because consists in a set of various packages that can be installed in one line of code (<code>install.packages(tidyverse)</code>), and each package fits into a part of the data science life cycle. This is the main reason why we prefer to use tidyverse instead of R base. It provides us with a consistent set of tools we can use for many different datasets, it is designed to keep our data tidy, and it contains all the specific tools we might need in our data science workflow.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="https://www.tidyverse.org/"><img src="img/ecosystem.jpeg" class="img-fluid figure-img" width="575"></a></p>
+<figcaption class="figure-caption">Tidyverse</figcaption>
+</figure>
+</div>
+<p>There is a set of core tidyverse packages that are installed with the main ecosystem, which are ones you are likely to use in everyday data analyses.</p>
+<ul>
+<li><p><strong><code>tibble</code></strong>: it is a package that <em>re-imagines the familiar R data.frame</em>. It is a way to store information in columns and rows, but does so in a way that addresses problems earlier in the pipeline. That is to say, it stores it in the tidy data format. The official documentation calls tibbles ‘lazy and slurly’, since they do less (they don’t change variable names or types, and don’t do partial matching) and complain more (e.g.&nbsp;when a variable does not exist). This forces you to confront problems earlier, typically leading to cleaner, more expressive code.</p></li>
+<li><p><strong><code>readr</code></strong>: this is a package we will use every time we start a new project. It helps read rectangular data into R, and it includes data in .csv and .tsv format. It is designed to flexibly parse many types of data found.</p>
+<ul>
+<li>to read data in .xlsx or .xlx format, you should install the tidyverse-adjacent package <strong><code>readxl</code></strong>.</li>
+</ul></li>
+<li><p><strong><code>dplyr:</code></strong> designed for data wrangling. It is built around five primary verbs (mutate, select, filter, summarize, and arrange) that help make the data wrangling process simpler.</p></li>
+<li><p><strong><code>tidyr:</code></strong> it is quite similar to <code>dplyr</code>, but its main goal is to provide a set of functions to help us convert dataframes into tidy data.</p></li>
+<li><p><strong><code>purr:</code></strong> enhances R’s functional programming toolkit by providing a complete and consistent set of tools for working with functions and vectors. It makes easier for us to work with loops inside a dataframe.</p></li>
+<li><p><strong><code>stringr:</code></strong> it is designed to help us work with data in string format.</p></li>
+<li><p><strong><code>forcats:</code></strong> it provides functions to help us work with data in the factor format.</p></li>
+<li><p><strong><code>ggplot:</code></strong> the main package for data visualization in the R community. It is a system for declaratively creating graphics, based on The Grammar of Graphics. You provide the data, tell ggplot2 how to map variables to aesthetics, what graphical primitives to use, and it takes care of the details.</p></li>
+</ul>
+<p>While this is the main structure of the tidyverse ecosystem, there are multiple adjacent packages that we can install which fit into the tidy syntax and work well with the tidy data format. Some of them are <code>readxl</code> to read data in .xlsx or .xl format, <code>janitor</code> for cleaning data, <code>patchwork</code> to paste ggplot graphs together, <code>tidymodels</code> for machine learning… and many more.</p>
+</section>
+<section id="tidy-data-functions" class="level2">
+<h2 class="anchored" data-anchor-id="tidy-data-functions">Tidy data functions</h2>
+<p>there are some basic functions that we use to tidy data:</p>
+<ul>
+<li><p><code>mutate</code>: to transform columns,</p></li>
+<li><p><code>select</code>: to select certain columns,</p></li>
+<li><p><code>filter</code>: to select certain rows (we can think of filter as the row-wise version of select, and select as the column-wise version of filter),</p></li>
+<li><p><code>arrange</code>: to reorder values of rows.</p></li>
+</ul>
+<p>Now, we will go over the basics of more complex data transformation functions to <strong>reshape</strong> the data: joins, pivots, summarizes and date processing.</p>
+<p>For example if we have a survey on households</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>household</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 7 × 3
+  household_ID neighborhood_income n_people_household
+         &lt;int&gt; &lt;chr&gt;                            &lt;dbl&gt;
+1            1 low income                           2
+2            2 low income                           1
+3            3 high income                          1
+4            4 high income                          1
+5            5 low income                           5
+6            6 high income                          4
+7            7 high income                          3</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>household <span class="sc">|&gt;</span> </span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(n_people_household<span class="sc">&gt;</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 3
+  household_ID neighborhood_income n_people_household
+         &lt;int&gt; &lt;chr&gt;                            &lt;dbl&gt;
+1            5 low income                           5
+2            6 high income                          4
+3            7 high income                          3</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>household <span class="sc">|&gt;</span> </span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(n_people_household<span class="sc">&gt;</span><span class="dv">2</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">neighborhood_income =</span> <span class="fu">toupper</span>(neighborhood_income))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 3
+  household_ID neighborhood_income n_people_household
+         &lt;int&gt; &lt;chr&gt;                            &lt;dbl&gt;
+1            5 LOW INCOME                           5
+2            6 HIGH INCOME                          4
+3            7 HIGH INCOME                          3</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>household <span class="sc">|&gt;</span> </span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(n_people_household<span class="sc">&gt;</span><span class="dv">2</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">neighborhood_income =</span> <span class="fu">toupper</span>(neighborhood_income)) <span class="sc">|&gt;</span> </span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(neighborhood_income,n_people_household)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 2
+  neighborhood_income n_people_household
+  &lt;chr&gt;                            &lt;dbl&gt;
+1 LOW INCOME                           5
+2 HIGH INCOME                          4
+3 HIGH INCOME                          3</code></pre>
+</div>
+</div>
+<section id="merges-of-dataframes" class="level3">
+<h3 class="anchored" data-anchor-id="merges-of-dataframes">Merges of dataframes</h3>
+<p>If you ever worked with SQL or multiple databases in the past, you might already be familiar with the concept of joining data. A tidy dataset should contain one type of observational unit per table. For example, if we have done a survey regarding labor conditions to individuals, but we also have sociodemographical information regarding their household, we should have each information in a different dataset. However, we will probably be interested in crossing the information regarding the individuals and their household conditions. So we need to have key IDs to be able to combine these two datasets: for example, in this case, the ID for the household.</p>
+<p><img src="img/merges.png" class="img-fluid" width="418"></p>
+<p>Note that the household ID is not the same as the person ID. Each person has a unique identifier, but so does each household. The information is consistent: when we have two individuals who share a household ID, we see in the household information that there are two people living there.</p>
+<p>Now, how do dataframe joins work?</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="https://medium.com/@niloy.swe/how-to-join-tables-across-databases-in-metabase-sql-e2bbbf67fb90"><img src="img/join-types.png" class="img-fluid figure-img" width="671"></a></p>
+<figcaption class="figure-caption">Niloy Biswas</figcaption>
+</figure>
+</div>
+<ul>
+<li><strong>Inner join:</strong> this creates a new dataset that only contains the information of rows where the IDs match. For example, in our case, the data of the household 5 wouldn’t appear since it doesn’t join any individual data.</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>inner_join <span class="ot">&lt;-</span> individual <span class="sc">%&gt;%</span> <span class="fu">inner_join</span>(household)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>inner_join</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 7 × 7
+  person_ID household_ID gender   age income neighborhood_income
+      &lt;int&gt;        &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;              
+1         1            1 f         36   2931 low income         
+2         2            1 f         43   1520 low income         
+3         3            2 m         48   1748 low income         
+4         4            3 m         38   4562 high income        
+5         5            4 m         33   4754 high income        
+6         6            6 f         44   1380 high income        
+7         7            7 f         38   4012 high income        
+# ℹ 1 more variable: n_people_household &lt;dbl&gt;</code></pre>
+</div>
+</div>
+<ul>
+<li><strong>Left join:</strong> it keeps all the rows of the data on the “left” and adds the columns that match the dataframe on the right. The decision of which dataframe goes where (left or right) is arbitrary and up to us, but we must keep in mind that it will be our main dataframe in the join. In our example, if we chose the individual dataset as the left, we would have the same table as the result of the inner join. But if we chose the household dataset, we would have a dataset with empty values for the ID’s that don’t match.</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>left_join_house <span class="ot">&lt;-</span> household <span class="sc">%&gt;%</span> <span class="fu">left_join</span>(individual)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>left_join_house</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 8 × 7
+  household_ID neighborhood_income n_people_household person_ID gender   age
+         &lt;dbl&gt; &lt;chr&gt;                            &lt;dbl&gt;     &lt;int&gt; &lt;chr&gt;  &lt;dbl&gt;
+1            1 low income                           2         1 f         36
+2            1 low income                           2         2 f         43
+3            2 low income                           1         3 m         48
+4            3 high income                          1         4 m         38
+5            4 high income                          1         5 m         33
+6            5 low income                           5        NA &lt;NA&gt;      NA
+7            6 high income                          4         6 f         44
+8            7 high income                          3         7 f         38
+# ℹ 1 more variable: income &lt;dbl&gt;</code></pre>
+</div>
+</div>
+<ul>
+<li><strong>Full join:</strong> it keeps all the columns and all the rows in both dataframes.</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>out_join <span class="ot">&lt;-</span> household <span class="sc">%&gt;%</span> <span class="fu">full_join</span>(individual)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>out_join</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 8 × 7
+  household_ID neighborhood_income n_people_household person_ID gender   age
+         &lt;dbl&gt; &lt;chr&gt;                            &lt;dbl&gt;     &lt;int&gt; &lt;chr&gt;  &lt;dbl&gt;
+1            1 low income                           2         1 f         36
+2            1 low income                           2         2 f         43
+3            2 low income                           1         3 m         48
+4            3 high income                          1         4 m         38
+5            4 high income                          1         5 m         33
+6            5 low income                           5        NA &lt;NA&gt;      NA
+7            6 high income                          4         6 f         44
+8            7 high income                          3         7 f         38
+# ℹ 1 more variable: income &lt;dbl&gt;</code></pre>
+</div>
+</div>
+</section>
+<section id="summarizing-information" class="level3">
+<h3 class="anchored" data-anchor-id="summarizing-information">Summarizing information</h3>
+<p>Many times, we will want to summarize the information in our dataset. We can catch a glimpse of the summarized dataset with functions such as <code>summary()</code> or <code>str()</code>. However, more often, we will want to see specific information regarding groups in our dataset. For example, how many households we have in the different types of neighborhoods. To do this, it is necessary to group our data. We will not look into the total number of households, but we will group the data by the neighborhood of the households. Then, we can count each group.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>household <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(neighborhood_income) <span class="sc">%&gt;%</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n=</span><span class="fu">n</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 2
+  neighborhood_income     n
+  &lt;chr&gt;               &lt;int&gt;
+1 high income             4
+2 low income              3</code></pre>
+</div>
+</div>
+<p>Other times, we might be interested in getting descriptive statistics per group. For example, the median age for men and women in the individuals dataset.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>individual <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(gender) <span class="sc">%&gt;%</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">median_age =</span> <span class="fu">median</span>(age))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 2
+  gender median_age
+  &lt;chr&gt;       &lt;dbl&gt;
+1 f            40.5
+2 m            38  </code></pre>
+</div>
+</div>
+<p>Or even combine groups and subgroups. For example, the median income for women and men who live in low income or high income neighborhoods</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>individual <span class="sc">%&gt;%</span> </span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(household) <span class="sc">%&gt;%</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(neighborhood_income, gender) <span class="sc">%&gt;%</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">income =</span> <span class="fu">median</span>(income))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 4 × 3
+# Groups:   neighborhood_income [2]
+  neighborhood_income gender income
+  &lt;chr&gt;               &lt;chr&gt;   &lt;dbl&gt;
+1 high income         f       2696 
+2 high income         m       4658 
+3 low income          f       2226.
+4 low income          m       1748 </code></pre>
+</div>
+</div>
+</section>
+<section id="reshaping-data" class="level3">
+<h3 class="anchored" data-anchor-id="reshaping-data">Reshaping data</h3>
+<p>Converting your data from wide-to-long or from long-to-wide data formats is referred to as <strong>reshaping</strong> your data.</p>
+<p>For example, take this subset of columns from our individuals dataset.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>individual <span class="sc">%&gt;%</span> <span class="fu">select</span>(person_ID, gender, age, income)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 7 × 4
+  person_ID gender   age income
+      &lt;int&gt; &lt;chr&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+1         1 f         36   2931
+2         2 f         43   1520
+3         3 m         48   1748
+4         4 m         38   4562
+5         5 m         33   4754
+6         6 f         44   1380
+7         7 f         38   4012</code></pre>
+</div>
+</div>
+<p>This is what we call a wide format: each variable has its own column, and each row represents a single observation. Long data, on the other hand, refers to a dataset where each variable is contained in its own column. This format is often used when working with large datasets or when performing statistical analyses that require data to be presented in a more condensed format.</p>
+<p>This is the same dataset we had previously but reshaped as long data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>individual <span class="sc">%&gt;%</span> </span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(person_ID, gender, age, income) <span class="sc">%&gt;%</span> </span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span><span class="fu">c</span>(person_ID, gender), <span class="at">names_to =</span> <span class="st">"variable"</span>, <span class="at">values_to =</span> <span class="st">"value"</span> )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 14 × 4
+   person_ID gender variable value
+       &lt;int&gt; &lt;chr&gt;  &lt;chr&gt;    &lt;dbl&gt;
+ 1         1 f      age         36
+ 2         1 f      income    2931
+ 3         2 f      age         43
+ 4         2 f      income    1520
+ 5         3 m      age         48
+ 6         3 m      income    1748
+ 7         4 m      age         38
+ 8         4 m      income    4562
+ 9         5 m      age         33
+10         5 m      income    4754
+11         6 f      age         44
+12         6 f      income    1380
+13         7 f      age         38
+14         7 f      income    4012</code></pre>
+</div>
+</div>
+<p>As you can see, the wide data format has a separate column for each variable, whereas the long data format has a single “variable” column that indicates whether the value refers to age or income.</p>
+</section>
+</section>
+<section id="data-visualization" class="level2">
+<h2 class="anchored" data-anchor-id="data-visualization">Data visualization</h2>
+<p>Visualization is a key part of the <em>data analysis workflow.</em> Not only does it help us explore our data and analysis results, but it also serves as the primary tool for sharing our findings with others. Whether we’re presenting our work in an academic paper, journalistic article, or a presentation to colleagues, graphs are essential to attract their attention and making our work interesting. This is why it is important to learn how to make graphs that display information in an <strong>effective</strong> but also <strong>aesthetically pleasing</strong> way.</p>
+<section id="grammar-of-graphics" class="level3">
+<h3 class="anchored" data-anchor-id="grammar-of-graphics">Grammar of graphics</h3>
+<p>Doing a good graphic involves data and creativity. However, there are certain common elements behind the creation of a graph that we can sum up as the <strong>grammar of graphics</strong> <span class="citation" data-cites="wilkinson_grammar_2005">Wickham (<a href="#ref-layered-grammar" role="doc-biblioref">2010</a>)</span>. Graphics are constructed by combining independent components, such as data, aesthetics, geometries, and scales.</p>
+<p>The package we will be using to make plots in R is called <code>ggplot2</code>, and its syntax is based on this grammar of graphics. In <code>ggplot2</code>, a plot is constructed by starting with a layer of data, and then adding additional layers to specify the aesthetics (e.g., color, shape, size) of the plot, the type of geometry (e.g., point, line, bar) to use to display the data, and the scale (e.g., linear, log, discrete) to use for each aesthetic. Each of these components can be modified and customized in a variety of ways to create complex and informative visualizations.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="https://joeroe.io/r4r_visualisation/r4r_visualisation_slides.html#13"><img src="img/grammar-of-graphics-2048x878.png" class="img-fluid figure-img" width="638"></a></p>
+<figcaption class="figure-caption">Joe Roe</figcaption>
+</figure>
+</div>
+<p>This process of assigning data variables to the visual properties of a plot is called <strong>mapping of aesthetic attributes</strong>. In other words, it is the way to show in a visually perceptible way the difference between values. Aesthetics refer to visual properties such as color, shape, size, transparency, and position that can be used to visually represent data.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/common-aesthetics-1.png" class="img-fluid figure-img" width="629"></p>
+<figcaption class="figure-caption">Commonly used aesthetics in data visualization: position, shape, size, color, line width, line type. Some of these aesthetics can represent both continuous and discrete data (position, size, line width, color) while others can usually only represent discrete data (shape, line type) <span class="citation" data-cites="wilke_fundamentals_nodate">(<a href="#ref-wilke_fundamentals_nodate" role="doc-biblioref">Wilke n.d.a</a>)</span></figcaption>
+</figure>
+</div>
+<p>The grammar of graphics approach allows users to create a wide range of plots, from basic scatter plots and histograms to complex multi-layered visualizations, using a consistent and intuitive syntax. It is a powerful tool for data exploration and communication and has become a popular approach for data visualization in the R community.</p>
+</section>
+<section id="types-of-graphs" class="level3">
+<h3 class="anchored" data-anchor-id="types-of-graphs">Types of graphs</h3>
+<p>We can group plots into various clusters according to the kind of data we want to show. We will often be interested in showing the magnitude of numbers: the total number of people living in different countries, the mean salary for different groups of populations. These cases have a set of categorical values (such as countries, or demographic groups) and a quantitative value for each category. This is the same as saying we are going to show <em>amounts</em> (<span class="citation" data-cites="wilke">Wilke (<a href="#ref-wilke" role="doc-biblioref">n.d.b</a>)</span>). The most common graph to showcase amounts are <strong>bar plots.</strong> For example, we can display the countries with lowest life expectancy in the year 2007.</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Each bar represents a categorical variable, and the length represents the quantitative value. Bars can be arranged either vertically or horizontally. By convention, when there are not many categories, vertical bars are the best option. But when one is working with many categories, the names on the horizontal axis might overlap, so displaying the values in the y axis is a better idea. Take a look at how the life expectancy ages in 2007 for the Americas would look like in a vertical axis…</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>and in a horizontal one.</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Bar plots tend to be the most common kind of visualization due to their effectiveness. Pretty much anyone can interpret them, and simple, easy-to-understand graphs are a key of data visualization. However, reusing them over and over in the same document might be repetitive and lose a reader’s attention, so it is also good to keep in mind other alternatives. For example, <strong>dot plots</strong> provide a cleaner graph by only showing a point where the bar would end, removing the “insides” of the bars. This minimalist approach is often considered synonymous with a good plot in the data visualization community. Expanding our knowledge of different types of graphs and their uses can keep things interesting and enhance the clarity of our data representation.</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>So far, we have seen examples showing values for individual groups. However, in other cases we might be interested in showing how some group, entity, or amount breaks down into individual pieces that each represent a <em>proportion</em> of the whole. Common examples include the percentage of races in a group of people (45% of the population in this neighborhood is black, 40% is white, 10% is latinx and 5% is asian) or the percentages of people voting for different political parties in an election (60% of the population voted for X candidate, while 40% voted for candidate Y).</p>
+<p>The archetypal visualization for this kind of information is the <strong>pie chart</strong>, where each group is displayed as colored areas inside of a circle. However, over time, this graph has gained quite a negative reputation. While it is very popular, it has been shown that the human eye understands proportions more easily when they are displayed vertically. Take a look at the proportion of people in each continent represented within the world’s total population in 2007, in a pie chart…</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>or in a stacked bar chart.</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The <strong>stacked bar chart</strong> shows more clearly the weight each continent has on the total population of the world, and allows us to see a small line representing Oceania, which wasn’t visible in the bar chart.</p>
+<p>Visualizing proportions can be challenging, specially when the whole is broken into many different pieces. That is to say, when we want to see the values for sub-groups inside of our groups. And this is specially useful when we want to control how a variable changes by different groups. For example, we could be interested in the amount of countries that have a high or a low life expectancy across continents. This could be done in a stacked bar chart:</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Stacked bar charts are useful for showing absolute values within the larger groups. It is clear from this graph that Africa has the most countries, but also that the majority of them have a low life expectancy. Another option to show this information would be a <strong>dodged bar chart</strong>, where the subgroup bars are positioned next to each other rather that on top.</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>In this case, there is no clear answer to which kind of plot is better! Data visualization is a field where scientists should explore and try out different options to decide which one suits the case better.</p>
+<p>So far, we have worked with the simplest kind of visualizations: counts or proportions. However, as we dive into the analysis, we might be interested in checking out how a particular variable is <em>distributed</em> in a dataset. That is to say, how the variable is spread: which values are more common and less common, which are extreme values, and so on.</p>
+<p>The most common visualization to show distributions is the <strong>histogram</strong>, which in practice is a variant of… the bar plot!</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The histogram shows the range of values (from the minimum to the maximum that they reach), and how often they are observed in each range.</p>
+<p>One thing to note about histograms is that their appearance (and therefore the message they convey) can change depending on the number of intervals used. The previous plot had divided the range of values into 30 ‘bins’ or equal intervals (e.g.&nbsp;‘0-10’, ‘10-20’, etc.) and counts how many observations fall into each one. We can increase the level of detail in the histogram by increasing the number of intervals, at the cost of losing generalization. Conversely, if we reduce the number of intervals, we show a more summarized distribution of the data, at the cost of losing detail.</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Another option to plot distributions are <strong>density graphs</strong>. Density plots are direct descendants of histograms. But instead of counts of observations per range of values, they show the probability distribution of the variable, i.e.&nbsp;how likely it is to find a particular value if we randomly selected one of the observations. Unlike histograms, which have been in use for a couple of centuries because they are relatively easy to create by hand, the (previously) laborious density plots have become popular with the advent of software and computers capable of creating them instantly.</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The results of density plots are interpreted similarly to those of a histogram: we notice the range of the data and how common they are in one range compared to another.</p>
+<p>Finally, we can plot distributions as <strong>boxplots</strong> (also called box and whisker plot). It displays a summary of the minimum, first quartile, median, third quartile, and maximum values of the data. First, let’s take a look at the following boxplot that displays the GDP per capita across continents in 2007.</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>This type of graphic contains a lot of information.</p>
+<ul>
+<li><p>The box in the middle represents the middle 50% of the data, with the lower edge representing the <em>first quartile</em> (25th percentile) and the upper edge representing the <em>third quartile</em> (75th percentile).</p></li>
+<li><p>The line inside the box represents the <em>median</em>.</p></li>
+<li><p>The whiskers extending from the box show the <em>range</em> of the data, typically defined as 1.5 times the <em>interquartile range (IQR)</em>, which is the distance between the first and third quartiles.</p></li>
+<li><p><em>Outliers</em>, which are data points that fall outside the whiskers, are shown as individual points.</p></li>
+</ul>
+<p>Finally, we could be interested in showing the relationship between variables (x-y). The most common way to show this is through <strong>scatterplots</strong>.</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="mapping-more-aesthetic-attributes" class="level3">
+<h3 class="anchored" data-anchor-id="mapping-more-aesthetic-attributes">Mapping more aesthetic attributes</h3>
+<p>So far, we mostly saw how data can be mapped into an x and y axis. However, we mentioned we can also map data as <em>shapes, sizes</em> and <em>colors</em>. We briefly saw how color can be introduced to show categorical variables when we are seeing proportions of the data. However, it can also be used as a continuous variable.</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>This graph shows that there is a relationship between longevity and GDP: countries with higher life expectancy are found at the top of the graph. As we continue to explore this relationship in the following plots, note that we also introduced a transformation on the X axis. We can see that the values in the scale go from 1,000,0000 to 10,000,000, and then to 100,000,000 until 1,000,000,000. This is called a <strong>logaritmic scale</strong>: the values are no longer evenly spaced, they increase exponentially. This is specially useful when we are working with data with a wide range of values, such as populations or income. For example, let’s introduce the variable continent into our ‘Wealth and health’ graph with a logarithmic scale in the GDP variable.</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>This returns us a more clear and compact graph, where we can better see the variability in the lower values for both variables, and relate them mostly to Africa.</p>
+<p>We could also show the continents as shapes:</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>However, the color tends to be a better option to plot categorical data. We could also introduce more data into the plot through the <em>size</em> of the dots or shapes.</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-26-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="discussion" class="level1">
+<h1>Discussion</h1>
+<p>The design of a graph should always be based on the data and focused on the topic we are researching. However, we should always be careful about not lying with graphs. That is to say, it is important not to toy with our graph to show only information that reinforces our hypothesis or what we want the data to say. <span class="citation" data-cites="kieran_data_2018">Kieran (<a href="#ref-kieran_data_2018" role="doc-biblioref">2018</a>)</span> explains this with a clear example from the New York Times. In November 2016, this newspaper reported some research on peoples’ confidence in the institutions of democracy. The headline in the <em>Times</em> ran “How Stable Are Democracies? ‘Warning Signs Are Flashing Red’”, and the graph accompanying the article certainly seemed to show an alarming decline.</p>
+<p><img src="img/ch-01-democracy-nyt-version.png" class="img-fluid" width="597" alt="A crisis of faith in democracy? (New York Times.)"><br>
+</p>
+<p>The graph was widely circulated on social media. However, this is an example on how one can lie with data. This plot presumable shows the the percentage of respondents who said “Yes”, presumably in contrast to those who said “No”. However, the survey asked respondants to rate the importance of living in a democracy on a ten point scale. The graph showed the difference across ages of people who had given of “10” (Absolutely important) only, not changes in the average score on the question. As it turns out, while there is some variation by year of birth, most people in these countries tend to rate the importance of living in a democracy very highly, even if they do not all score it as “Absolutely Important”. The political scientist Erik Voeten redrew the figure based using the average response.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/ch-01-democracy-voeten-version-2.png" class="img-fluid figure-img" width="670"></p>
+<figcaption class="figure-caption">Erik Voeten</figcaption>
+</figure>
+</div>
+<p>While we still see a decline in the average score by age cohort, on the order of between half a point to one and a half points on a ten point scale, it is not such a drastic decline as the one showed originally.</p>
+</section>
+<section id="references" class="level1 unnumbered">
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-grolemund_welcome_nodate" class="csl-entry" role="listitem">
+Grolemund, Hadley Wickham and Garrett. n.d. <em>Welcome <span></span> <span>R</span> for <span>Data</span> <span>Science</span></em>. Accessed March 23, 2023. <a href="https://r4ds.had.co.nz/">https://r4ds.had.co.nz/</a>.
+</div>
+<div id="ref-kieran_data_2018" class="csl-entry" role="listitem">
+Kieran, Healy. 2018. <em>Data <span>Visualization</span></em>. <a href="https://press.princeton.edu/books/hardcover/9780691181615/data-visualization">https://press.princeton.edu/books/hardcover/9780691181615/data-visualization</a>.
+</div>
+<div id="ref-peng_tidyverse_nodate" class="csl-entry" role="listitem">
+Peng, Stephanie C. Hicks and Roger D., Shannon E. Ellis. n.d. <em>Tidyverse <span>Skills</span> for <span>Data</span> <span>Science</span></em>. Accessed March 23, 2023. <a href="https://jhudatascience.org/tidyversecourse/">https://jhudatascience.org/tidyversecourse/</a>.
+</div>
+<div id="ref-layered-grammar" class="csl-entry" role="listitem">
+Wickham, Hadley. 2010. <span>“A Layered Grammar of Graphics.”</span> <em>Journal of Computational and Graphical Statistics</em> 19 (1): 3–28. <a href="https://doi.org/10.1198/jcgs.2009.07098">https://doi.org/10.1198/jcgs.2009.07098</a>.
+</div>
+<div id="ref-wickham_tidy_2014" class="csl-entry" role="listitem">
+———. 2014a. <span>“Tidy <span>Data</span>.”</span> <em>Journal of Statistical Software</em> 59 (10): 1–23. <a href="https://doi.org/10.18637/jss.v059.i10">https://doi.org/10.18637/jss.v059.i10</a>.
+</div>
+<div id="ref-wickham2014" class="csl-entry" role="listitem">
+———. 2014b. <span>“Tidy Data.”</span> <em>Journal of Statistical Software</em> 59 (10): 1–23. <a href="https://doi.org/10.18637/jss.v059.i10">https://doi.org/10.18637/jss.v059.i10</a>.
+</div>
+<div id="ref-wilke_fundamentals_nodate" class="csl-entry" role="listitem">
+Wilke, Claus O. n.d.a. <em>Fundamentals of <span>Data</span> <span>Visualization</span></em>. Accessed May 8, 2023. <a href="https://clauswilke.com/dataviz/aesthetic-mapping.html">https://clauswilke.com/dataviz/aesthetic-mapping.html</a>.
+</div>
+<div id="ref-wilke" class="csl-entry" role="listitem">
+———. n.d.b. <em>Fundamentals of Data Visualization</em>. <a href="https://clauswilke.com/dataviz/aesthetic-mapping.html">https://clauswilke.com/dataviz/aesthetic-mapping.html</a>.
+</div>
+<div id="ref-wilkinson_grammar_2005" class="csl-entry" role="listitem">
+Wilkinson, Leland. 2005. <em>The <span>Grammar</span> of <span>Graphics</span></em>. Statistics and <span>Computing</span>. New York: Springer-Verlag. <a href="https://doi.org/10.1007/0-387-28695-0">https://doi.org/10.1007/0-387-28695-0</a>.
+</div>
+</div></section></div></main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

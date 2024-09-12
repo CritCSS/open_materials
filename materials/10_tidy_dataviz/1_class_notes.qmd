@@ -1,0 +1,506 @@
+---
+title: "Tidyverse and dataviz"
+format: html
+#format: pdf
+# format: 
+#   revealjs:
+#     scrollable: true
+#     smaller: true
+editor: visual
+bibliography: references.bib
+---
+
+```{r setup, include=FALSE}
+library(tufte)
+# invalidate cache when the tufte version changes
+knitr::opts_chunk$set(cache.extra = packageVersion('tufte'))
+options(htmltools.dir.version = FALSE)
+library(tidyverse)
+library(gapminder)
+library(knitr)
+library(patchwork)
+library(knitr)
+
+
+individual <- tibble(person_ID = 1:7,
+                     household_ID = c(1, 1, 2, 3, 4, 6, 7),
+                     gender = c("f", "f", "m", "m", "m", "f", "f")) %>%
+              mutate(age = round(runif(nrow(.), min = 30, max = 50)),
+                     income = round(runif(nrow(.), min = 1000, max = 5000)))
+
+household <- tibble(household_ID = 1:7, 
+                    neighborhood_income = c("low income", "low income", 
+                                            "high income", "high income",
+                                            "low income", "high income", "high income"), 
+                    n_people_household = c(2, 1, 1, 1, 5, 4, 3))
+
+gapminder_low_lifeexp <- gapminder %>% 
+  filter(year == max(year)) %>% 
+  top_n(-5, lifeExp) 
+
+options(scipen=999)
+
+```
+
+# Introduction
+
+## Packages
+
+One of the main advantages that R has as a software for statistic analysis is its incremental syntax. This means that the things you can do in R are constantly updated and expanded through the creation of new **packages**, developed by researchers, users or private companies.
+
+[![Source: Gergely Daróczi](img/packages.png){width="641"}](https://gist.github.com/daroczig/3cf06d6db4be2bbe3368)
+
+These packages contain *code*, *data*, and *documentation* in a standardized collection that can be installed by users of R. Most of the time, we will install them in order to use *functions* that will do certain tasks that help us work with our data. So far, we were using functions contained in R base: such as `mean()`, `median()`, `quantile()`, etc. But as we dive deep into the data science life cycle, we might address certain challenges that require more complex, or specific, functions. We will need to import the data, tidy the data into a format that is easy to work with, explore the data, generate visualizations, carry out the analysis and communicate the insights. The tidyverse ecosystem provides a powerful tool for streamlining the workflow in a coherent manner that can be easily connected with other data science tools.
+
+# `tidyverse` + Data workflow
+
+The tidyverse is a set of R packages designed for data science. The main idea behind tidyverse is to contain in a single installation line, a set of tools that contain the entire data analysis workflow: from the importation of data to the communication of results.
+
+[![Source: R for Data Science](img/data-science-explore.png)](https://r4ds.had.co.nz/explore-intro.html)
+
+## Tidy data
+
+All packages share an underlying design philosophy, grammar, and data structures. These structures refer to the format of **tidy datasets**. But, what is tidy data? It is a way to describe data that's organized with a particular structure: a rectangular structure, where each variable has its own column and each observation has its own row [@wickham_tidy_2014; @peng_tidyverse_nodate].
+
+[![Julie Lowndes and Allison Horst](img/tidydata_1.jpg){width="653"}](https://www.openscapes.org/blog/2020/10/12/tidy-data/)
+
+According to [@wickham2014],
+
+> "Tidy datasets are easy to manipulate, model and visualize, and have a specific structure: each variable is a column, each observation is a row, and each type of observational unit is a table."
+
+Working with tidy data means that we work with information that has a consistent data structure. The main benefit behind this is that we will have to spend less time thinking how to process and clean data, because we can use existing tools instead of starting from scratch each time we work with a new dataset. In other words, we only require a small set of tools to be learned, since we can reuse them from one project to the other.
+
+[![Julie Lowndes and Allison Horst](img/tidydata_3.jpg)](https://www.openscapes.org/blog/2020/10/12/tidy-data/)
+
+## `tidyverse` ecosystem
+
+We can think of the tidyverse ecosystem [@grolemund_welcome_nodate] as the set of tools we can reuse in our tidy data. It is an ecosystem because consists in a set of various packages that can be installed in one line of code (`install.packages(tidyverse)`), and each package fits into a part of the data science life cycle. This is the main reason why we prefer to use tidyverse instead of R base. It provides us with a consistent set of tools we can use for many different datasets, it is designed to keep our data tidy, and it contains all the specific tools we might need in our data science workflow.
+
+[![Tidyverse](img/ecosystem.jpeg){width="575"}](https://www.tidyverse.org/)
+
+There is a set of core tidyverse packages that are installed with the main ecosystem, which are ones you are likely to use in everyday data analyses.
+
+-   **`tibble`**: it is a package that *re-imagines the familiar R data.frame*. It is a way to store information in columns and rows, but does so in a way that addresses problems earlier in the pipeline. That is to say, it stores it in the tidy data format. The official documentation calls tibbles 'lazy and slurly', since they do less (they don't change variable names or types, and don't do partial matching) and complain more (e.g. when a variable does not exist). This forces you to confront problems earlier, typically leading to cleaner, more expressive code.
+
+-   **`readr`**: this is a package we will use every time we start a new project. It helps read rectangular data into R, and it includes data in .csv and .tsv format. It is designed to flexibly parse many types of data found.
+
+    -   to read data in .xlsx or .xlx format, you should install the tidyverse-adjacent package **`readxl`**.
+
+-   **`dplyr:`** designed for data wrangling. It is built around five primary verbs (mutate, select, filter, summarize, and arrange) that help make the data wrangling process simpler.
+
+-   **`tidyr:`** it is quite similar to `dplyr`, but its main goal is to provide a set of functions to help us convert dataframes into tidy data.
+
+-   **`purr:`** enhances R's functional programming toolkit by providing a complete and consistent set of tools for working with functions and vectors. It makes easier for us to work with loops inside a dataframe.
+
+-   **`stringr:`** it is designed to help us work with data in string format.
+
+-   **`forcats:`** it provides functions to help us work with data in the factor format.
+
+-   **`ggplot:`** the main package for data visualization in the R community. It is a system for declaratively creating graphics, based on The Grammar of Graphics. You provide the data, tell ggplot2 how to map variables to aesthetics, what graphical primitives to use, and it takes care of the details.
+
+While this is the main structure of the tidyverse ecosystem, there are multiple adjacent packages that we can install which fit into the tidy syntax and work well with the tidy data format. Some of them are `readxl` to read data in .xlsx or .xl format, `janitor` for cleaning data, `patchwork` to paste ggplot graphs together, `tidymodels` for machine learning... and many more.
+
+## Tidy data functions
+
+there are some basic functions that we use to tidy data:
+
+-   `mutate`: to transform columns,
+
+-   `select`: to select certain columns,
+
+-   `filter`: to select certain rows (we can think of filter as the row-wise version of select, and select as the column-wise version of filter),
+
+-   `arrange`: to reorder values of rows.
+
+Now, we will go over the basics of more complex data transformation functions to **reshape** the data: joins, pivots, summarizes and date processing.
+
+For example if we have a survey on households
+
+```{r}
+household
+
+household |> 
+  filter(n_people_household>2)
+
+household |> 
+  filter(n_people_household>2) |> 
+  mutate(neighborhood_income = toupper(neighborhood_income))
+
+household |> 
+  filter(n_people_household>2) |> 
+  mutate(neighborhood_income = toupper(neighborhood_income)) |> 
+  select(neighborhood_income,n_people_household)
+```
+
+### Merges of dataframes
+
+If you ever worked with SQL or multiple databases in the past, you might already be familiar with the concept of joining data. A tidy dataset should contain one type of observational unit per table. For example, if we have done a survey regarding labor conditions to individuals, but we also have sociodemographical information regarding their household, we should have each information in a different dataset. However, we will probably be interested in crossing the information regarding the individuals and their household conditions. So we need to have key IDs to be able to combine these two datasets: for example, in this case, the ID for the household.
+
+![](img/merges.png){width="418"}
+
+Note that the household ID is not the same as the person ID. Each person has a unique identifier, but so does each household. The information is consistent: when we have two individuals who share a household ID, we see in the household information that there are two people living there.
+
+Now, how do dataframe joins work?
+
+[![Niloy Biswas](img/join-types.png){width="671"}](https://medium.com/@niloy.swe/how-to-join-tables-across-databases-in-metabase-sql-e2bbbf67fb90)
+
+-   **Inner join:** this creates a new dataset that only contains the information of rows where the IDs match. For example, in our case, the data of the household 5 wouldn't appear since it doesn't join any individual data.
+
+```{r, message=FALSE, warning=FALSE}
+inner_join <- individual %>% inner_join(household)
+inner_join
+```
+
+-   **Left join:** it keeps all the rows of the data on the "left" and adds the columns that match the dataframe on the right. The decision of which dataframe goes where (left or right) is arbitrary and up to us, but we must keep in mind that it will be our main dataframe in the join. In our example, if we chose the individual dataset as the left, we would have the same table as the result of the inner join. But if we chose the household dataset, we would have a dataset with empty values for the ID's that don't match.
+
+```{r, message=FALSE, warning=FALSE}
+left_join_house <- household %>% left_join(individual)
+left_join_house
+```
+
+-   **Full join:** it keeps all the columns and all the rows in both dataframes.
+
+```{r, message=FALSE, warning=FALSE}
+out_join <- household %>% full_join(individual)
+out_join
+```
+
+### Summarizing information
+
+Many times, we will want to summarize the information in our dataset. We can catch a glimpse of the summarized dataset with functions such as `summary()` or `str()`. However, more often, we will want to see specific information regarding groups in our dataset. For example, how many households we have in the different types of neighborhoods. To do this, it is necessary to group our data. We will not look into the total number of households, but we will group the data by the neighborhood of the households. Then, we can count each group.
+
+```{r, warning=FALSE}
+household %>% group_by(neighborhood_income) %>%
+  summarise(n=n())
+```
+
+Other times, we might be interested in getting descriptive statistics per group. For example, the median age for men and women in the individuals dataset.
+
+```{r, message=FALSE, warning=FALSE}
+individual %>% group_by(gender) %>%
+  summarise(median_age = median(age))
+```
+
+Or even combine groups and subgroups. For example, the median income for women and men who live in low income or high income neighborhoods
+
+```{r, message=FALSE, warning=FALSE}
+individual %>% 
+  left_join(household) %>%
+  group_by(neighborhood_income, gender) %>%
+  summarise(income = median(income))
+```
+
+### Reshaping data
+
+Converting your data from wide-to-long or from long-to-wide data formats is referred to as **reshaping** your data.
+
+For example, take this subset of columns from our individuals dataset.
+
+```{r, message=FALSE, warning=FALSE}
+individual %>% select(person_ID, gender, age, income)
+```
+
+This is what we call a wide format: each variable has its own column, and each row represents a single observation. Long data, on the other hand, refers to a dataset where each variable is contained in its own column. This format is often used when working with large datasets or when performing statistical analyses that require data to be presented in a more condensed format.
+
+This is the same dataset we had previously but reshaped as long data.
+
+```{r, message=FALSE, warning=FALSE}
+individual %>% 
+  select(person_ID, gender, age, income) %>% 
+  pivot_longer(cols = -c(person_ID, gender), names_to = "variable", values_to = "value" )
+```
+
+As you can see, the wide data format has a separate column for each variable, whereas the long data format has a single "variable" column that indicates whether the value refers to age or income.
+
+## Data visualization
+
+Visualization is a key part of the *data analysis workflow.* Not only does it help us explore our data and analysis results, but it also serves as the primary tool for sharing our findings with others. Whether we're presenting our work in an academic paper, journalistic article, or a presentation to colleagues, graphs are essential to attract their attention and making our work interesting. This is why it is important to learn how to make graphs that display information in an **effective** but also **aesthetically pleasing** way.
+
+### Grammar of graphics
+
+Doing a good graphic involves data and creativity. However, there are certain common elements behind the creation of a graph that we can sum up as the **grammar of graphics** [@wilkinson_grammar_2005, @layered-grammar]. Graphics are constructed by combining independent components, such as data, aesthetics, geometries, and scales.
+
+The package we will be using to make plots in R is called `ggplot2`, and its syntax is based on this grammar of graphics. In `ggplot2`, a plot is constructed by starting with a layer of data, and then adding additional layers to specify the aesthetics (e.g., color, shape, size) of the plot, the type of geometry (e.g., point, line, bar) to use to display the data, and the scale (e.g., linear, log, discrete) to use for each aesthetic. Each of these components can be modified and customized in a variety of ways to create complex and informative visualizations.
+
+[![Joe Roe](img/grammar-of-graphics-2048x878.png){width="638"}](https://joeroe.io/r4r_visualisation/r4r_visualisation_slides.html#13)
+
+This process of assigning data variables to the visual properties of a plot is called **mapping of aesthetic attributes**. In other words, it is the way to show in a visually perceptible way the difference between values. Aesthetics refer to visual properties such as color, shape, size, transparency, and position that can be used to visually represent data.
+
+![Commonly used aesthetics in data visualization: position, shape, size, color, line width, line type. Some of these aesthetics can represent both continuous and discrete data (position, size, line width, color) while others can usually only represent discrete data (shape, line type) [@wilke_fundamentals_nodate]](img/common-aesthetics-1.png){width="629"}
+
+The grammar of graphics approach allows users to create a wide range of plots, from basic scatter plots and histograms to complex multi-layered visualizations, using a consistent and intuitive syntax. It is a powerful tool for data exploration and communication and has become a popular approach for data visualization in the R community.
+
+### Types of graphs
+
+We can group plots into various clusters according to the kind of data we want to show. We will often be interested in showing the magnitude of numbers: the total number of people living in different countries, the mean salary for different groups of populations. These cases have a set of categorical values (such as countries, or demographic groups) and a quantitative value for each category. This is the same as saying we are going to show *amounts* (@wilke). The most common graph to showcase amounts are **bar plots.** For example, we can display the countries with lowest life expectancy in the year 2007.
+
+```{r echo=FALSE}
+ggplot(gapminder_low_lifeexp, aes(x = reorder(country, lifeExp), y = lifeExp))+
+  geom_col()+
+  labs(title = "Countries with lowest life expectancy",
+    subtitle = "year: 2007",
+    y = "Country",
+    x = "Life expectancy (in years)",
+    caption = "source: Gapminder")+
+  theme_minimal()
+```
+
+Each bar represents a categorical variable, and the length represents the quantitative value. Bars can be arranged either vertically or horizontally. By convention, when there are not many categories, vertical bars are the best option. But when one is working with many categories, the names on the horizontal axis might overlap, so displaying the values in the y axis is a better idea. Take a look at how the life expectancy ages in 2007 for the Americas would look like in a vertical axis...
+
+```{r echo=FALSE}
+gapminder %>% filter(continent == "Americas" & year == 2007) %>% 
+  ggplot(aes(x = reorder(country, lifeExp), y = lifeExp))+
+  geom_col()+
+  labs(    title = "Life expectancy in the Americas",
+    subtitle = "year: 2007",
+    y = "Country",
+    x = "Life expectancy (in years)")+
+  theme_minimal()
+```
+
+and in a horizontal one.
+
+```{r echo=FALSE}
+gapminder %>% filter(continent == "Americas" & year == 2007) %>% 
+  ggplot(aes(y = reorder(country, lifeExp), x = lifeExp))+
+  geom_col()+
+  labs(    title = "Life expectancy in the Americas",
+    subtitle = "year: 2007",
+    y = "Country",
+    x = "Life expectancy (in years)")+
+  theme_minimal()
+```
+
+Bar plots tend to be the most common kind of visualization due to their effectiveness. Pretty much anyone can interpret them, and simple, easy-to-understand graphs are a key of data visualization. However, reusing them over and over in the same document might be repetitive and lose a reader's attention, so it is also good to keep in mind other alternatives. For example, **dot plots** provide a cleaner graph by only showing a point where the bar would end, removing the "insides" of the bars. This minimalist approach is often considered synonymous with a good plot in the data visualization community. Expanding our knowledge of different types of graphs and their uses can keep things interesting and enhance the clarity of our data representation.
+
+```{r echo=FALSE}
+gapminder %>% filter(continent == "Americas" & year == 2007) %>% 
+  ggplot(aes(y = reorder(country, lifeExp), x = lifeExp))+
+  geom_point()+
+  labs(    title = "Life expectancy in the Americas",
+    subtitle = "year: 2007",
+    y = "Country",
+    x = "Life expectancy (in years)")+
+  theme_minimal()
+```
+
+So far, we have seen examples showing values for individual groups. However, in other cases we might be interested in showing how some group, entity, or amount breaks down into individual pieces that each represent a *proportion* of the whole. Common examples include the percentage of races in a group of people (45% of the population in this neighborhood is black, 40% is white, 10% is latinx and 5% is asian) or the percentages of people voting for different political parties in an election (60% of the population voted for X candidate, while 40% voted for candidate Y).
+
+The archetypal visualization for this kind of information is the **pie chart**, where each group is displayed as colored areas inside of a circle. However, over time, this graph has gained quite a negative reputation. While it is very popular, it has been shown that the human eye understands proportions more easily when they are displayed vertically. Take a look at the proportion of people in each continent represented within the world's total population in 2007, in a pie chart...
+
+```{r echo=FALSE}
+ggplot(gapminder %>% filter(year == 2007), aes(x = "", y = pop, fill =continent))+
+  geom_col(position = "fill")+
+  theme_minimal()+
+  labs(x = "",
+       y = "",
+       title = "World's population",
+       subtitle = "year: 2007",
+       fill = "Continent")+
+  coord_polar("y", start=0)+
+  theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+```
+
+or in a stacked bar chart.
+
+```{r,echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(gapminder %>% filter(year == 2007), aes(x = "", y = (pop)/1000000000, fill = continent))+
+  geom_col()+
+  theme_minimal()+
+  labs(y = "Population (in billions)",
+       x = "",
+       title = "World's population",
+       subtitle = "year: 2007",
+       fill = "Continent")
+```
+
+The **stacked bar chart** shows more clearly the weight each continent has on the total population of the world, and allows us to see a small line representing Oceania, which wasn't visible in the bar chart.
+
+Visualizing proportions can be challenging, specially when the whole is broken into many different pieces. That is to say, when we want to see the values for sub-groups inside of our groups. And this is specially useful when we want to control how a variable changes by different groups. For example, we could be interested in the amount of countries that have a high or a low life expectancy across continents. This could be done in a stacked bar chart:
+
+```{r, echo=FALSE}
+gapminder%>% 
+  mutate(
+    grouped_life_exp = case_when(
+      lifeExp > median(lifeExp) ~ 'High life expectancy',
+      lifeExp < median(lifeExp) ~ 'Low life expectancy'
+    )
+  ) %>% 
+  filter(year == 2007) %>%
+  ggplot(aes(x = continent, fill = grouped_life_exp))+
+  geom_bar()+
+  theme_minimal()+
+  labs(y = "n of countries",
+       x = "",
+       title = "Life expectancy across the Continents",
+       subtitle = "year: 2007",
+       fill = "Category")
+```
+
+Stacked bar charts are useful for showing absolute values within the larger groups. It is clear from this graph that Africa has the most countries, but also that the majority of them have a low life expectancy. Another option to show this information would be a **dodged bar chart**, where the subgroup bars are positioned next to each other rather that on top.
+
+```{r echo=FALSE}
+gapminder%>% 
+  mutate(
+    grouped_life_exp = case_when(
+      lifeExp > median(lifeExp) ~ 'High life expectancy',
+      lifeExp < median(lifeExp) ~ 'Low life expectancy'
+    )
+  ) %>% 
+  filter(year == 2007) %>%
+  ggplot(aes(x = continent, fill = grouped_life_exp))+
+  geom_bar(position = position_dodge(width = 1))+
+  theme_minimal()+
+  labs(y = "n of countries",
+       x = "",
+       title = "Life expectancy across the Continents",
+       subtitle = "year: 2007",
+       fill = "Category")
+
+```
+
+In this case, there is no clear answer to which kind of plot is better! Data visualization is a field where scientists should explore and try out different options to decide which one suits the case better.
+
+So far, we have worked with the simplest kind of visualizations: counts or proportions. However, as we dive into the analysis, we might be interested in checking out how a particular variable is *distributed* in a dataset. That is to say, how the variable is spread: which values are more common and less common, which are extreme values, and so on.
+
+The most common visualization to show distributions is the **histogram**, which in practice is a variant of... the bar plot!
+
+```{r,echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(gapminder %>% filter(year == 2007), aes(x=lifeExp))+
+  geom_histogram()+
+  theme_minimal()+
+  labs(x = "Life expectancy (in years)")
+```
+
+The histogram shows the range of values (from the minimum to the maximum that they reach), and how often they are observed in each range.
+
+One thing to note about histograms is that their appearance (and therefore the message they convey) can change depending on the number of intervals used. The previous plot had divided the range of values into 30 'bins' or equal intervals (e.g. '0-10', '10-20', etc.) and counts how many observations fall into each one. We can increase the level of detail in the histogram by increasing the number of intervals, at the cost of losing generalization. Conversely, if we reduce the number of intervals, we show a more summarized distribution of the data, at the cost of losing detail.
+
+```{r,echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(gapminder %>% filter(year == 2007), aes(x=lifeExp))+
+  geom_histogram(bins = 5)+
+  theme_minimal()+
+  labs(x = "Life expectancy (in years)")
+```
+
+Another option to plot distributions are **density graphs**. Density plots are direct descendants of histograms. But instead of counts of observations per range of values, they show the probability distribution of the variable, i.e. how likely it is to find a particular value if we randomly selected one of the observations. Unlike histograms, which have been in use for a couple of centuries because they are relatively easy to create by hand, the (previously) laborious density plots have become popular with the advent of software and computers capable of creating them instantly.
+
+```{r,echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(gapminder %>% filter(year == 2007), aes(x=lifeExp))+
+  geom_density()+
+  theme_minimal()+
+  labs(x = "Life expectancy (in years)")
+```
+
+The results of density plots are interpreted similarly to those of a histogram: we notice the range of the data and how common they are in one range compared to another.
+
+Finally, we can plot distributions as **boxplots** (also called box and whisker plot). It displays a summary of the minimum, first quartile, median, third quartile, and maximum values of the data. First, let's take a look at the following boxplot that displays the GDP per capita across continents in 2007.
+
+```{r, echo=FALSE}
+ggplot(gapminder %>% filter(year == 2007), aes(x = continent, y=gdpPercap))+
+  geom_boxplot()+
+  labs(title = "GDP per capita",
+       subtitle = "year: 2007", 
+       x = "Continent",
+       y = "GDP (USD)")+
+  theme_minimal()
+```
+
+This type of graphic contains a lot of information.
+
+-   The box in the middle represents the middle 50% of the data, with the lower edge representing the *first quartile* (25th percentile) and the upper edge representing the *third quartile* (75th percentile).
+
+-   The line inside the box represents the *median*.
+
+-   The whiskers extending from the box show the *range* of the data, typically defined as 1.5 times the *interquartile range (IQR)*, which is the distance between the first and third quartiles.
+
+-   *Outliers*, which are data points that fall outside the whiskers, are shown as individual points.
+
+Finally, we could be interested in showing the relationship between variables (x-y). The most common way to show this is through **scatterplots**.
+
+```{r,echo=FALSE}
+ggplot(gapminder %>% filter(year == 2007), aes(y = lifeExp, x=gdpPercap))+
+  geom_point()+
+  labs(title = "Wealth and health across countries",
+       subtitle = "year: 2007",
+       x = "GDP (USD)",
+       y = "Life expectancy (in years)")+
+  theme_minimal()
+```
+
+### Mapping more aesthetic attributes
+
+So far, we mostly saw how data can be mapped into an x and y axis. However, we mentioned we can also map data as *shapes, sizes* and *colors*. We briefly saw how color can be introduced to show categorical variables when we are seeing proportions of the data. However, it can also be used as a continuous variable.
+
+```{r,echo=FALSE}
+ggplot(gapminder %>% filter(year == 2007), aes(y = gdpPercap, x=pop, color = lifeExp))+
+  geom_point()+
+  scale_color_viridis_c()+
+  scale_x_log10()+
+  scale_y_log10()+
+  labs(title = "Wealth and population",
+       subtitle = "year: 2007",
+       y = "GDP (USD)",
+       x = "Population",
+       color = "Life exp.")+
+  theme_minimal()
+```
+
+This graph shows that there is a relationship between longevity and GDP: countries with higher life expectancy are found at the top of the graph. As we continue to explore this relationship in the following plots, note that we also introduced a transformation on the X axis. We can see that the values in the scale go from 1,000,0000 to 10,000,000, and then to 100,000,000 until 1,000,000,000. This is called a **logaritmic scale**: the values are no longer evenly spaced, they increase exponentially. This is specially useful when we are working with data with a wide range of values, such as populations or income. For example, let's introduce the variable continent into our 'Wealth and health' graph with a logarithmic scale in the GDP variable.
+
+```{r,echo=FALSE}
+ggplot(gapminder %>% filter(year == 2007), aes(y = lifeExp, x=gdpPercap, color = continent))+
+  geom_point()+
+  scale_x_log10()+
+  labs(title = "Wealth and health across countries",
+       subtitle = "year: 2007",
+       x = "GDP (USD)",
+       y = "Life expectancy (in years)")+
+  theme_minimal()
+```
+
+This returns us a more clear and compact graph, where we can better see the variability in the lower values for both variables, and relate them mostly to Africa.
+
+We could also show the continents as shapes:
+
+```{r,echo=FALSE}
+ggplot(gapminder %>% filter(year == 2007), aes(y = lifeExp, x=gdpPercap, 
+                                               shape = continent))+
+  geom_point()+
+  scale_x_log10()+
+  labs(title = "Wealth and health across countries",
+       subtitle = "year: 2007",
+       x = "GDP (USD)",
+       y = "Life expectancy (in years)")+
+  theme_minimal()
+```
+
+However, the color tends to be a better option to plot categorical data. We could also introduce more data into the plot through the *size* of the dots or shapes.
+
+```{r,echo=FALSE}
+ggplot(gapminder %>% filter(year == 2007), aes(y = lifeExp, x=gdpPercap, 
+                                               color = continent, size = pop/1000000))+
+  geom_point()+
+  scale_x_log10()+
+  labs(title = "Wealth and health across countries",
+       subtitle = "year: 2007",
+       x = "GDP (USD)",
+       y = "Life expectancy (in years)", 
+       size = "Population (in millions)")+
+  theme_minimal()
+```
+
+# Discussion
+
+The design of a graph should always be based on the data and focused on the topic we are researching. However, we should always be careful about not lying with graphs. That is to say, it is important not to toy with our graph to show only information that reinforces our hypothesis or what we want the data to say. @kieran_data_2018 explains this with a clear example from the New York Times. In November 2016, this newspaper reported some research on peoples' confidence in the institutions of democracy. The headline in the *Times* ran "How Stable Are Democracies? 'Warning Signs Are Flashing Red'", and the graph accompanying the article certainly seemed to show an alarming decline.
+
+![A crisis of faith in democracy? (New York Times.)](img/ch-01-democracy-nyt-version.png){width="597"}\
+
+The graph was widely circulated on social media. However, this is an example on how one can lie with data. This plot presumable shows the the percentage of respondents who said "Yes", presumably in contrast to those who said "No". However, the survey asked respondants to rate the importance of living in a democracy on a ten point scale. The graph showed the difference across ages of people who had given of "10" (Absolutely important) only, not changes in the average score on the question. As it turns out, while there is some variation by year of birth, most people in these countries tend to rate the importance of living in a democracy very highly, even if they do not all score it as "Absolutely Important". The political scientist Erik Voeten redrew the figure based using the average response.
+
+![Erik Voeten](img/ch-01-democracy-voeten-version-2.png){width="670"}
+
+While we still see a decline in the average score by age cohort, on the order of between half a point to one and a half points on a ten point scale, it is not such a drastic decline as the one showed originally.
+
+# References

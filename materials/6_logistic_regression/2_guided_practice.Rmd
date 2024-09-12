@@ -1,0 +1,280 @@
+---
+title: "Logistic Regression"
+subtitle: "Guided practice"
+author: ""
+date: ""
+output: html_notebook
+bibliography: references.bib
+---
+
+In this guided practice we will introduce R's workflow to build a simple logistic regression model. We will first briefly explore a data set in order to choose our predictor and outcome variables, and afterwards fit a model and interpret our results.
+
+```{r setup, message=FALSE, warning=FALSE, include=FALSE}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+The data set we will be using is the **Home Mortgage Disclosure Act Data, NY, 2015** provided and compiled by the [Consumer Finance Protection Board](https://www.kaggle.com/datasets/jboysen/ny-home-mortgage?resource=download). This dataset covers all mortgage decisions made in 2015 for the state of New York.
+
+```{r}
+dataset <- readRDS("data/sample_mortgage.RDS")
+```
+
+As you can see, this dataset contains various information regarding the people who applied for loans and the neighborhoods in which they live, including demographic and socio-economical data.
+
+```{r}
+glimpse(dataset)
+```
+
+Let's explore the relation between action taken on loans and the reported race of loan applicants:
+
+```{r}
+dataset %>% 
+  group_by(applicant_race_name_1,action_taken_name) %>% 
+  summarise(n=n()) %>% 
+  group_by(applicant_race_name_1) %>% 
+  mutate(n = n/sum(n)) %>% 
+  pivot_wider(.,names_from = "applicant_race_name_1",values_from = "n")
+```
+
+We can clearly identify some differences between groups we may want to further explore. Let's build a model!
+
+# Building a logistic regression model
+
+We will be studying the relation between action taken on loans ($Y$) and a series of sociodemographical characteristics of applicants ($x$). That is to say, we will try to estimate the parameters $\beta_{0}$ and $\beta_{j}$ of the model described by the following equation:
+
+$$
+\log {\frac{P(x)}{1-P(x)}}= \beta_0 + \sum\limits_{j=1}^p \beta_j X
+$$
+
+Where $P(x)$ represents the probability of a loan being originated.
+
+## Data pre-processing
+
+First and foremost, our dependent variable should be of the factor class:
+
+```{r}
+class(dataset$action_taken_name)
+```
+
+On the other hand, we should identify which is the reference or base level of `action_taken_name`:
+
+```{r}
+levels(dataset$action_taken_name)
+```
+
+If necessary, we could change the reference level using the `relevel` function
+
+```{r}
+#dataset$action_taken_name <- relevel(dataset$action_taken_name, ref = "Loan originated")
+#levels(dataset$action_taken_name)
+```
+
+We will now proceed to apply a simple pre-processing: we will remove rows with no data regarding the characteristics of people applying to loans:
+
+```{r}
+dataset <- dataset %>% 
+  filter(applicant_ethnicity_name != "Not applicable")
+```
+
+## Fitting our model
+
+```{r}
+library(tidymodels)
+```
+
+When using `tidymodels`, specifying a model requires [@kuhn2022]:
+
+1.  Specifying the type of model (e.g., logistic regression, random forest, KNN, etc).
+
+2.  Specifying the engine for fitting the model.
+
+3.  When required, declaring the mode of the model. The mode reflects the type of prediction outcome.
+
+```{r}
+log_model <- logistic_reg() %>% 
+  set_mode("classification") %>% 
+  set_engine("glm")
+```
+
+Once the details of the model have been specified, the model estimation can be achieved using the fit() function: we must declare which data set to get our information from, the outcome variable -to the left of the \~ symbol-, and the predictor variable (or variables) -to its right-.
+
+Let's start with a small model:
+
+```{r}
+log_fit <- log_model %>%
+ fit(action_taken_name ~ applicant_race_name_1, 
+     data = dataset)
+```
+
+This object will store our parameter's estimations. We can use the `tidy()` function to obtain information about our parameters:
+
+```{r}
+tidy(log_fit)
+```
+
+> *Try interpreting the model's coefficients (important clue: which is the reference group for applicant_race_name_1?).*
+
+Let's add some more variables:
+
+```{r}
+log_fit <- log_model %>%
+ fit(action_taken_name ~ applicant_ethnicity_name + applicant_race_name_1 + 
+       loan_purpose_name + loan_type_name + 
+       property_type_name + hud_median_family_income + 
+       loan_amount_000s + number_of_1_to_4_family_units + 
+       minority_population, 
+     data = dataset)
+```
+
+```{r}
+tidy(log_fit) %>%
+  filter(p.value < 0.05)
+```
+
+As usual, we can refine this model by analyzing the p-values corresponding to each variable and removing those variables with extremely high p-values.
+
+How can we interpret our coefficients?
+
+For categorical variables such as applicant_race_name_1, a positive coefficient means that the group identified by the dummy variable (for instance, Black or African American) has a greater possibility of being classified as $Y=1$ (that is to say, a bigger probability of a loan being originated) than the reference category (American Indian or Alaska Native).
+
+For numerical variables such as minority_population, a negative coefficient means that a greater value of will be associated with decreasing chances of a loan being originated.
+
+## Evaluation
+
+What are the predictions of our model? Let's extract them using the function `predict`:
+
+```{r}
+test_val <- log_fit %>%
+  predict(dataset) %>% 
+  bind_cols(., dataset) 
+```
+
+```{r}
+test_val %>% head(.,10)
+```
+
+We can get the probabilities instead of the final classification adding `type = "prob"`. Having this information, we may modify the decision threshold in case we consider it necessary to improve our model.
+
+```{r}
+log_fit %>%
+  predict(dataset, type = "prob") %>% 
+  bind_cols(., dataset) %>% 
+  head(.,10)
+```
+
+Since we are working with a categorical variable, we will use metrics based on the confusion matrix to assess the performance of the model. To get the confusion matrix results, we should use the function `conf_mat`. It takes as input the dataframe with the results, the parameter `truth` which should have the observed with the real value, and `estimate` with the predicted value.
+
+```{r}
+test_val$action_taken_name <- relevel(test_val$action_taken_name, ref = "Loan originated")
+test_val$.pred_class <- relevel(test_val$.pred_class, ref = "Loan originated")
+```
+
+```{r}
+conf_mat(test_val, truth = action_taken_name, estimate = .pred_class)
+```
+
+This matrix can be interpreted as:
+
+-   2639 cases are true negatives, not originated loans that were classified correctly.
+-   10751 observations are true positives, originated loans that were classified correctly.
+-   4989 cases are false negatives, not originated loans that were classified as originated.
+-   1753 are false positives: originated loans that were classified as not originated.
+
+We can easily plot the confusion matrix to get a visual representation of the distribution of our cases:
+
+```{r}
+conf_mat(test_val, truth = action_taken_name, estimate = .pred_class) %>% 
+  autoplot(type = "heatmap")
+```
+
+Let's calculate some performance metrics (accuracy, sensitivity and precision):
+
+```{r}
+custom_metrics <- metric_set(accuracy, sens, precision)
+custom_metrics(test_val, truth = action_taken_name, estimate = .pred_class)
+```
+
+> *Interpret the performance metrics: What are the strengths of our model? And it's weaknesses?*
+
+Notice the precision is low, which means that our model's main problem is producing a great amount of false positives (not originated loans that were classified as originated). That is to say, it is excessively biased towards predicting that the loan will be granted. Even though few granted loans will be misclassified as not granted, loans that were not granted will frequently be classified as granted.
+
+We may address this problem by modifying our threshold:
+
+```{r}
+test_val2 <- log_fit %>%
+  predict(dataset, type = "prob") %>% 
+  bind_cols(., dataset) %>% 
+  mutate(.pred_class = factor(case_when(`.pred_Loan originated` > 0.6 ~ "Loan originated",
+                                 TRUE ~ "Loan not originated"),
+                levels = c("Loan not originated","Loan originated")))
+```
+
+With a 0.6 threshold, notice that the model starts predicting more frequently that the loan won't be originated.
+
+```{r}
+test_val2$action_taken_name <- relevel(test_val2$action_taken_name, ref = "Loan originated")
+test_val2$.pred_class <- relevel(test_val2$.pred_class, ref = "Loan originated")
+```
+
+```{r}
+conf_mat(test_val2, truth = action_taken_name, estimate = .pred_class)
+```
+
+And therefore, the precision improves, but only at the expense of making other metrics (namely, sensitivity) worse. Can you understand why?
+
+```{r}
+custom_metrics(test_val2, truth = action_taken_name, estimate = .pred_class)
+```
+
+Finally, let's build a Hosmer-Lemeshow plot to get a better understand where the model is having trouble predicting:
+
+```{r}
+library(OneR)
+```
+
+We first need to assign groups to observations according to their predicted probability:
+
+```{r}
+test_val2['group'] <- bin(test_val2[".pred_Loan originated"], 
+                          nbins = 10, method = 'l', labels=c(1:10))
+```
+
+On the other hand, we need to count the observed originated loans for each group:
+
+```{r}
+positive_class <- test_val2 %>% 
+  filter(action_taken_name=="Loan originated") %>% 
+  group_by(group) %>% 
+  count()
+```
+
+And finally compute the mean predicted probability per group:
+
+```{r}
+HL_df <- test_val2 %>% 
+  group_by(group) %>% 
+  summarise(pred = mean(`.pred_Loan originated`), 
+            count = n()) %>%
+  inner_join(., positive_class) %>%
+  mutate(freq = n/count)
+```
+
+```{r}
+ggplot(HL_df, aes(x = pred, y = freq)) + 
+  geom_point(aes(size = n), color = "cadetblue") +
+  geom_text(aes(label = n), nudge_y = 0.05)+
+  geom_abline(slope = 1, intercept = 0, linetype='dashed') + 
+  theme_bw() +
+  labs(title='Hosmer-Lemeshow', 
+       size='n', 
+       x="Predicted probability", 
+       y="Observed frequency")
+```
+
+How can we read this plot? Circles positioned above the dashed line suggest that the model is underestimating the probability of a loan being granted for those groups, whereas circles positioned below indicate that the model is overestimating the probability of a loan being granted for those groups.
+
+# References

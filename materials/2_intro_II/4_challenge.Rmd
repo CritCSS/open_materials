@@ -1,0 +1,19 @@
+---
+title: "Introduction II"
+subtitle: "Challenge"
+author: ""
+date: ""
+output: html_notebook
+---
+
+For this challenge, you will create a new repository and explore a new data set:
+
+1. Create a new private repository in GitHub and make your teacher a collaborator. Open a new RStudio Project using its Repository URL and save a new R script in the folder corresponding to your new repository, as well as the table_2-3.csv data set and the table_2.pdf file.
+
+2. Import the table_2-3.csv data set. This is a .csv file, you will need to use the readr package to import it (install it). The information on how to interpret the information contained in it is in the table_2.pdf file.
+
+3. Explore and transform the data set in any way you consider necessary to understand its data. (Tip: remember you can select columns that start with some character pattern such as "kir_q").
+
+4. Draw conclusions from your empirical analysis and save your transformed data set (or data sets) as an .RDS object.
+
+5. Push your script and results to GitHub.

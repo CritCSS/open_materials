@@ -1,0 +1,463 @@
+---
+title: "Introduction II"
+subtitle: "Guided practice"
+author: ''
+date: ''
+output: html_notebook
+bibliography: references.bib
+---
+
+```{r setup, message=FALSE, warning=FALSE, include=FALSE}
+knitr::opts_chunk$set(message = FALSE,warning = FALSE)
+```
+
+# Working with R and Git
+
+In this guided practice, we will introduce you to the basics of working with R and GitHub. After setting up your GitHub's user and creating a new repository, we will study R's syntax, objects, basic commands, and introduce you to a basic R workflow. The final step of our guided practice will be to upload to a GitHub repository our progress.
+
+## Setting up Git
+
+Create a new account in [GitHub](https://github.com/) ([this site](https://docs.github.com/en/get-started/onboarding/getting-started-with-your-github-account) might be useful if you get stuck). Once you have set up your user, create a new repository using the $+$ drop-down menu you will find in the upper-right corner (select *New repository*). Make the repository private. Once you repository has been created, go to *Settings* \> *Collaborators* \> *Add people* and add your teacher.
+
+In RStudio, start a new Project using: File \> New Project \> Version Control \> Git. In *Repository URL*, paste the clone URL of the GitHub repository we just created. This will be your first time using Git! Make sure you install all necessary software and follow the steps described in the class notes on how to authenticate our identity when interacting with GitHub from a new device.
+
+Save this script in the folder corresponding to your new repository, as well as summary_dataset.RDS (for the code in this script to run properly, you will need to save *summary_dataset.RDS* inside a folder named *asec* inside another folder called *data*). 
+
+## Packages
+
+When working with R, we will usually draw on functions that belong to packages. In order to download a package we can use the function **install.packages()**. When the command is executed, the files corresponding to the package will be downloaded from the CRAN page to the directory where R is installed. Depending on the package and our internet connection, this may take some minutes. 
+
+For example:
+
+```{r, eval=FALSE}
+install.packages("tidyverse")
+install.packages("janitor")
+install.packages("openxlsx")
+```
+
+We will only use this function **once**. Once the packages we need are installed in our computer, we will load them using **library(package_name)** every time we start a new R session.
+
+We can use the syntax package_name**::**function_name() to refer to functions belonging to a package (this is specially useful in cases where two different libraries have functions with the same name). For example:
+
+```{r, eval=FALSE}
+janitor::clean_names()
+```
+
+
+## Help, errors and warnings
+
+The basic command to find out what a function does or simply ask for help is help("function name") or ?("function name").
+
+If we make a mistake, try to use a function on an object that is not appropriate, or simply mess up, R will print an **error message** in the console. This is different from a **warning**, which also appears in the console in the same color. A warning merely alerts us that the command we entered behaved in a certain way that may not be desirable, but it generally does not indicate that something went wrong.
+
+When there is an error message, it means that what we intended to do did not work. This is common, so instead of getting frustrated and panicking, we should read the error and try to modify our code accordingly. If we are not sure about how to solve our error, the usual course of action is to copy the error message and search for it on Google. In most cases, someone else has already encountered the same error and posted it on a platform such as [Stack Overflow](https://stackoverflow.com/).
+
+Some tips for googling:
+
+- Explicit you are looking for an R syntax solution (and, if it were the case, a function belonging to a certain package).
+
+- Try identifying and copying the most relevant part of the error (exclude elements such as the names or values of the objects you were working with). 
+
+## Naming conventions
+
+A useful naming convention for R objects or functions: names should use only lowercase letters, numbers, and \_. Use underscores (\_) (so called snake case) to separate words within a name [@wickhamTidyverseStyleGuide2021]. 
+
+For example: use my_n1_obj instead of myn1obj or MyN1Obj.
+
+## Functions
+
+One of the main advantages of using R is that in addition to using built-in functions or functions from various packages, we can also create our own functions to automate repetitive tasks. This is particularly useful when we need to perform the same data processing steps on a dataset multiple times. By creating a function, we can streamline the process and avoid the need to manually repeat the same code over and over again.
+
+-   Parentheses **"()"** are used in functions to define the parameters.
+
+-   Commas **","** are used to separate parameters within a function.
+
+-   What the function does will be defined inside curly brackets **"{}"**.
+
+The basic syntax for creating a function is as follows:
+
+```{r}
+
+my_first_function<-function(arguments){
+	#[something gets done]
+}
+
+```
+
+## R objects and indexing
+
+Brackets **"[]"** (or **"[[]]"**) and the **"\$"** sign are subsetting operators in R [@wickhamAdvanced2019]. They are used to access parts of an object using their indices (indexing) or names. Let's see how to use the for our main data structures.
+
+### Vectors
+
+We can create a vector using the **c()** command. For example:
+
+```{r}
+vector_1 <- c("very small","small","big","bigger")
+```
+
+The table() function is useful for creating a univariate tabulation of the frequencies of each category in a vector. 
+
+```{r}
+table(vector_1)
+```
+Note that R has ordered the elements in the vector according to their alphabetical order. This will happen with all character vectors (when creating tables, visualizations, etc.). The order of the elements may or may not be relevant. If it were relevant to us, we should create a factor type vector.
+
+When creating a factor vector, we should indicate the levels of the vector:
+
+```{r}
+factor_1 <- factor(vector_1,
+                   levels = c("very small","small","big","bigger"))
+```
+
+
+```{r}
+table(factor_1)
+```
+Note that the elements in the vector are now displayed the way we intended them to be displayed.
+
+In a **vector**: "[]" brackets are used to access an element by its index number or order.
+
+For example, to access the third element in a vector "x", you would use:
+
+```{r}
+vector_1[3]
+```
+
+To access more than one element, we use a vector specifying the position of the elements we want. For example, to get the first and third element in x we would use:
+
+```{r}
+vector_1[c(1,3)]
+```
+
+To exclude any elements, we use -. For example, to get all elements except the first and third element in x we would use:
+
+```{r}
+vector_1[-c(1,3)]
+```
+
+We can also use logical conditions, such as:
+
+```{r}
+vector_1[c(FALSE,TRUE,FALSE,TRUE)]
+```
+
+### Lists
+
+We can create a list using the **list()** command. For example:
+
+```{r}
+lst <- list("a_letter"="a",
+            "a_number"= 2, 
+            "a_vector"= c(4,5,6), 
+            "another_list"= list("b", c(8,9)))
+
+lst
+
+```
+
+In a **list**: "[[]]" brackets are used to access an element by its position or index number in the list. For example, to access the first element in a list "lst", you would use:
+
+```{r}
+lst[[2]]
+```
+
+Using a simple pair of brackets "[]" will return **a new list**, which will contain the subset of the elements of the original list we specify.
+
+```{r}
+lst[2]
+class(lst[2])
+```
+
+Quiz: how can you make the following statement TRUE?
+
+```{r, eval=FALSE}
+lst[2]*2 == 4
+```
+
+On the other hand, the "\$" symbol allows us to access a specific element using its name. For example, to access the a_number element of list "lst", you would use:
+
+```{r}
+lst$a_number
+```
+
+### Data Frames
+
+We can create a data frame using the **data.frame()** command. For example:
+
+```{r}
+table_1 <- data.frame("col1" = c("a","b","c"),
+                      "col2" = c(1,2,3),
+                      "col3" = c("yes","no","maybe"))
+
+
+table_1
+
+```
+
+In a **table**, brackets are used to access an element by its index.
+
+When subsetting with a single index, they behave like lists and index the columns. For example, to create a new data frame that only contains the first column of table_1, we would use:
+
+```{r}
+table_1[1]
+class(table_1[1])
+```
+
+On the other hand, the "\$" symbol allows us to access a specific column using its name. For example, to access the col1 column of table_1, you would use:
+
+```{r}
+table_1$col1
+```
+
+Note that in this case, we obtain a vector, not a smaller data frame.
+
+When subsetting with two indices, they indicate the row and column position of the desired element. For example, to access the element in the second row and third column of table_1, we would use:
+
+```{r}
+table_1[2, 3]
+```
+
+If we omit one of the indices, R will consider it as referring to all rows or columns.
+
+If they are both blank, we will get our full dataframe.
+
+```{r}
+table_1[,]
+```
+
+To access all columns in the third row, we can use:
+
+```{r}
+table_1[3,]
+```
+
+We can also use logical conditions:
+
+```{r}
+table_1[table_1$col2>1,]
+```
+
+# Tidyverse
+
+We will now import and explore a database, and later save our results. For this purpose, we will use the [tidyverse](https://www.tidyverse.org/) collection of R packages. All tidyverse packages share an underlying design philosophy, grammar, and data structures.
+
+## Loading our libraries
+
+Let's first load the libraries we will be needing for this class:
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(openxlsx)
+```
+
+## Importing a dataset
+
+A first step working with data is to import the data set we aim to analyze. There are specific packages available for loading files of various formats. The following table summarizes some of the main functions you might need:
+
+```{r, echo=FALSE}
+import_table <- tibble(
+  "File type" = c("Plain text",
+                        "Plain text",
+                        "Plain text",
+                        "R files",
+                        "R files",
+                         "Other softwares",
+                         "Other softwares",
+                         "Excel",
+                         "Excel"),
+           "Package" =c("readr",
+                        "readr",
+                        "readr",
+                        "RBase",
+                        "RBase",
+                        "haven",
+                        "haven",
+                        "openxlsx",
+                        "readxl"),
+             "Extension" =c(".csv",
+                          ".txt",
+                          ".tsv",
+                          ".RDS",
+                          ".RDATA",
+                          ".dta",
+                          ".sav",
+                          ".xlsx",
+                          ".xls"),
+         "Functions" = c("read_csv()",
+                           "read_txt()","read_tsv()",
+                           "readRDS()", "open()",
+                           "read_dta()","read_spss()",
+                           "read.xlsx()","read_excel()")    
+)  
+
+import_table
+```
+
+
+An easy way to manually import databases using the **Import Dataset** button on the Environment screen. This allows us to select the format of the database we wish to import, specify the file path, and view the corresponding R code necessary for importing it (at the bottom right side of the pop-up window). We can copy this code and use it as a model next time we try to import a file.
+
+Let's open the file we will be using for this class and store it in an object called "set1":
+
+```{r}
+set1 <- readRDS("data/asec/summary_dataset.RDS")
+```
+
+It is always important to read the methodological documentation of the database we will be using, as well as the dictionary or registry (which should help us understand the information stored in each column).
+The database we will be using contains a summary of the information contained in the Annual Social and Economic (ASEC) Supplement conducted by the Bureau of the Census for the Bureau of Labor Statistics in 2022.
+You can find the ASEC 2022 Public Use Data Dictionary in the file cpsmar22.pdf
+
+
+## Cleaning and tidying
+
+Which are the variables in this data set? Let's use the **names()** function to extract them:
+
+```{r}
+names(set1)
+```
+Note the column names don't follow the naming conventions discussed in previous sections. 
+
+A useful function to solve this is **janitor::clean_names()**. This function reformats column names to follow our naming conventions:
+
+```{r}
+set1 <- clean_names(set1)
+```
+
+```{r}
+names(set1)
+```
+
+## Exploring
+
+Let's start exploring our data base!
+
+### A first glimpse
+
+Using **head()**, we can view the first 10 observations of a dataset by default. However, we can adjust the number of rows displayed by specifying the desired value for the *n* argument.
+
+Let's see the first 5 values of our dataset:
+
+```{r}
+head(set1, n=5)
+```
+
+Yo get some more details about the contents of our dataset, we can use glimpse():
+
+```{r}
+glimpse(set1)
+```
+The function summary() can provide us with additional information about the distribution of the numeric variables in our dataset:
+
+```{r}
+summary(set1)
+```
+
+
+### Transformations
+
+The tidyverse collection includes the magrittr package, a package that introduces the **pipe operator %>%** (keyboard shortcut: Ctrl + Shift + M). 
+
+The pipe operator denotes performing a specific operation on the object immediately to its left and passing the result to the next operation in the sequence. It is used to indicate a sequence of actions that should be performed on the data.
+
+For example, instead of "glimpse(set1)", we could have written "set1 %>% glimpse()".
+
+Let's apply some transformations in our dataset using the following dplyr functions (dplyr is another package that belongs to the tidyverse collection)
+
+-   **select()**: used to select (and optionally rename) variables in a data frame. The columns can be selected using their names or with formulations such as starts_with("some pattern") or contains("some pattern"), or combinations of both.
+
+-   **filter()**: used to subset a data frame, retaining all rows that satisfy certain conditions.
+
+-   **mutate()**: creates new columns that are functions of existing variables.
+
+-   **arrange()**: orders the rows of a data frame by the values of selected columns.
+
+Let's first choose the columns we are interested in using select(). We won't be using column obs, as it indicates the number of rows in the original dataset that correspond to each group and is not relevant for our current analysis. We can therefore select all columns except obs and save to a new table this reduced dataframe.
+
+```{r}
+my_analysis <- set1 %>% 
+  select(c("a_sex","prdtrace","age_grouped","average_income"))
+```
+
+Another way to achieve the same result would be to use:
+
+```{r}
+my_analysis <- set1 %>% 
+  select("prdtrace",starts_with("a"))
+```
+
+That is to say, all columns whose names start with an "a" or are named 'prdtrace'.
+
+For this exercise, we will be interested in the population 35 years old or older: we can use the function filter() to keep rows that satisfy this condition:
+
+```{r}
+my_analysis <- set1 %>% 
+  select(c("a_sex","prdtrace","age_grouped","average_income")) %>% 
+  filter(age_grouped == "Older than 35") 
+```
+
+Note that the pipe operator enables us to chain multiple operations together, making our code easier to read. This helps to streamline complex data manipulation tasks by breaking them down into smaller, more manageable steps.
+
+In our dataset, sex information is in a different column from race information. For a more complex intersectional analysis, we might want to easily observe both dimensions together. To do this, we can create a new column using the command mutate() together with the function paste0(), which concatenates values. 
+
+Let's look at a little example of what paste0 does before applying this transformation to our dataset:
+
+```{r}
+ch1 <- "Hi "
+ch2 <- "world"
+paste0(ch1, ch2, "!")
+```
+In our dataset, we would like to create a new column called "intersectional" which contains sex and race information sepatated by "-". After creating this column, we can delete the columns that contain sex and race information using select()
+
+```{r}
+my_analysis <- set1 %>% 
+  select(c("a_sex","prdtrace","age_grouped","average_income")) %>% 
+  filter(age_grouped == "Older than 35") %>% 
+  mutate(intersectional = paste0(a_sex, " - ", prdtrace)) %>% 
+  select(-c("a_sex","prdtrace"))
+```
+
+Finally, let's order our table's rows according to average income in order to make it easier to look at the effect of sex and race on income level using arrange(). By default, this function arranges rows in ascending order. However, we can specify a descending order by using a "-" sign before the variable we want to sort by:
+
+```{r}
+my_analysis <- set1 %>% 
+  select(c("a_sex","prdtrace","age_grouped","average_income")) %>% 
+  filter(age_grouped == "Older than 35") %>% 
+  mutate(intersectional = paste0(a_sex, " - ", prdtrace)) %>% 
+  select(-c("a_sex","prdtrace")) %>% 
+  arrange(-average_income) 
+```
+
+This is the final version of our empirical analysis! Interpret and discuss the results obtained.  
+
+```{r}
+my_analysis
+```
+
+
+## Exporting
+
+Keep in mind objects created during our R session only exist in our environment and will disappear once we quit the R session unless we save them. It is therefore very important to export our results. To do so, we need to chose the appropriate function considering our desired file format. 
+
+For any of these functions, we should tell R which **object** to save and the **file path** to the folder where we want it to be saved.
+
+To save our analysis table as an excel file, we can use: 
+
+```{r,eval=FALSE}
+write.xlsx(my_analysis,"excel_results.xslx")
+```
+
+To save our analysis table as an .RDS file, we can use:
+
+```{r,eval=FALSE}
+saveRDS(my_analysis,"rds_results.RDS")
+```
+
+
+# Uploading our work to GitHub
+
+Once we are done working on a project, we will usually upload our progress to GitHub. In order to do this, go to the Git tab in the environment pane and stage all your changes (checking the *Staged* box). Click *Commit* and write your commit message explaining your modifications in the repository. Once you commit your changes, use the *push* button in order to upload your changes to GitHub.
+
+Check whether you successfully uploaded your progress by visiting your repository's site in GitHub's site.
+
+# References

@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.551">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Unsupervised Learning</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="1_class_notes_files/libs/clipboard/clipboard.min.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/quarto.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/popper.min.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="1_class_notes_files/libs/quarto-html/anchor.min.js"></script>
+<link href="1_class_notes_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="1_class_notes_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="1_class_notes_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="1_class_notes_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="1_class_notes_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Unsupervised Learning</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>During the last lecture we addressed supervised classification models in machine learning. The main characteristic of these methods is that we have a target variable we want to predict, based on features or predictors. When the target variable is continuous, we talk about regression problems, but when it’s a categorical variable, we talk about classification problems.</p>
+<p>In this opportunity, we will discover a different type of machine learning methods: unsupervised learning. Unlike the supervised case, now we will not have a Y variable that we want to predict based on X features. We will only have a set of X features that are represented in a data space, from which we can extract relevant information. That is, we are not interested in being able to predict values, but rather finding interesting patterns in the data that can be inferred from the features.</p>
+<p>There are mainly two types of problems that can be approached through unsupervised learning:</p>
+<ol type="1">
+<li><p><strong>Dimensionality reduction</strong>: This refers to the process of finding combinations of features to replace the original ones, in order to reduce the dimension of the problem. In other words, to “rewrite” the data into fewer variables. This is often useful for the case of highly dimensional dataframes, where several variables are correlated. Dimensionality reduction is useful to compress information in order to reduce computational memory requirements, visualize data into more readable representations, and as input for other machine learning methods (such as classification or clustering).</p></li>
+<li><p><strong>Clustering:</strong> The goal of these type of algorithms is to find ‘similar’ cases. That is, to find groups within the observations that share similar values within the feature space. In this class, we will address different clustering methods.</p></li>
+</ol>
+</section>
+<section id="clustering" class="level1">
+<h1>Clustering</h1>
+<section id="overview" class="level2">
+<h2 class="anchored" data-anchor-id="overview">Overview</h2>
+<p>As explained before, <strong>clustering</strong> refers to a set of methods that aim to find <em>subgroups</em> of similar observations within the data. The goal of these methods is to partition the sample in a way that the observations within each group are quite similar to each other, while observations in different groups are quite different from each other <span class="citation" data-cites="hastie2009">(<a href="#ref-hastie2009" role="doc-biblioref">Hastie, Tibshirani, and Friedman 2009</a>)</span>. However, what does it mean that observations are <em>similar</em> and <em>different</em>?</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/01_clustering.png" class="img-fluid figure-img" width="291"></p>
+<figcaption>Finding subgroups within the observations.</figcaption>
+</figure>
+</div>
+<p>Broadly speaking, subgroups of similar data are those where the intra-cluster distance is minimized, and the inter-cluster distance is maximized. The observations in one group should be as homogeneous as possible, and the observations of different groups should be as heterogeneous as possible between each other. The measures to define similarity and difference are domain-specific considerations that should be taken into account by the knowledge of the data. We will now look into different approaches for clustering.</p>
+</section>
+<section id="k-means-clustering" class="level2">
+<h2 class="anchored" data-anchor-id="k-means-clustering">K-Means Clustering</h2>
+<p>Take a look at the following figure. It takes information from the Gapminder dataset and plots the relationship between GDP per capita and life expectancy for all the countries in 2007.</p>
+<blockquote class="blockquote">
+<p>Based on this information, how many groups do you think you could make from these observations? And which criteria would you use to group them?</p>
+</blockquote>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="1_class_notes_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Intuitively, we might initially consider forming <strong>two distinct groups</strong>: one comprising countries characterized by both high life expectancy and a substantial GDP per capita, and another consisting of low-income nations with correspondingly low life expectancy. However, an alternative approach could involve categorizing our observations into <strong>three distinct groups</strong>, thereby introducing an additional cluster comprising middle-income countries with intermediate life expectancy. Determining the number of groups can be a subjective decision and can be tailored to the specific characteristics of the dataset; in essence, the possibilities are as diverse as the number of observations.</p>
+<p>This conceptual framework underlies the fundamental principles of the <strong>k-means clustering algorithm.</strong> Operating on the basis of a predefined value for K (the number of clusters):</p>
+<ol type="1">
+<li>Each observation is assigned to one of the K defined clusters.</li>
+<li>The clusters are mutually exclusive, ensuring that no observation is part of more than one cluster.</li>
+</ol>
+<p>Now, how does this algorithm define which observation will belong into each cluster? How does it define the similarity between the subgroups? The k-means clustering algorithm does so minimizing <strong>within-cluster variation.</strong> The key metric for measuring this variation is the <em>squared Euclidean distance</em><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. For each cluster <em>k</em>, the within-cluster variation is computed as the sum of squared Euclidean distances between all pairs of observations within that cluster, divided by the total number of observations in that cluster.</p>
+<p>The algorithm is guided by the goal of optimizing this within-cluster variation problem, seeking to minimize the following expression:</p>
+<p><span class="math display">\[
+\min_{C_{1},...,C_{k}} \left\{W(C_{k})=\frac{1}{|C_{k}|} \sum_{i,i^{'} \in C_{k}} \sum_{j=1}^p (x_{ij} - x_{i^{'}j})^2\right\}
+\]</span></p>
+<p>Therefore, the goal of the algorithm is to find a method to partition the observations into <em>K</em> clusters that optimizes this problem, that is, that returns the smaller value of the within-cluster variation.</p>
+<p>The algorithm has the following steps:</p>
+<ol type="1">
+<li>Randomly assigns to each observation a value from 1 to K, based on the K defined clusters.</li>
+<li>Repeats until convergence:
+<ol start="3" type="1">
+<li>For each of the K clusters, computes the <em>centroid</em>. The <em>k</em>th cluster centroid is the <em>p</em> feature average (mean) for the observations in that cluster.</li>
+<li>Assign <em>x</em> to the nearest center (the closest one in terms of Euclidean distance).</li>
+<li>Recalculate the cluster centers as the mean of all data points assigned to each cluster.</li>
+</ol></li>
+<li>The algorithm converges to <em>K</em> clusters (more iterations do not change the result), each with its own center.</li>
+</ol>
+<p>As the algorithm progresses, the obtained clustering continually improves, ensuring that the within-cluster distance is minimized. This iterative process leads to clusters with observations that are more similar to each other than to those in other clusters. When the result no longer changes, it means that the distance was optimized, a <em>local optimum</em> has been reached.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="https://allisonhorst.com/k-means-clustering"><img src="img/02_kmeans.gif" class="img-fluid figure-img" width="661" alt="Allison Horst"></a></p>
+<figcaption>Allison Horst</figcaption>
+</figure>
+</div>
+<p>The k-means clustering method has <strong>several limitations</strong> that should be considered when applying it.</p>
+<p>First, a significant challenge lies in the determination of the pre-defined number of clusters, K, which is often unknown. The algorithm’s effectiveness is sensitive to this parameter, and <strong>different values of K</strong> can lead to varied clustering outcomes. To address this, practitioners commonly iterate over different values of K and assess the clustering results to find the most suitable configuration.</p>
+<p>Secondly, the algorithm is susceptible to converging to a <em>local</em> optimum rather than a <em>global</em> optimum. This sensitivity arises from the dependence on the initial random assignment of clusters in Step 1. To mitigate this, it is advisable to run the algorithm multiple times with <strong>different initial configurations</strong>, and then select the solution that yields the most favorable clustering results.</p>
+<p>Additionally, k-means is constrained to continuous variables, as computing centroids relies on the mean of the <em>p</em> features of the data. Therefore, when <strong>dealing with categorical or non-continuous data</strong>, alternative clustering methods may be more appropriate<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>.</p>
+<p>Moreover, the algorithm is <strong>highly sensitive to outliers</strong>, as the centroid is influenced by the mean of the features. Outliers can disproportionately impact the mean, leading to biased cluster centers. Preprocessing steps, such as outlier removal or transformation, may be necessary to enhance the robustness of the algorithm in the presence of outliers <a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>.</p>
+<p>In summary, while k-means clustering is a valuable tool for partitioning data into clusters, users should be mindful of its sensitivity to the pre-defined number of clusters, the reliance on random initialization, and its suitability for continuous variables. Careful consideration and experimentation with different configurations are essential to obtain meaningful and reliable clustering results.</p>
+</section>
+<section id="hierarchical-clustering" class="level2">
+<h2 class="anchored" data-anchor-id="hierarchical-clustering">Hierarchical Clustering</h2>
+<p>Some of the limitations from the K-Means clustering can be overcome with another method: Hierarchical Clustering. The premise of this method is that we do not know the number of clusters before training the data, and we use a <strong>dendogram</strong> to get an overview and define the ideal K.</p>
+<section id="interpreting-the-dendogram" class="level3">
+<h3 class="anchored" data-anchor-id="interpreting-the-dendogram">Interpreting the dendogram</h3>
+<p>The dendrogram is a tree-based graphical representation of the results of hierarchical clustering. It visualizes the hierarchy of clusters and the relationships between data points.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/04_dendogram.png" class="img-fluid figure-img" width="602"></p>
+<figcaption>Gareth James, Daniela Witten, Trevor Hastie, Robert Tibshirani</figcaption>
+</figure>
+</div>
+<p>The upper figure illustrates a dendrogram. The X-axis represents individual data points in the dataset, while the Y-axis depicts the distances between data points or clusters. At the dendrogram’s bottom, each vertical line represents a single data point, essentially treating each as its own cluster. Moving up on the dendrogram, vertical lines merge into clusters, formed by grouping data points more similar to each other than to the rest of the data. The creation of a new cluster occurs where vertical lines merge into a horizontal line, with the height of the line reflecting the dissimilarity between the merging clusters.</p>
+<p>To determine the number of clusters for analysis, a horizontal line is drawn across the dendrogram at a chosen height. The number of clusters corresponds to the intersections between this line and the vertical lines. The choice of the cutoff point depends on the desired level of granularity in clustering results. A higher cutoff yields fewer, larger clusters, while a lower cutoff results in more, smaller clusters.</p>
+<p>After determining the number of clusters and the cutting point on the dendrogram, the resulting clusters are used in the analysis. Each data point is assigned to one of these clusters. For example, in the second figure, a cutoff at height 9 produces two clusters, depicted in pink and green. In the last image, a cutoff at level 5 leads to a split into three clusters, colored in pink, yellow, and green. This flexibility in choosing the cutoff allows for tailoring the clustering solution to the specific problem and the desired level of detail for the results.</p>
+</section>
+<section id="algorithm-steps" class="level3">
+<h3 class="anchored" data-anchor-id="algorithm-steps">Algorithm steps</h3>
+<p>The most common type of hierarchical clustering is the <strong>bottom-up</strong> and <strong>aglomerative</strong> clustering. It refers to the fact that the clusters will be grouped from the individual observations to larger groups. The general idea is that each observation will begin by being considered as an individual cluster. Then, the clusters that are closer to each other will be identified and merged into one larger cluster. This process will be iterated until all the observations are agglomerated into one cluster. Therefore, it adds up the clusters in each iteration.</p>
+<p>How does the algorithm work?</p>
+<ol type="1">
+<li><p><strong>Initialization:</strong> We start by considering that each data point is an individual cluster. In the beginning, we have N clusters, where N is the number of data points.</p></li>
+<li><p><strong>Similarity calculation:</strong> We compute the similarity matrix or distance between all pairs of clusters. There are several ways to measure similarity, such as Euclidean distance, Manhattan distance, cosine similarity, etc.</p></li>
+<li><p><strong>Cluster merging:</strong> The two most similar clusters are merged into one. The choice of which clusters to merge is based on the similarity matrix. This is repeated at each step until only one cluster remains.</p></li>
+<li><p><strong>Hierarchy construction:</strong> As the clusters are merged, a tree hierarchy (dendrogram) is constructed showing how the data are grouped at different levels of similarity. In the dendrogram, clusters are merged based on distance on the vertical axis.</p></li>
+<li><p><strong>Cluster selection:</strong> To determine the optimal number of clusters, you can examine the dendrogram and decide at which level of similarity you want to cut the tree. This will determine the number of clusters.</p></li>
+</ol>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="https://github.com/allisonhorst/stats-illustrations"><img src="img/03_hierarchical_clustering.jpg" class="img-fluid figure-img" width="603" alt="Hierarchical Clustering by Allison Horst"></a></p>
+<figcaption>Hierarchical Clustering by Allison Horst</figcaption>
+</figure>
+</div>
+</section>
+<section id="dissimilarity-measures" class="level3">
+<h3 class="anchored" data-anchor-id="dissimilarity-measures">Dissimilarity measures</h3>
+<p>The algorithm for hierarchical clustering is straightforward, yet the choice of dissimilarity measurement and linkage methods plays a crucial role in shaping the resulting dendrogram and clusters. Unlike K-Means clustering, hierarchical clustering involves assessing <strong>dissimilarity</strong> when clusters contain multiple observations, achieved through different <strong>linkage</strong> methods. The selection of the linkage method significantly influences the clustering outcomes. Here are four common types of linkage methods:</p>
+<p>The four most common types of linkage methods include:</p>
+<ol type="1">
+<li><p><strong>Single Linkage (Minimum Linkage):</strong> Measures the distance between the closest pair of data points in two different clusters. It tends to produce elongated clusters and is sensitive to outliers.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="https://medium.com/@dhivyasamin/hierarchical-clustering-algorithm-in-machine-learning-bd9f97ca6701"><img src="img/single.jpg" class="img-fluid figure-img" alt="Dhivya"></a></p>
+<figcaption>Dhivya</figcaption>
+</figure>
+</div></li>
+<li><p><strong>Complete Linkage (Maximum Linkage):</strong> Measures the distance between the farthest pair of data points in two different clusters. It tends to produce compact, spherical clusters and is less sensitive to outliers.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="https://medium.com/@dhivyasamin/hierarchical-clustering-algorithm-in-machine-learning-bd9f97ca6701"><img src="img/complete.jpg" class="img-fluid figure-img" alt="Dhivya"></a></p>
+<figcaption>Dhivya</figcaption>
+</figure>
+</div></li>
+<li><p><strong>Average Linkage (UPGMA - Unweighted Pair Group Method with Arithmetic Mean):</strong> Computes the average distance between all pairs of data points in two different clusters. It provides a balance between single and complete linkage, yielding relatively balanced clusters.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="https://medium.com/@dhivyasamin/hierarchical-clustering-algorithm-in-machine-learning-bd9f97ca6701"><img src="img/avg.jpg" class="img-fluid figure-img" alt="Dhivya"></a></p>
+<figcaption>Dhivya</figcaption>
+</figure>
+</div></li>
+<li><p><strong>Centroid Linkage:</strong> Calculates the distance between the centroids (mean points) of two clusters. It can be computationally efficient but may not work well with clusters of irregular shapes.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="https://medium.com/@dhivyasamin/hierarchical-clustering-algorithm-in-machine-learning-bd9f97ca6701"><img src="img/centroid.jpg" class="img-fluid figure-img" alt="Dhivya"></a></p>
+<figcaption>Dhivya</figcaption>
+</figure>
+</div></li>
+</ol>
+<p>The choice of linkage method depends on the characteristics of the data and the desired structure of the clusters. Each method has its advantages and limitations, making it essential to consider the nature of the dataset and the goals of the analysis when selecting an appropriate linkage method for hierarchical clustering. Experimentation with different methods is often necessary to determine the most suitable approach for a particular dataset and clustering objective.</p>
+</section>
+</section>
+<section id="practical-issues-in-clustering" class="level2">
+<h2 class="anchored" data-anchor-id="practical-issues-in-clustering">Practical issues in clustering</h2>
+<p>Both K-Means and Hierarchical Clustering assign each observation to a cluster of similar data points. However, as researchers, it’s crucial to consider the following points when employing such methods:</p>
+<ul>
+<li><p><strong>Correlated Variables:</strong> Variables with high correlations may lead to the formation of clusters based on these correlations rather than capturing meaningful patterns in the data. Employing dimensionality reduction techniques, such as Principal Component Analysis (PCA), can help address this issue by transforming the data into uncorrelated variables.</p></li>
+<li><p><strong>High-Dimensional Datasets:</strong> High-dimensional datasets, characterized by a large number of variables, can pose challenges for clustering methods. The increased complexity may result in suboptimal clustering outcomes. It is advisable to explore dimensionality reduction techniques or feature selection to enhance the performance of clustering algorithms.</p></li>
+<li><p><strong>Outliers:</strong> Outliers have the potential to distort clustering results. Traditional clustering methods like K-Means and Hierarchical Clustering lack built-in mechanisms to robustly handle extreme values. Researchers may consider employing alternative clustering methods, such as Hierarchical DBSCAN<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>, which is more robust to outliers and density variations in data.</p></li>
+<li><p><strong>Variable Standardization:</strong> Clustering algorithms are sensitive to the scale of variables, and when variables have varying units of measurement, standardization becomes crucial. Failing to standardize may result in certain variables dominating the clustering process due to their larger units. Ensuring that all variables are on a similar scale through standardization helps to avoid this issue.</p></li>
+</ul>
+<p>These considerations highlight the importance of preprocessing and understanding the characteristics of the data before applying clustering methods. By addressing issues related to correlated variables, high dimensionality, outliers, and variable scale, researchers can enhance the robustness and reliability of clustering results for more meaningful insights.</p>
+</section>
+</section>
+<section id="discussion" class="level1">
+<h1>Discussion</h1>
+<p>It’s important to emphasize that clustering and unsupervised methods, in general, are not designed for predictive tasks. Instead, they serve to uncover patterns in data, such as identifying strong correlations among variables. This ability makes them valuable tools for revealing and representing disparities. Through clustering, we can unveil the co-occurrence and relationships among variables that may be obscured when treated as control factors, such as the connection between gender and income or occupation.</p>
+<p>However, as previously mentioned, these methods do not involve predicting a target variable, and therefore, there’s no way to assess their performance. Consequently, there’s no fixed “ideal” outcome to strive for when creating clusters. These methods lack robustness and should not be used to draw causal interpretations. This doesn’t imply that the results are not valuable; rather, they should be approached critically. For instance, you can scrutinize the distribution of variables within each cluster and seek to understand the underlying reasons for the model’s grouping. Then, while they offer highly analytical and interpretative valuable insights, they have limited predictive utility.</p>
+</section>
+<section id="references" class="level1 unnumbered">
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-hastie2009" class="csl-entry" role="listitem">
+Hastie, Trevor, Robert Tibshirani, and Jerome Friedman. 2009. <em>The Elements of Statistical Learning</em>. Springer Series in Statistics. New York, NY: Springer New York. <a href="https://doi.org/10.1007/978-0-387-84858-7">https://doi.org/10.1007/978-0-387-84858-7</a>.
+</div>
+</div></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>The euclidean distance measures the distance between two points in a n-dimensional space. It is given by <span class="math inline">\(D = √((x2 - x1)^2 + (y2 - y1)^2 + (z2 - z1)^2 + ... + (xn - x1)^2)\)</span><a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>The categorical variant for this algorithm is K-<a href="https://www.analyticsvidhya.com/blog/2021/06/kmodes-clustering-algorithm-for-categorical-data/">Modes clustering</a>.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>An alternative method to K-Means clustering that overcomes this limitation is its variant <em>K-Medoids</em>. K-Medoids is similar to K-Means in that it aims to partition a dataset into K clusters, but it represents the cluster centers not by the mean but by the medoid of the cluster. It also outperforms K-Means by taking into account categorical variables. However, it is computationally more expensive than the K-Means algorithm.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>Hierarchical DBSCAN (Density-Based Spatial Clustering of Applications with Noise) is a variation of the DBSCAN clustering algorithm that organizes clusters in a hierarchical or tree-like structure rather than identifying clusters as separate, non-overlapping groups.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

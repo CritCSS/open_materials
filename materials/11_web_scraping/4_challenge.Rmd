@@ -1,0 +1,11 @@
+---
+title: "Web Scraping"
+subtitle: "Challenge"
+author: ""
+date: ""
+output: html_notebook
+---
+
+For this challenge, you will look into [Judith Butler's Wikipedia](https://en.wikipedia.org/wiki/Judith_Butler) page and using the web scraping tools we addressed in this class build a dataframe with her bibliography.
+
+If you prefer, you can choose another author or activist of your interest and extract their work (bibliography, art, films) into a dataframe.

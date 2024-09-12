@@ -1,0 +1,56 @@
+---
+title: "Installation"
+runningheader: "" # only for pdf output
+subtitle: "" # only for html output
+format: html
+#format: pdf
+# format: 
+#   revealjs:
+#     scrollable: true
+#     smaller: true
+editor: visual
+---
+
+This course will use several software and packages. This notes can be used as a guide to install all the requirements before class.
+
+```{r}
+install.packages(c('tidyverse',
+                   'janitor',
+                   'openxlsx',
+                   'devtools',
+                   'usethis',
+                   'reticulate',
+                   'igraph',
+                   'ggraph', 
+                   'naivebayes', 
+                   'discrim', 
+                   'tm', 
+                   'Rtsne', 
+                   'word2vec', 
+                   'tidytext', 
+                   'topicmodels', 
+                   'textclean', 
+                   'stm',
+                   'tufte',
+                   'knitr'))
+```
+
+### Installation of Keras (deep learning)
+
+following <https://tensorflow.rstudio.com/install/>
+
+install python from terminal:
+
+`pip3 install tensorflow`
+
+```{r}
+install.packages("keras")
+library(keras)
+install_keras()
+```
+
+### Check that keras works
+
+```{r}
+mnist <- keras::dataset_mnist()
+```

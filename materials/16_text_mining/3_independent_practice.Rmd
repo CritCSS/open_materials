@@ -1,0 +1,75 @@
+---
+title: "Text Mining"
+subtitle: "Independent practice"
+author: ""
+date: ""
+output: html_notebook
+---
+
+```{r setup, message=FALSE, warning=FALSE, include=FALSE}
+knitr::opts_chunk$set(message = FALSE,warning = FALSE)
+```
+
+## Text pre processing
+
+For this independent practice, you will process the text of scraped biographies of feminists in Wikipedia.
+
+1. Import the libraries `tidyverse`, `tidytext`, `textstem` and read the file "feminists_wiki.csv" contained in the folder "data".
+
+```{r}
+
+```
+
+2. Convert the text to lower case. 
+
+```{r}
+
+```
+
+3. Remove digits, punctuation signs and rare characters.
+
+```{r}
+
+```
+
+4. Tokenize the text into unigrams. 
+
+```{r}
+
+```
+
+5. Lemmatize the tokens.  
+
+```{r}
+
+```
+
+6. What are the 10 most common words? Display them in a plot and explore them in the data frame. 
+
+```{r}
+
+```
+
+7. Remove general and corpus-specific stop words. 
+
+```{r}
+
+```
+
+8. Identify the new 10 most common words. 
+
+```{r}
+
+```
+10. Create the tf-idf values for each word. 
+
+```{r}
+
+```
+
+11. Explore the terms with highest TF-IDF values for two different biographies. From these tokens, what can you infer from the different figures? 
+
+```{r}
+
+```
+

@@ -1,0 +1,70 @@
+---
+title: "Shiny Apps"
+subtitle: "Guided practice"
+author: ""
+date: ""
+output: html_notebook
+---
+
+In this guided practice we will
+
+```{r setup, message=FALSE, warning=FALSE, include=FALSE}
+knitr::opts_chunk$set(message = FALSE,warning = FALSE)
+```
+
+```{r}
+library(word2vec)
+library(tidyverse)
+
+data <- read_csv('data/pretrained/state_ofthe_union_texts.csv')
+
+data <- data %>% distinct(Text)
+
+data$text_clean <- txt_clean_word2vec(data$Text)
+```
+
+```{r}
+model <- word2vec(x = data$text_clean, dim = 15, iter = 20,  min_count=5)
+
+model
+```
+
+```{r}
+predict(model, newdata = c("woman"), type = "nearest", top_n = 10)
+```
+
+```{r}
+predict(model, newdata = c("man"), type = "nearest", top_n = 10)
+
+```
+
+```{r}
+predict(model, newdata = c("senate"), type = "nearest", top_n = 10)
+
+```
+```{r}
+wv <- predict(model, newdata = c("senate", "congress"), type = "embedding")
+wv <- wv["senate", ] + wv["congress", ]
+predict(model, newdata = wv, type = "nearest", top_n = 5)
+
+```
+
+```{r}
+wv <- predict(model, newdata = c("war", "violence"), type = "embedding")
+wv <- wv["war", ] + wv["violence", ]
+predict(model, newdata = wv, type = "nearest", top_n = 10)
+
+```
+```{r}
+wv <- predict(model, newdata = c("capitalist", "money"), type = "embedding")
+wv <- wv["capitalist", ] - wv["money", ]
+predict(model, newdata = wv, type = "nearest", top_n = 10)
+
+```
+
+```{r}
+wv <- predict(model, newdata = c("women", "house"), type = "embedding")
+wv <- wv["women", ] - wv["house", ]
+predict(model, newdata = wv, type = "nearest", top_n = 10)
+
+```
